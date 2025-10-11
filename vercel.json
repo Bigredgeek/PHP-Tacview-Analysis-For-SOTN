@@ -1,35 +1,30 @@
 {
   "version": 2,
   "functions": {
-    "*.php": {
+    "api/*.php": {
       "runtime": "vercel-php@0.6.0"
     }
   },
   "routes": [
     {
       "src": "/",
-      "dest": "/index.php"
+      "dest": "/api/index.php"
     },
     {
       "src": "/debriefing.php",
-      "dest": "/debriefing.php"
-    },
-    {
-      "src": "/tacview.php",
-      "dest": "/tacview.php"
+      "dest": "/api/debriefing.php"
     },
     {
       "src": "/tacview.css",
       "dest": "/tacview.css"
     },
     {
-      "src": "/(.*\\.(gif|jpg|jpeg|png|css|js))",
-      "dest": "/$1"
+      "src": "/(categoryIcons|objectIcons|languages|debriefings)/(.*)",
+      "dest": "/$1/$2"
     },
     {
-      "src": "/(.*)",
+      "src": "/(.*\\.(gif|jpg|jpeg|png|css|js|xml))",
       "dest": "/$1"
     }
-  ],
-  "buildCommand": "echo 'PHP project ready for deployment'"
+  ]
 }
