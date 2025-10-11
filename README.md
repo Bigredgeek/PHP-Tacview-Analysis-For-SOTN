@@ -61,3 +61,25 @@ Created by Ezor, modified by various contributors for enhanced functionality and
 ## License
 
 See License.txt for details.
+
+## Changelog
+
+### October 11, 2025 - Vercel Deployment Configuration
+- **Added Vercel deployment support** with serverless PHP functions
+- **Created public directory structure** for static asset serving
+- **Implemented API endpoints** at `/api/debriefing` for serverless function handling
+- **Updated file paths** to reference public directory for CSS, icons, and language files
+- **Configured vercel.json** with proper routing for static files and API endpoints
+- **Added package.json** with vercel-php runtime support
+- **Established proper directory structure** required by Vercel platform:
+  - `public/` - Contains all static assets (CSS, icons, language files, XML data)
+  - `api/` - Contains serverless function endpoints
+- **Fixed deployment errors** related to missing output directory
+- **Enhanced GitHub integration** for automatic deployments via Vercel
+
+### October 11, 2025 - PHP 8.4+ Compatibility
+- **Fixed deprecated XML function calls** - Updated `xml_set_object()` usage for modern PHP
+- **Added proper property declarations** - Fixed dynamic property creation warnings
+- **Modernized L() function** - Updated language handling for current PHP standards
+- **Enhanced error handling** - Added proper checks for undefined array keys
+- **Updated XML parser callbacks** - Ensured compatibility with PHP 8.4+ XML handling
