@@ -1,5 +1,5 @@
 <?php
-// Main entry point - redirect to debriefing
-header('Location: /debriefing.php');
+// Main entry point - redirect to debriefing API endpoint
+header('Location: /api/debriefing');
 exit();
 ?>

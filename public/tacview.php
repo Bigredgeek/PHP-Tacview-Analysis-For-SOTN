@@ -112,8 +112,13 @@ class tacview
 	function tacview($aLanguage = "it")
 	{
 
-		// Open language file
-		require_once "languages/tacview_" . $aLanguage . ".php";
+		// Open language file - check if we're in API context or public context
+		$language_path = "languages/tacview_" . $aLanguage . ".php";
+		if (!file_exists($language_path)) {
+			// Try from current directory if in public context
+			$language_path = __DIR__ . "/languages/tacview_" . $aLanguage . ".php";
+		}
+		require_once $language_path;
 		$this->language = $_LANGUAGE;
 	}
 

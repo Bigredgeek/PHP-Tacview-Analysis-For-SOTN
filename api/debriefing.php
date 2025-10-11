@@ -19,20 +19,24 @@ echo '</head>';
 echo '<body>';
 echo '<h1>PHP Tacview Debriefing</h1>';
 
+// Change to the public directory so relative paths work correctly
+$original_cwd = getcwd();
+chdir($base_path);
+
 // Initialize tacview
 $tv = new tacview("en");
 
 // Set the correct image path for Vercel deployment
 $tv->image_path = "/";
 
-// Check for XML files in public/debriefings
-$xmlFiles = glob($base_path . "/debriefings/*.xml");
+// Check for XML files in debriefings
+$xmlFiles = glob("debriefings/*.xml");
 echo "<p>Looking for XML files in debriefings folder...</p>";
 echo "<p>Found " . count($xmlFiles) . " XML files.</p>";
 
 if (count($xmlFiles) == 0) {
     echo "<p>No XML files found. Looking for other files...</p>";
-    $allFiles = glob($base_path . "/debriefings/*");
+    $allFiles = glob("debriefings/*");
     echo "<ul>";
     foreach ($allFiles as $file) {
         echo "<li>" . basename($file) . "</li>";
@@ -46,6 +50,9 @@ foreach ($xmlFiles as $filexml) {
     $tv->proceedStats("$filexml","Mission Test");
     echo $tv->getOutput();
 }
+
+// Restore original working directory
+chdir($original_cwd);
 
 echo '</body>';
 echo '</html>';

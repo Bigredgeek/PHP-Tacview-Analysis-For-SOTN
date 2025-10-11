@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 // PHPTacview
 // Copyright (c) 2006 Julien "Ezor" RozÃ©
@@ -112,8 +112,13 @@ class tacview
 	function tacview($aLanguage = "it")
 	{
 
-		// Open language file
-		require_once "languages/tacview_" . $aLanguage . ".php";
+		// Open language file - check if we're in API context or public context
+		$language_path = "languages/tacview_" . $aLanguage . ".php";
+		if (!file_exists($language_path)) {
+			// Try from current directory if in public context
+			$language_path = __DIR__ . "/languages/tacview_" . $aLanguage . ".php";
+		}
+		require_once $language_path;
 		$this->language = $_LANGUAGE;
 	}
 
@@ -586,7 +591,7 @@ class tacview
 				// $this->displayEventRow($event);
 				$this->addOutput('<tr class="statisticsTable">');
 				$this->addOutput('<td class="statisticsTable"><a href="javascript: showDetails(\'' . $key . '\')">' . $key . '</a></td>');
-				$this->addOutput('<td class="statisticsTable"><img class="statisticsTable" src="objectIcons/' . str_replace(array(" ","/"), array("_","_"), $stat["Aircraft"]) . '.jpg" alt=""/></td>');
+				$this->addOutput('<td class="statisticsTable"><img class="statisticsTable" src="' . $this->image_path . 'objectIcons/' . str_replace(array(" ","/"), array("_","_"), $stat["Aircraft"]) . '.jpg" alt=""/></td>');
 				$this->addOutput('<td class="statisticsTable">' . $stat["Aircraft"] . '</td>');
 
 				if(array_key_exists("Group",$stat))
@@ -635,7 +640,7 @@ class tacview
 				else
 					$x_air = "";
 
-				$this->addOutput('<img class="hiddenStatsTable" src="./objectIcons/' . str_replace(array(" ","/"), array("_","_"), $x_air) . '.jpg" alt="" />');
+				$this->addOutput('<img class="hiddenStatsTable" src="' . $this->image_path . 'objectIcons/' . str_replace(array(" ","/"), array("_","_"), $x_air) . '.jpg" alt="" />');
 
 				$this->addOutput('<h2>' . $this->L("pilotStats") . '</h2>');
 
