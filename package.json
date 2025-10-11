@@ -2,9 +2,9 @@
   "name": "php-tacview-analysis",
   "version": "1.0.0",
   "description": "PHP Tacview Analysis Tool for Song of the Nibelungs",
-  "main": "index.html",
+  "main": "public/index.html",
   "scripts": {
-    "build": "echo 'Static files ready in public directory'",
+    "build": "echo 'Build completed - static files ready in public directory'",
     "start": "php -S 0.0.0.0:8000",
     "dev": "php -S localhost:8000"
   },
