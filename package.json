@@ -1,0 +1,17 @@
+{
+  "name": "php-tacview-analysis",
+  "version": "1.0.0",
+  "description": "PHP Tacview Analysis Tool for Song of the Nibelungs",
+  "main": "debriefing.php",
+  "scripts": {
+    "start": "php -S 0.0.0.0:8000",
+    "build": "echo 'No build step required for PHP'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Bigredgeek/PHP-Tacview-Analysis-For-SOTN.git"
+  },
+  "keywords": ["php", "tacview", "dcs", "flight-simulator", "analysis"],
+  "author": "Bigredgeek",
+  "license": "See License.txt"
+}
