@@ -131,6 +131,39 @@ class tacview
 	}
 
 	//
+	// get correct object icon filename with fallback mapping
+	//
+	function getObjectIcon($aircraftName)
+	{
+		// Clean the aircraft name for filename
+		$iconName = str_replace(array(" ","/"), array("_","_"), $aircraftName);
+		
+		// Icon mapping for missing files to existing alternatives
+		$iconMappings = array(
+			'MiG-29_Fulcrum' => 'MiG-29A_Fulcrum-A',
+			'Humvee' => 'HUMMER',
+			'leopard-2A4' => 'LEOPARD2',
+			'F-104_Starfighter' => 'F-16C_Fighting_Falcon', // Similar fighter jet
+			'Mirage_F1_EE' => 'Mirage_2000C', // Similar Mirage variant
+			'A-4E_Skyhawk' => 'AV-8B_Harrier_II_NA', // Similar attack aircraft
+			'BTR-80' => 'BTR70', // Similar APC
+			'T-72B' => 'M60', // Similar tank
+			'MTLB' => 'M113', // Similar APC
+			'ZU-23-2' => 'AVANGER', // Similar AA gun
+			'Soldier_Redeye_LDM' => 'IGLA', // Similar MANPADS
+			'SA-7_Grail' => 'IGLA', // Similar MANPADS
+			'UAZ-469' => 'GAZ66' // Similar utility vehicle
+		);
+		
+		// Check if we need to map this icon to an existing one
+		if (isset($iconMappings[$iconName])) {
+			$iconName = $iconMappings[$iconName];
+		}
+		
+		return $iconName . '.jpg';
+	}
+
+	//
 	// add HTML to the current output
 	//
 	function addOutput($aHtml)
@@ -591,7 +624,7 @@ class tacview
 				// $this->displayEventRow($event);
 				$this->addOutput('<tr class="statisticsTable">');
 				$this->addOutput('<td class="statisticsTable"><a href="javascript: showDetails(\'' . $key . '\')">' . $key . '</a></td>');
-				$this->addOutput('<td class="statisticsTable"><img class="statisticsTable" src="' . $this->image_path . 'objectIcons/' . str_replace(array(" ","/"), array("_","_"), $stat["Aircraft"]) . '.jpg" alt=""/></td>');
+				$this->addOutput('<td class="statisticsTable"><img class="statisticsTable" src="' . $this->image_path . 'objectIcons/' . $this->getObjectIcon($stat["Aircraft"]) . '" alt=""/></td>');
 				$this->addOutput('<td class="statisticsTable">' . $stat["Aircraft"] . '</td>');
 
 				if(array_key_exists("Group",$stat))
@@ -640,7 +673,7 @@ class tacview
 				else
 					$x_air = "";
 
-				$this->addOutput('<img class="hiddenStatsTable" src="' . $this->image_path . 'objectIcons/' . str_replace(array(" ","/"), array("_","_"), $x_air) . '.jpg" alt="" />');
+				$this->addOutput('<img class="hiddenStatsTable" src="' . $this->image_path . 'objectIcons/' . $this->getObjectIcon($x_air) . '" alt="" />');
 
 				$this->addOutput('<h2>' . $this->L("pilotStats") . '</h2>');
 
