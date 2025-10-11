@@ -8,23 +8,15 @@
   "routes": [
     {
       "src": "/",
-      "dest": "/api/index.php"
+      "dest": "/index.html"
     },
     {
       "src": "/debriefing.php",
       "dest": "/api/debriefing.php"
     },
     {
-      "src": "/tacview.css",
-      "dest": "/tacview.css"
-    },
-    {
-      "src": "/(categoryIcons|objectIcons|languages|debriefings)/(.*)",
-      "dest": "/$1/$2"
-    },
-    {
-      "src": "/(.*\\.(gif|jpg|jpeg|png|css|js|xml))",
-      "dest": "/$1"
+      "src": "/(.*)",
+      "dest": "/public/$1"
     }
   ]
 }

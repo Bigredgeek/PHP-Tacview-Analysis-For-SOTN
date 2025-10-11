@@ -2,8 +2,8 @@
 // Debriefing API endpoint for Vercel
 // Include the main tacview class and debriefing logic
 
-// Set the correct paths for includes
-$base_path = __DIR__ . '/..';
+// Set the correct paths for includes - tacview.php is now in public directory
+$base_path = __DIR__ . '/../public';
 
 // Include the tacview class
 require_once $base_path . '/tacview.php';
@@ -22,7 +22,7 @@ echo '<h1>PHP Tacview Debriefing</h1>';
 // Initialize tacview
 $tv = new tacview("en");
 
-// Check for XML files
+// Check for XML files in public/debriefings
 $xmlFiles = glob($base_path . "/debriefings/*.xml");
 echo "<p>Looking for XML files in debriefings folder...</p>";
 echo "<p>Found " . count($xmlFiles) . " XML files.</p>";
