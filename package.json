@@ -2,10 +2,11 @@
   "name": "php-tacview-analysis",
   "version": "1.0.0",
   "description": "PHP Tacview Analysis Tool for Song of the Nibelungs",
-  "main": "debriefing.php",
+  "main": "index.php",
   "scripts": {
+    "build": "echo 'PHP project ready for deployment'",
     "start": "php -S 0.0.0.0:8000",
-    "build": "echo 'No build step required for PHP'"
+    "dev": "php -S localhost:8000"
   },
   "repository": {
     "type": "git",
