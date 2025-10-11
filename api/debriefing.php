@@ -22,6 +22,9 @@ echo '<h1>PHP Tacview Debriefing</h1>';
 // Initialize tacview
 $tv = new tacview("en");
 
+// Set the correct image path for Vercel deployment
+$tv->image_path = "/";
+
 // Check for XML files in public/debriefings
 $xmlFiles = glob($base_path . "/debriefings/*.xml");
 echo "<p>Looking for XML files in debriefings folder...</p>";
