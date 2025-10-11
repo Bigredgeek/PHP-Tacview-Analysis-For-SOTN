@@ -53,6 +53,44 @@ PHP Tacview transforms your XML flight log into a visually understandable, inter
 - Added proper error handling for undefined array keys
 - Modernized code structure
 - Enhanced for Song of the Nibelungs campaign analysis
+- **NEW**: Full Vercel deployment support with modern configuration
+- **NEW**: Optimized serverless function architecture
+- **NEW**: Best practices compliance per Vercel documentation
+
+## Deployment
+
+### Local Development
+```bash
+php -S localhost:8000
+# Navigate to http://localhost:8000/debriefing.php
+```
+
+### Cloud Deployment (Vercel)
+This project is configured for seamless deployment to Vercel:
+
+1. **Automatic Deployment**: Connected to GitHub for automatic deployments
+2. **Serverless Functions**: PHP functions run as serverless endpoints at `/api/debriefing`
+3. **Static Assets**: CSS, icons, and data files served from `public/` directory
+4. **Modern Configuration**: Uses latest Vercel best practices with `rewrites` instead of legacy `routes`
+
+**Live Demo**: [Deploy to Vercel](https://vercel.com/new/clone?repository-url=https://github.com/Bigredgeek/PHP-Tacview-Analysis-For-SOTN)
+
+## Project Structure
+
+### For Local Development
+- `debriefing.php` - Main web interface
+- `tacview.php` - Core XML processing class  
+- `tacview.css` - Stylesheet for the web interface
+
+### For Cloud Deployment
+- `api/` - Serverless function endpoints
+  - `debriefing.php` - Main API endpoint for Vercel
+- `public/` - Static assets directory
+  - `tacview.css` - Stylesheet
+  - `categoryIcons/` - Icons for event categories
+  - `objectIcons/` - Icons for specific unit types
+  - `languages/` - Language localization files
+  - `debriefings/` - Directory for Tacview XML files
 
 ## Original Credits
 
@@ -63,6 +101,16 @@ Created by Ezor, modified by various contributors for enhanced functionality and
 See License.txt for details.
 
 ## Changelog
+
+### October 11, 2025 - Vercel Configuration Optimization
+- **Updated to modern Vercel best practices** per official documentation
+- **Replaced legacy `routes` with `rewrites`** for better performance and support
+- **Added JSON schema reference** for autocomplete and validation
+- **Specified `outputDirectory`** for explicit static file location
+- **Corrected API endpoint paths** to use clean URLs without .php extensions
+- **Fixed redirect URLs** in index.html to match new API routing
+- **Enhanced package.json configuration** with proper main field reference
+- **Validated all file paths** and directory structure for deployment compatibility
 
 ### October 11, 2025 - Vercel Deployment Configuration
 - **Added Vercel deployment support** with serverless PHP functions
