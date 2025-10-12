@@ -39,7 +39,7 @@
 	$_LANGUAGE['killedShip'] = 'Ilma-laiva tuhoamiset';
 	$_LANGUAGE['teamKill'] = 'Oma tuli';
 	$_LANGUAGE['hit'] = 'Osuma';
-	$_LANGUAGE['destroyed'] = 'Tuhottu';
+	$_LANGUAGE['destroyed'] = 'Menetykset';
 	$_LANGUAGE['hitBy'] = 'Osunut';
 	$_LANGUAGE['nothing'] = 'ei mitään';
 	$_LANGUAGE['ObjectShell'] = 'Kranaatti';

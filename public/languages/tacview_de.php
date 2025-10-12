@@ -39,7 +39,7 @@
 	$_LANGUAGE['killedShip'] = 'Luft/Schiff Abschüsse';
 	$_LANGUAGE['teamKill'] = 'Eigenbeschuss';
 	$_LANGUAGE['hit'] = 'Getroffen';
-	$_LANGUAGE['destroyed'] = 'Zerstört';
+	$_LANGUAGE['destroyed'] = 'Verluste';
 	$_LANGUAGE['hitBy'] = 'Getroffen von';
 	$_LANGUAGE['nothing'] = 'nichts';
 	$_LANGUAGE['ObjectShell'] = 'Granate';

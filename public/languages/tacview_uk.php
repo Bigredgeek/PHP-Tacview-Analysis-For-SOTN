@@ -39,7 +39,7 @@
 	$_LANGUAGE['killedShip'] = 'Повітря-корабель знищено';
 	$_LANGUAGE['teamKill'] = 'Свій вогонь';
 	$_LANGUAGE['hit'] = 'Влучання';
-	$_LANGUAGE['destroyed'] = 'Знищено';
+	$_LANGUAGE['destroyed'] = 'Втрати';
 	$_LANGUAGE['hitBy'] = 'Уражений';
 	$_LANGUAGE['nothing'] = 'нічого';
 	$_LANGUAGE['ObjectShell'] = 'Снаряд';

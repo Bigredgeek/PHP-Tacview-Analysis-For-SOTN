@@ -39,7 +39,7 @@
 	$_LANGUAGE['killedShip'] = 'Ar-navio destruídos';
 	$_LANGUAGE['teamKill'] = 'Fogo amigo';
 	$_LANGUAGE['hit'] = 'Acerto';
-	$_LANGUAGE['destroyed'] = 'Destruído';
+	$_LANGUAGE['destroyed'] = 'Perdas';
 	$_LANGUAGE['hitBy'] = 'Atingido por';
 	$_LANGUAGE['nothing'] = 'nada';
 	$_LANGUAGE['ObjectShell'] = 'Projétil';

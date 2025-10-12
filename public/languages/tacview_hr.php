@@ -39,7 +39,7 @@
 	$_LANGUAGE['killedShip'] = 'Uništeno Zr/Brod';
 	$_LANGUAGE['teamKill'] = 'Prijateljska paljba';
 	$_LANGUAGE['hit'] = 'Pogođen';
-	$_LANGUAGE['destroyed'] = 'Uništen';
+	$_LANGUAGE['destroyed'] = 'Gubici';
 	$_LANGUAGE['hitBy'] = 'POgođen od';
 	$_LANGUAGE['nothing'] = '-ništa-';
 	$_LANGUAGE['ObjectShell'] = 'shell';
