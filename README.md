@@ -13,13 +13,13 @@ PHP Tacview transforms your XML flight log into a visually understandable, inter
 - **Multi-level table sorting** - Organizes pilots by GROUP first, then alphabetically by name within groups
 - **Professional tactical analysis format** - Military-style reporting optimized for squadron operations
 - Web-based interface with responsive design
-- Multi-language support (English, Spanish, French, Croatian, Italian)
+- **Multi-language support** - 10 languages available (English, German, Spanish, Finnish, French, Croatian, Italian, Portuguese, Russian, Ukrainian)
 - PHP 8.4+ compatibility with modern error handling
 - **Dual deployment support** - Works seamlessly in both local development and cloud serverless environments
 
 ## Requirements
 
-- PHP 8.0 or higher
+- **PHP 8.4 or higher** (fully modernized for PHP 8.4+)
 - Web server (Apache, Nginx, or PHP built-in server)
 
 ## Installation
@@ -52,17 +52,16 @@ PHP Tacview transforms your XML flight log into a visually understandable, inter
 
 ## Recent Updates
 
+- **� NEW: 5 Additional Languages** - Added German, Finnish, Portuguese, Russian, and Ukrainian localizations
+- **🏗️ PHP 8.4 Full Modernization** - Replaced all deprecated PHP 4 syntax with modern PHP 8 standards
+- **� Constructor Compatibility** - Updated from PHP 4-style `function tacview()` to `function __construct()`
+- **📝 Property Visibility** - Replaced deprecated `var` keyword with proper `public` declarations
+- **🎯 Kill Attribution Fix** - Fixed weapon tracking to properly attribute kills to pilots
+- **💬 Professional Translations** - Updated English translations to military aviation terminology
+- **🚀 Vercel Deployment Fixed** - Corrected routing configuration for proper serverless deployment
 - **🎯 MAJOR: Smart Icon Mapping System** - Eliminates missing picture issues with intelligent fallbacks
 - **📊 MAJOR: Multi-Level Table Sorting** - Professional organization by GROUP → PILOT NAME
 - **🚀 ENHANCED: Tactical Analysis Format** - Military-style reporting for complex operations
-- Fixed PHP 8.4+ compatibility issues
-- Updated deprecated XML function calls
-- Added proper error handling for undefined array keys
-- Modernized code structure
-- Enhanced for Song of the Nibelungs campaign analysis
-- **NEW**: Full Vercel deployment support with modern configuration
-- **NEW**: Optimized serverless function architecture
-- **NEW**: Best practices compliance per Vercel documentation
 
 ## Deployment
 
@@ -108,6 +107,39 @@ Created by Ezor, modified by various contributors for enhanced functionality and
 See License.txt for details.
 
 ## Changelog
+
+### October 11, 2025 - Multilingual Expansion & PHP 8 Modernization
+- **🌍 Added 5 new language localizations**:
+  - German (de) - Professional military aviation terminology
+  - Finnish (fi) - Complete tactical analysis translations
+  - Portuguese (pt) - Brazilian/European Portuguese support
+  - Russian (ru) - Full Cyrillic character support
+  - Ukrainian (uk) - Modern Ukrainian military terminology
+- **All languages now available**: English, German, Spanish, Finnish, French, Croatian, Italian, Portuguese, Russian, Ukrainian
+- **Usage**: Add `?lang=XX` to URL (e.g., `/debriefing.php?lang=de` for German)
+- **🏗️ Complete PHP 8.4 modernization**:
+  - Replaced all 33 deprecated `var` property declarations with `public` visibility modifiers
+  - Updated PHP 4-style constructor `function tacview()` to modern `function __construct()`
+  - Eliminated all PHP 4 legacy syntax patterns
+  - Full compatibility with PHP 8.4+ strict standards
+- **🔧 Fixed Vercel deployment**:
+  - Created simple redirect `index.html` in public directory
+  - Updated `vercel.json` routing configuration
+  - Fixed "Invalid URL" error on root path
+- **✅ Code quality improvements**:
+  - Removed all debug statements from production code
+  - Synchronized root and public directory files
+  - Verified no deprecated functions (ereg, mysql_*, split, etc.)
+  - Confirmed modern PCRE regex usage throughout
+
+### October 11, 2025 - Kill Attribution & Translation Fixes
+- **🎯 Fixed kill attribution system** - Properly tracks weapon ownership for accurate pilot credit
+- **💬 Professional military translations** - Updated English language file:
+  - "PILOTNAME" → "Aircrew"
+  - "FIREDARMEMENT" → "Weapons Fired"
+  - Removed raw key display in favor of professional terminology
+- **🐛 Fixed language loading** - Resolved PHP 8.4 constructor issue preventing translations from loading
+- **🧹 Code cleanup** - Removed obsolete test files and debug output
 
 ### October 11, 2025 - Aircraft-Only Statistics Filtering
 - **🚁 Enhanced pilot statistics filtering** - Removed ground units from main statistics table
@@ -171,4 +203,7 @@ See License.txt for details.
 - **Updated XML parser callbacks** - Ensured compatibility with PHP 8.4+ XML handling
 
 ---
-**Last Deployment**: October 11, 2025 18:43 MST - Pilot initialization fix deployment
+**Last Updated**: October 11, 2025  
+**PHP Version**: 8.4+ Required  
+**Languages**: 10 (en, de, es, fi, fr, hr, it, pt, ru, uk)  
+**Status**: Production Ready - Fully PHP 8.4 Compatible
