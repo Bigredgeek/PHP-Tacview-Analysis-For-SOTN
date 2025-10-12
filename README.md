@@ -52,16 +52,16 @@ PHP Tacview transforms your XML flight log into a visually understandable, inter
 
 ## Recent Updates
 
-- **� NEW: 5 Additional Languages** - Added German, Finnish, Portuguese, Russian, and Ukrainian localizations
-- **🏗️ PHP 8.4 Full Modernization** - Replaced all deprecated PHP 4 syntax with modern PHP 8 standards
-- **� Constructor Compatibility** - Updated from PHP 4-style `function tacview()` to `function __construct()`
-- **📝 Property Visibility** - Replaced deprecated `var` keyword with proper `public` declarations
-- **🎯 Kill Attribution Fix** - Fixed weapon tracking to properly attribute kills to pilots
-- **💬 Professional Translations** - Updated English translations to military aviation terminology
-- **🚀 Vercel Deployment Fixed** - Corrected routing configuration for proper serverless deployment
-- **🎯 MAJOR: Smart Icon Mapping System** - Eliminates missing picture issues with intelligent fallbacks
-- **📊 MAJOR: Multi-Level Table Sorting** - Professional organization by GROUP → PILOT NAME
-- **🚀 ENHANCED: Tactical Analysis Format** - Military-style reporting for complex operations
+- 5 Additional Languages - Added German, Finnish, Portuguese, Russian, and Ukrainian localizations
+- PHP 8.4 Full Modernization - Replaced all deprecated PHP 4 syntax with modern PHP 8 standards
+- Constructor Compatibility - Updated from PHP 4-style `function tacview()` to `function __construct()`
+- Property Visibility - Replaced deprecated `var` keyword with proper `public` declarations
+- Kill Attribution Fix - Fixed weapon tracking to properly attribute kills to pilots
+- Professional Translations - Updated English translations to military aviation terminology
+- Vercel Deployment Fixed - Corrected routing configuration for proper serverless deployment
+- Smart Icon Mapping System - Eliminates missing picture issues with intelligent fallbacks
+- Multi-Level Table Sorting - Professional organization by GROUP then PILOT NAME
+- Tactical Analysis Format - Military-style reporting for complex operations
 
 ## Deployment
 
@@ -109,51 +109,51 @@ See License.txt for details.
 ## Changelog
 
 ### October 11, 2025 - Multilingual Expansion & PHP 8 Modernization
-- **🌍 Added 5 new language localizations**:
+- Added 5 new language localizations:
   - German (de) - Professional military aviation terminology
   - Finnish (fi) - Complete tactical analysis translations
   - Portuguese (pt) - Brazilian/European Portuguese support
   - Russian (ru) - Full Cyrillic character support
   - Ukrainian (uk) - Modern Ukrainian military terminology
-- **All languages now available**: English, German, Spanish, Finnish, French, Croatian, Italian, Portuguese, Russian, Ukrainian
-- **Usage**: Add `?lang=XX` to URL (e.g., `/debriefing.php?lang=de` for German)
-- **🏗️ Complete PHP 8.4 modernization**:
+- All languages now available: English, German, Spanish, Finnish, French, Croatian, Italian, Portuguese, Russian, Ukrainian
+- Usage: Add `?lang=XX` to URL (e.g., `/debriefing.php?lang=de` for German)
+- Complete PHP 8.4 modernization:
   - Replaced all 33 deprecated `var` property declarations with `public` visibility modifiers
   - Updated PHP 4-style constructor `function tacview()` to modern `function __construct()`
   - Eliminated all PHP 4 legacy syntax patterns
   - Full compatibility with PHP 8.4+ strict standards
-- **🔧 Fixed Vercel deployment**:
+- Fixed Vercel deployment:
   - Created simple redirect `index.html` in public directory
   - Updated `vercel.json` routing configuration
   - Fixed "Invalid URL" error on root path
-- **✅ Code quality improvements**:
+- Code quality improvements:
   - Removed all debug statements from production code
   - Synchronized root and public directory files
   - Verified no deprecated functions (ereg, mysql_*, split, etc.)
   - Confirmed modern PCRE regex usage throughout
 
 ### October 11, 2025 - Kill Attribution & Translation Fixes
-- **🎯 Fixed kill attribution system** - Properly tracks weapon ownership for accurate pilot credit
-- **💬 Professional military translations** - Updated English language file:
+- Fixed kill attribution system - Properly tracks weapon ownership for accurate pilot credit
+- Professional military translations - Updated English language file:
   - "PILOTNAME" → "Aircrew"
   - "FIREDARMEMENT" → "Weapons Fired"
   - Removed raw key display in favor of professional terminology
-- **🐛 Fixed language loading** - Resolved PHP 8.4 constructor issue preventing translations from loading
-- **🧹 Code cleanup** - Removed obsolete test files and debug output
+- Fixed language loading - Resolved PHP 8.4 constructor issue preventing translations from loading
+- Code cleanup - Removed obsolete test files and debug output
 
 ### October 11, 2025 - Aircraft-Only Statistics Filtering
-- **🚁 Enhanced pilot statistics filtering** - Removed ground units from main statistics table
-- **✈️ Aircraft and helicopter focus** - Table now shows only airborne units with pilot data
-- **🎯 Problem resolution** - Eliminated ground units like '207MRD/2TA-8-3', 'Depot Guard-13-1', 'Olympus-20-3' from pilot statistics
-- **🔧 Dual filtering implementation**:
+- Enhanced pilot statistics filtering - Removed ground units from main statistics table
+- Aircraft and helicopter focus - Table now shows only airborne units with pilot data
+- Problem resolution - Eliminated ground units like '207MRD/2TA-8-3', 'Depot Guard-13-1', 'Olympus-20-3' from pilot statistics
+- Dual filtering implementation:
   - Enhanced `sortStatsByGroupAndPilot()` function with `isset($stat["Aircraft"])` validation
   - Added safety check in table display loop to ensure only aircraft/helicopter entries
-- **📊 Cleaner tactical analysis** - Professional pilot performance metrics without ground unit clutter
-- **🎖️ Military standard compliance** - Proper separation of air and ground operations reporting
+- Cleaner tactical analysis - Professional pilot performance metrics without ground unit clutter
+- Military standard compliance - Proper separation of air and ground operations reporting
 
 ### October 11, 2025 - Smart Icon Mapping System & Table Sorting
-- **🎯 Added intelligent icon fallback system** - Eliminates 404 errors for missing aircraft/vehicle icons
-- **🔧 Created getObjectIcon() function** with comprehensive mapping table for missing icons:
+- Added intelligent icon fallback system - Eliminates 404 errors for missing aircraft/vehicle icons
+- Created getObjectIcon() function with comprehensive mapping table for missing icons:
   - `MiG-29_Fulcrum` → `MiG-29A_Fulcrum-A` (Similar MiG-29 variant)
   - `Humvee` → `HUMMER` (Same vehicle, different naming)
   - `leopard-2A4` → `LEOPARD2` (Same tank, different naming)
@@ -161,46 +161,46 @@ See License.txt for details.
   - `Mirage_F1_EE` → `Mirage_2000C` (Similar Mirage variant)
   - `A-4E_Skyhawk` → `AV-8B_Harrier_II_NA` (Similar attack aircraft)
   - Plus mappings for all missing ground vehicles (BTR-80, T-72B, MTLB, etc.)
-- **📊 Implemented multi-level table sorting** for statistics display:
-  - **Primary Sort**: GROUP (organizes pilots by tactical units/squadrons)
-  - **Secondary Sort**: PILOT NAME (alphabetical within each group)
-- **🚀 Enhanced tactical analysis presentation**:
+- Implemented multi-level table sorting for statistics display:
+  - Primary Sort: GROUP (organizes pilots by tactical units/squadrons)
+  - Secondary Sort: PILOT NAME (alphabetical within each group)
+- Enhanced tactical analysis presentation:
   - Professional military-style reporting format
   - Clear squadron/flight organization visibility
   - Improved readability for large-scale operations
   - Better understanding of mission force structure
-- **⚡ Cross-platform compatibility** - All enhancements work in both local and serverless environments
-- **🎖️ Optimized for Song of the Nibelungs analysis** - Perfect organization for complex multi-squadron operations
+- Cross-platform compatibility - All enhancements work in both local and serverless environments
+- Optimized for Song of the Nibelungs analysis - Organization for complex multi-squadron operations
 
 ### October 11, 2025 - Vercel Configuration Optimization
-- **Updated to modern Vercel best practices** per official documentation
-- **Replaced legacy `routes` with `rewrites`** for better performance and support
-- **Added JSON schema reference** for autocomplete and validation
-- **Specified `outputDirectory`** for explicit static file location
-- **Corrected API endpoint paths** to use clean URLs without .php extensions
-- **Fixed redirect URLs** in index.html to match new API routing
-- **Enhanced package.json configuration** with proper main field reference
-- **Validated all file paths** and directory structure for deployment compatibility
+- Updated to modern Vercel best practices per official documentation
+- Replaced legacy `routes` with `rewrites` for better performance and support
+- Added JSON schema reference for autocomplete and validation
+- Specified `outputDirectory` for explicit static file location
+- Corrected API endpoint paths to use clean URLs without .php extensions
+- Fixed redirect URLs in index.html to match new API routing
+- Enhanced package.json configuration with proper main field reference
+- Validated all file paths and directory structure for deployment compatibility
 
 ### October 11, 2025 - Vercel Deployment Configuration
-- **Added Vercel deployment support** with serverless PHP functions
-- **Created public directory structure** for static asset serving
-- **Implemented API endpoints** at `/api/debriefing` for serverless function handling
-- **Updated file paths** to reference public directory for CSS, icons, and language files
-- **Configured vercel.json** with proper routing for static files and API endpoints
-- **Added package.json** with vercel-php runtime support
-- **Established proper directory structure** required by Vercel platform:
+- Added Vercel deployment support with serverless PHP functions
+- Created public directory structure for static asset serving
+- Implemented API endpoints at `/api/debriefing` for serverless function handling
+- Updated file paths to reference public directory for CSS, icons, and language files
+- Configured vercel.json with proper routing for static files and API endpoints
+- Added package.json with vercel-php runtime support
+- Established proper directory structure required by Vercel platform:
   - `public/` - Contains all static assets (CSS, icons, language files, XML data)
   - `api/` - Contains serverless function endpoints
-- **Fixed deployment errors** related to missing output directory
-- **Enhanced GitHub integration** for automatic deployments via Vercel
+- Fixed deployment errors related to missing output directory
+- Enhanced GitHub integration for automatic deployments via Vercel
 
 ### October 11, 2025 - PHP 8.4+ Compatibility
-- **Fixed deprecated XML function calls** - Updated `xml_set_object()` usage for modern PHP
-- **Added proper property declarations** - Fixed dynamic property creation warnings
-- **Modernized L() function** - Updated language handling for current PHP standards
-- **Enhanced error handling** - Added proper checks for undefined array keys
-- **Updated XML parser callbacks** - Ensured compatibility with PHP 8.4+ XML handling
+- Fixed deprecated XML function calls - Updated `xml_set_object()` usage for modern PHP
+- Added proper property declarations - Fixed dynamic property creation warnings
+- Modernized L() function - Updated language handling for current PHP standards
+- Enhanced error handling - Added proper checks for undefined array keys
+- Updated XML parser callbacks - Ensured compatibility with PHP 8.4+ XML handling
 
 ---
 **Last Updated**: October 11, 2025  
