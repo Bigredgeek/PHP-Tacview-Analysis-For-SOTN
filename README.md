@@ -9,13 +9,9 @@ PHP Tacview transforms your XML flight log into a visually understandable, inter
 - Parse Tacview XML files and display mission events
 - Chronological timeline of combat events
 - Visual icons for different unit types and actions
-- **Smart icon mapping system** - Automatically handles missing aircraft/vehicle icons with intelligent fallbacks
-- **Multi-level table sorting** - Organizes pilots by GROUP first, then alphabetically by name within groups
-- **Professional tactical analysis format** - Military-style reporting optimized for squadron operations
-- Web-based interface with responsive design
-- **Multi-language support** - 10 languages available (English, German, Spanish, Finnish, French, Croatian, Italian, Portuguese, Russian, Ukrainian)
+- 10 languages available (English, German, Spanish, Finnish, French, Croatian, Italian, Portuguese, Russian, Ukrainian) (AI Generated localisations, please advise any changes required)
 - PHP 8.4+ compatibility with modern error handling
-- **Dual deployment support** - Works seamlessly in both local development and cloud serverless environments
+- Works seamlessly in both local development and cloud serverless environments
 
 ## Requirements
 
@@ -49,20 +45,7 @@ PHP Tacview transforms your XML flight log into a visually understandable, inter
 - `categoryIcons/` - Icons for event categories
 - `objectIcons/` - Icons for specific unit types
 - `debriefings/` - Directory for Tacview XML files
-
-## Recent Updates
-
-- 5 Additional Languages - Added German, Finnish, Portuguese, Russian, and Ukrainian localizations
-- PHP 8.4 Full Modernization - Replaced all deprecated PHP 4 syntax with modern PHP 8 standards
-- Constructor Compatibility - Updated from PHP 4-style `function tacview()` to `function __construct()`
-- Property Visibility - Replaced deprecated `var` keyword with proper `public` declarations
-- Kill Attribution Fix - Fixed weapon tracking to properly attribute kills to pilots
-- Professional Translations - Updated English translations to military aviation terminology
-- Vercel Deployment Fixed - Corrected routing configuration for proper serverless deployment
-- Smart Icon Mapping System - Eliminates missing picture issues with intelligent fallbacks
-- Multi-Level Table Sorting - Professional organization by GROUP then PILOT NAME
-- Tactical Analysis Format - Military-style reporting for complex operations
-
+- 
 ## Deployment
 
 ### Local Development
@@ -100,7 +83,7 @@ This project is configured for seamless deployment to Vercel:
 
 ## Original Credits
 
-Created by Ezor, modified by various contributors for enhanced functionality and modern PHP compatibility.
+Created by Ezor
 
 ## License
 
@@ -134,10 +117,9 @@ See License.txt for details.
 
 ### October 11, 2025 - Kill Attribution & Translation Fixes
 - Fixed kill attribution system - Properly tracks weapon ownership for accurate pilot credit
-- Professional military translations - Updated English language file:
+- Improve language used to describe table headers - Updated English language file:
   - "PILOTNAME" → "Aircrew"
   - "FIREDARMEMENT" → "Weapons Fired"
-  - Removed raw key display in favor of professional terminology
 - Fixed language loading - Resolved PHP 8.4 constructor issue preventing translations from loading
 - Code cleanup - Removed obsolete test files and debug output
 
@@ -148,8 +130,6 @@ See License.txt for details.
 - Dual filtering implementation:
   - Enhanced `sortStatsByGroupAndPilot()` function with `isset($stat["Aircraft"])` validation
   - Added safety check in table display loop to ensure only aircraft/helicopter entries
-- Cleaner tactical analysis - Professional pilot performance metrics without ground unit clutter
-- Military standard compliance - Proper separation of air and ground operations reporting
 
 ### October 11, 2025 - Smart Icon Mapping System & Table Sorting
 - Added intelligent icon fallback system - Eliminates 404 errors for missing aircraft/vehicle icons
@@ -157,20 +137,11 @@ See License.txt for details.
   - `MiG-29_Fulcrum` → `MiG-29A_Fulcrum-A` (Similar MiG-29 variant)
   - `Humvee` → `HUMMER` (Same vehicle, different naming)
   - `leopard-2A4` → `LEOPARD2` (Same tank, different naming)
-  - `F-104_Starfighter` → `F-16C_Fighting_Falcon` (Similar fighter jet)
-  - `Mirage_F1_EE` → `Mirage_2000C` (Similar Mirage variant)
-  - `A-4E_Skyhawk` → `AV-8B_Harrier_II_NA` (Similar attack aircraft)
   - Plus mappings for all missing ground vehicles (BTR-80, T-72B, MTLB, etc.)
 - Implemented multi-level table sorting for statistics display:
   - Primary Sort: GROUP (organizes pilots by tactical units/squadrons)
   - Secondary Sort: PILOT NAME (alphabetical within each group)
-- Enhanced tactical analysis presentation:
-  - Professional military-style reporting format
-  - Clear squadron/flight organization visibility
-  - Improved readability for large-scale operations
-  - Better understanding of mission force structure
 - Cross-platform compatibility - All enhancements work in both local and serverless environments
-- Optimized for Song of the Nibelungs analysis - Organization for complex multi-squadron operations
 
 ### October 11, 2025 - Vercel Configuration Optimization
 - Updated to modern Vercel best practices per official documentation
