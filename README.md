@@ -109,6 +109,16 @@ See License.txt for details.
 
 ## Changelog
 
+### October 11, 2025 - Aircraft-Only Statistics Filtering
+- **🚁 Enhanced pilot statistics filtering** - Removed ground units from main statistics table
+- **✈️ Aircraft and helicopter focus** - Table now shows only airborne units with pilot data
+- **🎯 Problem resolution** - Eliminated ground units like '207MRD/2TA-8-3', 'Depot Guard-13-1', 'Olympus-20-3' from pilot statistics
+- **🔧 Dual filtering implementation**:
+  - Enhanced `sortStatsByGroupAndPilot()` function with `isset($stat["Aircraft"])` validation
+  - Added safety check in table display loop to ensure only aircraft/helicopter entries
+- **📊 Cleaner tactical analysis** - Professional pilot performance metrics without ground unit clutter
+- **🎖️ Military standard compliance** - Proper separation of air and ground operations reporting
+
 ### October 11, 2025 - Smart Icon Mapping System & Table Sorting
 - **🎯 Added intelligent icon fallback system** - Eliminates 404 errors for missing aircraft/vehicle icons
 - **🔧 Created getObjectIcon() function** with comprehensive mapping table for missing icons:
