@@ -108,7 +108,7 @@ class tacview
 	//
 	// constructor
 	//
-	function tacview($aLanguage = "it")
+	function tacview($aLanguage = "en")
 	{
 
 		// Open language file - check if we're in API context or public context
