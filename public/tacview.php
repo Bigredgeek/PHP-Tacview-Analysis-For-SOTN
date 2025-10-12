@@ -410,6 +410,20 @@ class tacview
 				{
 					case "HasLanded":
 
+						// Ensure pilot entry exists for HasLanded events - this can be the first event for a pilot
+						if (!isset($this->stats[$primaryObjectPilot]))
+						{
+							// Create pilot entry if it doesn't exist
+							$this->stats[$primaryObjectPilot]["Aircraft"] = $event["PrimaryObject"]["Name"];
+							$this->stats[$primaryObjectPilot]["Group"]    = $event["PrimaryObject"]["Group"];
+							$this->stats[$primaryObjectPilot]["Type"]     = $event["PrimaryObject"]["Type"];
+
+							if (!array_key_exists("Events", $this->stats[$primaryObjectPilot]))
+							{
+								$this->stats[$primaryObjectPilot]["Events"] = array();
+							}
+						}
+
 						$this->increaseStat($this->stats[$primaryObjectPilot], "Lands", "Count");
 
 						if (!isset($event["Airport"]))
@@ -426,6 +440,20 @@ class tacview
 					case "HasTakeOff":	// obsolete
 					case "HasTakenOff":
 
+						// Ensure pilot entry exists for HasTakenOff events - this can be the first event for a pilot
+						if (!isset($this->stats[$primaryObjectPilot]))
+						{
+							// Create pilot entry if it doesn't exist
+							$this->stats[$primaryObjectPilot]["Aircraft"] = $event["PrimaryObject"]["Name"];
+							$this->stats[$primaryObjectPilot]["Group"]    = $event["PrimaryObject"]["Group"];
+							$this->stats[$primaryObjectPilot]["Type"]     = $event["PrimaryObject"]["Type"];
+
+							if (!array_key_exists("Events", $this->stats[$primaryObjectPilot]))
+							{
+								$this->stats[$primaryObjectPilot]["Events"] = array();
+							}
+						}
+
 						$this->increaseStat($this->stats[$primaryObjectPilot], "TakeOffs", "Count");
 
 						if (!isset($event["Airport"]))
@@ -441,6 +469,20 @@ class tacview
 
 					case "HasFired":
 					
+						// Ensure pilot entry exists for HasFired events - this can be the first event for a pilot
+						if (!isset($this->stats[$primaryObjectPilot]))
+						{
+							// Create pilot entry if it doesn't exist
+							$this->stats[$primaryObjectPilot]["Aircraft"] = $event["PrimaryObject"]["Name"];
+							$this->stats[$primaryObjectPilot]["Group"]    = $event["PrimaryObject"]["Group"];
+							$this->stats[$primaryObjectPilot]["Type"]     = $event["PrimaryObject"]["Type"];
+
+							if (!array_key_exists("Events", $this->stats[$primaryObjectPilot]))
+							{
+								$this->stats[$primaryObjectPilot]["Events"] = array();
+							}
+						}
+					
 						if	(	array_key_exists("SecondaryObject",$event) and
 								array_key_exists("Type",$event["SecondaryObject"]) and
 								$event["SecondaryObject"]["Type"] != "Parachutist"
@@ -453,6 +495,20 @@ class tacview
 						break;
 						
 					case "HasBeenDestroyed":
+
+						// Ensure pilot entry exists for HasBeenDestroyed events - this can be the first event for a pilot
+						if (!isset($this->stats[$primaryObjectPilot]))
+						{
+							// Create pilot entry if it doesn't exist
+							$this->stats[$primaryObjectPilot]["Aircraft"] = $event["PrimaryObject"]["Name"];
+							$this->stats[$primaryObjectPilot]["Group"]    = $event["PrimaryObject"]["Group"];
+							$this->stats[$primaryObjectPilot]["Type"]     = $event["PrimaryObject"]["Type"];
+
+							if (!array_key_exists("Events", $this->stats[$primaryObjectPilot]))
+							{
+								$this->stats[$primaryObjectPilot]["Events"] = array();
+							}
+						}
 
 						$this->increaseStat($this->stats[$primaryObjectPilot], "Destroyed", "Count");
 						
@@ -468,6 +524,7 @@ class tacview
 
 								$this->stats[$secondaryObjectPilot]["Aircraft"] = $event["SecondaryObject"]["Name"];
 								$this->stats[$secondaryObjectPilot]["Group"]    = $event["SecondaryObject"]["Group"];
+								$this->stats[$secondaryObjectPilot]["Type"]     = $event["SecondaryObject"]["Type"];
 
 								if (!array_key_exists("Events", $this->stats[$secondaryObjectPilot]))
 								{
@@ -495,6 +552,20 @@ class tacview
 
 					case "HasBeenHitBy":
 
+						// Ensure pilot entry exists for HasBeenHitBy events - this can be the first event for a pilot
+						if (!isset($this->stats[$primaryObjectPilot]))
+						{
+							// Create pilot entry if it doesn't exist
+							$this->stats[$primaryObjectPilot]["Aircraft"] = $event["PrimaryObject"]["Name"];
+							$this->stats[$primaryObjectPilot]["Group"]    = $event["PrimaryObject"]["Group"];
+							$this->stats[$primaryObjectPilot]["Type"]     = $event["PrimaryObject"]["Type"];
+
+							if (!array_key_exists("Events", $this->stats[$primaryObjectPilot]))
+							{
+								$this->stats[$primaryObjectPilot]["Events"] = array();
+							}
+						}
+
 						$this->increaseStat($this->stats[$primaryObjectPilot], "Hit", "Count");
 						$this->increaseStat($this->stats[$primaryObjectPilot], "Hit", $event["SecondaryObject"]["Name"]);
 
@@ -511,6 +582,7 @@ class tacview
 	
 								$this->stats[$parentObjectPilot]["Aircraft"] = $event["ParentObject"]["Name"];
 								$this->stats[$parentObjectPilot]["Group"]    = $event["ParentObject"]["Group"];
+								$this->stats[$parentObjectPilot]["Type"]     = $event["ParentObject"]["Type"];
 	
 								if (!array_key_exists("Events", $this->stats[$parentObjectPilot]))
 								{
@@ -562,6 +634,7 @@ class tacview
 
 									$this->stats[$parentObjectPilot]["Aircraft"] = $event["ParentObject"]["Name"];
 									$this->stats[$parentObjectPilot]["Group"]    = $event["ParentObject"]["Group"];
+									$this->stats[$parentObjectPilot]["Type"]     = $event["ParentObject"]["Type"];
 
 									if (!array_key_exists("Events", $this->stats[$parentObjectPilot]))
 									{
@@ -603,6 +676,7 @@ class tacview
 
 									$this->stats[$secondaryObjectPilot]["Aircraft"] = $event["SecondaryObject"]["Name"];
 									$this->stats[$secondaryObjectPilot]["Group"]    = $event["SecondaryObject"]["Group"];
+									$this->stats[$secondaryObjectPilot]["Type"]     = $event["SecondaryObject"]["Type"];
 
 									if (!array_key_exists("Events", $this->stats[$secondaryObjectPilot]))
 									{
