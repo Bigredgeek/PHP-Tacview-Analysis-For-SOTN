@@ -10,7 +10,7 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/api/debriefing"
+      "destination": "/index.html"
     },
     {
       "source": "/debriefing.php",
