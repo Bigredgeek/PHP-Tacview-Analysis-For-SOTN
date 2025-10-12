@@ -9,12 +9,12 @@
   },
   "rewrites": [
     {
-      "source": "/debriefing.php",
+      "source": "/",
       "destination": "/api/debriefing"
     },
     {
-      "source": "/",
-      "destination": "/index.html"
+      "source": "/debriefing.php",
+      "destination": "/api/debriefing"
     }
   ]
 }
