@@ -9,13 +9,9 @@ PHP Tacview transforms your XML flight log into a visually understandable, inter
 - Parse Tacview XML files and display mission events
 - Chronological timeline of combat events
 - Visual icons for different unit types and actions
-- **Smart icon mapping system** - Automatically handles missing aircraft/vehicle icons with intelligent fallbacks
-- **Multi-level table sorting** - Organizes pilots by GROUP first, then alphabetically by name within groups
-- **Professional tactical analysis format** - Military-style reporting optimized for squadron operations
-- Web-based interface with responsive design
-- **Multi-language support** - 10 languages available (English, German, Spanish, Finnish, French, Croatian, Italian, Portuguese, Russian, Ukrainian)
+- 10 languages available (English, German, Spanish, Finnish, French, Croatian, Italian, Portuguese, Russian, Ukrainian) (AI generated localizations)
 - PHP 8.4+ compatibility with modern error handling
-- **Dual deployment support** - Works seamlessly in both local development and cloud serverless environments
+- Works seamlessly in both local development and cloud serverless environments
 
 ## Requirements
 
@@ -52,17 +48,13 @@ PHP Tacview transforms your XML flight log into a visually understandable, inter
 
 ## Recent Updates
 
-- **� NEW: 5 Additional Languages** - Added German, Finnish, Portuguese, Russian, and Ukrainian localizations
-- **🏗️ PHP 8.4 Full Modernization** - Replaced all deprecated PHP 4 syntax with modern PHP 8 standards
-- **� Constructor Compatibility** - Updated from PHP 4-style `function tacview()` to `function __construct()`
-- **📝 Property Visibility** - Replaced deprecated `var` keyword with proper `public` declarations
-- **🎯 Kill Attribution Fix** - Fixed weapon tracking to properly attribute kills to pilots
-- **💬 Professional Translations** - Updated English translations to military aviation terminology
-- **🚀 Vercel Deployment Fixed** - Corrected routing configuration for proper serverless deployment
-- **🎯 MAJOR: Smart Icon Mapping System** - Eliminates missing picture issues with intelligent fallbacks
-- **📊 MAJOR: Multi-Level Table Sorting** - Professional organization by GROUP → PILOT NAME
-- **🚀 ENHANCED: Tactical Analysis Format** - Military-style reporting for complex operations
-
+- ** NEW: 5 Additional Languages** - Added German, Finnish, Portuguese, Russian, and Ukrainian localizations
+- ** PHP 8.4 Full Modernization** - Replaced all deprecated PHP 4 syntax with modern PHP 8 standards
+- ** Constructor Compatibility** - Updated from PHP 4-style `function tacview()` to `function __construct()`
+- ** Property Visibility** - Replaced deprecated `var` keyword with proper `public` declarations
+- ** Kill Attribution Fix** - Fixed weapon tracking to properly attribute kills to pilots
+- ** Professional Translations** - Updated English translations to military aviation terminology
+- ** Vercel Deployment Fixed** - Corrected routing configuration for proper serverless deployment
 ## Deployment
 
 ### Local Development
@@ -100,7 +92,7 @@ This project is configured for seamless deployment to Vercel:
 
 ## Original Credits
 
-Created by Ezor, modified by various contributors for enhanced functionality and modern PHP compatibility.
+Created by **Ezor**
 
 ## License
 
