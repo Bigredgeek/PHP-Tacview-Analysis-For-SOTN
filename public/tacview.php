@@ -1,4 +1,5 @@
 <?php
+echo "DEPLOYMENT: 2025-10-11 pilot fix active\n";
 
 // PHPTacview
 // Copyright (c) 2006 Julien "Ezor" RozÃ©
