@@ -171,7 +171,8 @@ class tacview
 		// Convert to array with pilot names as keys for sorting
 		$sortableArray = array();
 		foreach ($stats as $pilotName => $stat) {
-			if ($pilotName != "" && substr($pilotName, 0, 5) != "Pilot") {
+			// Only include entries that have Aircraft data (aircraft/helicopters only, no ground units)
+			if ($pilotName != "" && substr($pilotName, 0, 5) != "Pilot" && isset($stat["Aircraft"])) {
 				$sortableArray[] = array(
 					'pilotName' => $pilotName,
 					'group' => isset($stat["Group"]) ? $stat["Group"] : "ZZZ_NoGroup", // Put no-group entries at end
@@ -659,7 +660,8 @@ class tacview
 		foreach ($sortedStats as $key => $stat)
 		{
 
-			if ($key != "" and substr($key, 0, 5) != "Pilot")
+			// Only display aircraft and helicopters (entries with Aircraft data)
+			if ($key != "" and substr($key, 0, 5) != "Pilot" and isset($stat["Aircraft"]))
 			{
 				// $this->displayEventRow($event);
 				$this->addOutput('<tr class="statisticsTable">');
