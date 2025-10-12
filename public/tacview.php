@@ -59,51 +59,51 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 class tacview
 {
-	var $language = array();
-	var $htmlOutput = "";
+	public $language = array();
+	public $htmlOutput = "";
 
 	// Oggetto Airport
-	var $airport = array();
-	var $tagAirportOpened = false;
-	var $airportCurrentId = 0;
+	public $airport = array();
+	public $tagAirportOpened = false;
+	public $airportCurrentId = 0;
 
 	// Oggetto Primary
-	var $primaryObjects = array();
-	var $tagPrimaryObjectOpened = false;
-	var $primaryObjectCurrentId = 0;
+	public $primaryObjects = array();
+	public $tagPrimaryObjectOpened = false;
+	public $primaryObjectCurrentId = 0;
 
 	// Oggetto Secondary
-	var $secondaryObjects = array();
-	var $tagSecondaryObjectOpened = false;
-	var $secondaryObjectCurrentId = 0;
+	public $secondaryObjects = array();
+	public $tagSecondaryObjectOpened = false;
+	public $secondaryObjectCurrentId = 0;
 
 	// Oggetto Parent
-	var $parentObjects = array();
-	var $tagParentObjectOpened = false;
-	var $parentObjectCurrentId = 0;
+	public $parentObjects = array();
+	public $tagParentObjectOpened = false;
+	public $parentObjectCurrentId = 0;
 
 	// vettore oggetti -- non usato --
-	var $objects = array();
-	var $tagObjectOpened = false;
-	var $objectCurrentId = 0;
+	public $objects = array();
+	public $tagObjectOpened = false;
+	public $objectCurrentId = 0;
 
 	// vettore eventi
-	var $events = array();
-	var $tagEventOpened = false;
-	var $eventCurrentId = 0;
-	var $stats = array();
-	var $weaponOwners = array(); // Track weapon ID -> pilot who fired it
-	var $missionName = "";
-	var $xmlParser = 0;
-	var $currentData = "";
-	var $tagObjectsOpened = false;
-	var $tagEventsOpened = false;
-	var $sam_enemies = array();
-	var $tagOpened = "";
-	var $startTime;
-	var $duration;
-	var $image_path = "";
-	var $firephp;
+	public $events = array();
+	public $tagEventOpened = false;
+	public $eventCurrentId = 0;
+	public $stats = array();
+	public $weaponOwners = array(); // Track weapon ID -> pilot who fired it
+	public $missionName = "";
+	public $xmlParser = 0;
+	public $currentData = "";
+	public $tagObjectsOpened = false;
+	public $tagEventsOpened = false;
+	public $sam_enemies = array();
+	public $tagOpened = "";
+	public $startTime;
+	public $duration;
+	public $image_path = "";
+	public $firephp;
 	// we log today’s date as an example. you could log whatever variable you want to
 
 	//
