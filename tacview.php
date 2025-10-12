@@ -164,6 +164,43 @@ class tacview
 	}
 
 	//
+	// sort statistics by Group first, then by Pilot Name within groups
+	//
+	function sortStatsByGroupAndPilot($stats)
+	{
+		// Convert to array with pilot names as keys for sorting
+		$sortableArray = array();
+		foreach ($stats as $pilotName => $stat) {
+			if ($pilotName != "" && substr($pilotName, 0, 5) != "Pilot") {
+				$sortableArray[] = array(
+					'pilotName' => $pilotName,
+					'group' => isset($stat["Group"]) ? $stat["Group"] : "ZZZ_NoGroup", // Put no-group entries at end
+					'data' => $stat
+				);
+			}
+		}
+		
+		// Sort by group first, then by pilot name
+		usort($sortableArray, function($a, $b) {
+			// Primary sort: by Group
+			$groupCompare = strcasecmp($a['group'], $b['group']);
+			if ($groupCompare !== 0) {
+				return $groupCompare;
+			}
+			// Secondary sort: by Pilot Name within same group
+			return strcasecmp($a['pilotName'], $b['pilotName']);
+		});
+		
+		// Convert back to original format
+		$sortedStats = array();
+		foreach ($sortableArray as $entry) {
+			$sortedStats[$entry['pilotName']] = $entry['data'];
+		}
+		
+		return $sortedStats;
+	}
+
+	//
 	// add HTML to the current output
 	//
 	function addOutput($aHtml)
@@ -616,7 +653,10 @@ class tacview
 
 		//$class = "row1";
 
-		foreach ($this->stats as $key => $stat)
+		// Sort statistics by Group first, then by Pilot Name within groups
+		$sortedStats = $this->sortStatsByGroupAndPilot($this->stats);
+
+		foreach ($sortedStats as $key => $stat)
 		{
 
 			if ($key != "" and substr($key, 0, 5) != "Pilot")
