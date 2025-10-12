@@ -93,6 +93,7 @@ class tacview
 	var $tagEventOpened = false;
 	var $eventCurrentId = 0;
 	var $stats = array();
+	var $weaponOwners = array(); // Track weapon ID -> pilot who fired it
 	var $missionName = "";
 	var $xmlParser = 0;
 	var $currentData = "";
@@ -109,17 +110,19 @@ class tacview
 	//
 	// constructor
 	//
-	function tacview($aLanguage = "it")
+	function __construct($aLanguage = "en")
 	{
-
-		// Open language file - check if we're in API context or public context
-		$language_path = "languages/tacview_" . $aLanguage . ".php";
-		if (!file_exists($language_path)) {
-			// Try from current directory if in public context
-			$language_path = __DIR__ . "/languages/tacview_" . $aLanguage . ".php";
+		$language_path = __DIR__ . "/languages/tacview_" . $aLanguage . ".php";
+		if (file_exists($language_path)) {
+			include $language_path;
+			if (isset($_LANGUAGE) && is_array($_LANGUAGE)) {
+				$this->language = $_LANGUAGE;
+			} else {
+				$this->language = array();
+			}
+		} else {
+			$this->language = array();
 		}
-		require_once $language_path;
-		$this->language = $_LANGUAGE;
 	}
 
 	//
@@ -467,34 +470,46 @@ class tacview
 
 						break;
 
-					case "HasFired":
-					
-						// Ensure pilot entry exists for HasFired events - this can be the first event for a pilot
-						if (!isset($this->stats[$primaryObjectPilot]))
-						{
-							// Create pilot entry if it doesn't exist
-							$this->stats[$primaryObjectPilot]["Aircraft"] = $event["PrimaryObject"]["Name"];
-							$this->stats[$primaryObjectPilot]["Group"]    = $event["PrimaryObject"]["Group"];
-							$this->stats[$primaryObjectPilot]["Type"]     = $event["PrimaryObject"]["Type"];
+				case "HasFired":
+				
+					// Ensure pilot entry exists for HasFired events - this can be the first event for a pilot
+					if (!isset($this->stats[$primaryObjectPilot]))
+					{
+						// Create pilot entry if it doesn't exist
+						$this->stats[$primaryObjectPilot]["Aircraft"] = $event["PrimaryObject"]["Name"];
+						$this->stats[$primaryObjectPilot]["Group"]    = $event["PrimaryObject"]["Group"];
+						$this->stats[$primaryObjectPilot]["Type"]     = $event["PrimaryObject"]["Type"];
 
-							if (!array_key_exists("Events", $this->stats[$primaryObjectPilot]))
-							{
-								$this->stats[$primaryObjectPilot]["Events"] = array();
-							}
-						}
-					
-						if	(	array_key_exists("SecondaryObject",$event) and
-								array_key_exists("Type",$event["SecondaryObject"]) and
-								$event["SecondaryObject"]["Type"] != "Parachutist"
-							)
+						if (!array_key_exists("Events", $this->stats[$primaryObjectPilot]))
 						{
-							$this->increaseStat($this->stats[$primaryObjectPilot], "Fired", "Count");
-							$this->increaseStat($this->stats[$primaryObjectPilot], "Fired", $event["SecondaryObject"]["Name"]);
+							$this->stats[$primaryObjectPilot]["Events"] = array();
 						}
-
-						break;
+					}
+				
+					if	(	array_key_exists("SecondaryObject",$event) and
+							array_key_exists("Type",$event["SecondaryObject"]) and
+							$event["SecondaryObject"]["Type"] != "Parachutist"
+						)
+					{
+						$this->increaseStat($this->stats[$primaryObjectPilot], "Fired", "Count");
+						$this->increaseStat($this->stats[$primaryObjectPilot], "Fired", $event["SecondaryObject"]["Name"]);
 						
-					case "HasBeenDestroyed":
+						// Track weapon ownership for kill attribution
+						if (isset($event["SecondaryObject"]["ID"]) && 
+						    ($event["SecondaryObject"]["Type"] == "Missile" || $event["SecondaryObject"]["Type"] == "Bomb"))
+						{
+							$this->weaponOwners[$event["SecondaryObject"]["ID"]] = array(
+								'pilot' => $primaryObjectPilot,
+								'aircraft' => $event["PrimaryObject"]["Name"],
+								'group' => $event["PrimaryObject"]["Group"],
+								'type' => $event["PrimaryObject"]["Type"],
+								'weapon' => $event["SecondaryObject"]["Name"],
+								'time' => $event["Time"]
+							);
+						}
+					}
+
+					break;					case "HasBeenDestroyed":
 
 						// Ensure pilot entry exists for HasBeenDestroyed events - this can be the first event for a pilot
 						if (!isset($this->stats[$primaryObjectPilot]))
@@ -510,45 +525,93 @@ class tacview
 							}
 						}
 
-						$this->increaseStat($this->stats[$primaryObjectPilot], "Destroyed", "Count");
+					$this->increaseStat($this->stats[$primaryObjectPilot], "Destroyed", "Count");
+					
+					$secondaryObjectPilot = null;
+					
+					if (	array_key_exists("SecondaryObject",$event) and
+							array_key_exists("Pilot", $event["SecondaryObject"]) 
+						)
+					{							
+						$secondaryObjectPilot = $event["SecondaryObject"]["Pilot"];
 						
-						if (	array_key_exists("SecondaryObject",$event) and
-								array_key_exists("Pilot", $event["SecondaryObject"]) 
-							)
-						{							
-							$secondaryObjectPilot = $event["SecondaryObject"]["Pilot"];
-							
-							if (!isset($this->stats[$secondaryObjectPilot]))
+						if (!isset($this->stats[$secondaryObjectPilot]))
+						{
+							// If Pilot of Seconday Object does not exist  yet, create them.
+
+							$this->stats[$secondaryObjectPilot]["Aircraft"] = $event["SecondaryObject"]["Name"];
+							$this->stats[$secondaryObjectPilot]["Group"]    = $event["SecondaryObject"]["Group"];
+							$this->stats[$secondaryObjectPilot]["Type"]     = $event["SecondaryObject"]["Type"];
+
+							if (!array_key_exists("Events", $this->stats[$secondaryObjectPilot]))
 							{
-								// If Pilot of Seconday Object does not exist  yet, create them.
-
-								$this->stats[$secondaryObjectPilot]["Aircraft"] = $event["SecondaryObject"]["Name"];
-								$this->stats[$secondaryObjectPilot]["Group"]    = $event["SecondaryObject"]["Group"];
-								$this->stats[$secondaryObjectPilot]["Type"]     = $event["SecondaryObject"]["Type"];
-
-								if (!array_key_exists("Events", $this->stats[$secondaryObjectPilot]))
-								{
-									$this->stats[$secondaryObjectPilot]["Events"] = array();
-								}
-								
+								$this->stats[$secondaryObjectPilot]["Events"] = array();
 							}
 							
-							array_push($this->stats[$secondaryObjectPilot]["Events"], $event);
 						}
-						else
+						
+						array_push($this->stats[$secondaryObjectPilot]["Events"], $event);
+					}
+					else
+					{
+						// No explicit killer - try to infer from weapon tracking
+						// Look for weapons destroyed at approximately the same time as this aircraft
+						$currentTime = $event["Time"];
+						$currentID = $event["PrimaryObject"]["ID"];
+						
+						// Search recent events for weapon destruction that matches this kill
+						foreach ($this->events as $otherEvent)
+						{
+							// Look for weapon HasBeenDestroyed events within 1 second
+							if (isset($otherEvent["Action"]) && $otherEvent["Action"] == "HasBeenDestroyed" &&
+							    isset($otherEvent["PrimaryObject"]["Type"]) && 
+							    ($otherEvent["PrimaryObject"]["Type"] == "Missile" || $otherEvent["PrimaryObject"]["Type"] == "Bomb") &&
+							    isset($otherEvent["Time"]) &&
+							    abs($otherEvent["Time"] - $currentTime) < 1.0 &&
+							    isset($otherEvent["PrimaryObject"]["ID"]))
+							{
+								$weaponID = $otherEvent["PrimaryObject"]["ID"];
+								
+								// Check if we know who fired this weapon
+								if (isset($this->weaponOwners[$weaponID]))
+								{
+									$weaponOwner = $this->weaponOwners[$weaponID];
+									$secondaryObjectPilot = $weaponOwner['pilot'];
+									
+									// Make sure pilot exists in stats
+									if (!isset($this->stats[$secondaryObjectPilot]))
+									{
+										$this->stats[$secondaryObjectPilot]["Aircraft"] = $weaponOwner['aircraft'];
+										$this->stats[$secondaryObjectPilot]["Group"]    = $weaponOwner['group'];
+										$this->stats[$secondaryObjectPilot]["Type"]     = $weaponOwner['type'];
+
+										if (!array_key_exists("Events", $this->stats[$secondaryObjectPilot]))
+										{
+											$this->stats[$secondaryObjectPilot]["Events"] = array();
+										}
+									}
+									
+									// Add event to killer's record
+									array_push($this->stats[$secondaryObjectPilot]["Events"], $event);
+									break; // Found the killer, stop searching
+								}
+							}
+						}
+						
+						// If still no killer found, skip this kill attribution
+						if ($secondaryObjectPilot === null)
 						{
 							continue 2;
-						}							
-							
-						if (!array_key_exists("Killed", $this->stats[$secondaryObjectPilot]))
-						{
-							$this->stats[$secondaryObjectPilot]["Killed"] = array();
 						}
-	
-						$this->increaseStat($this->stats[$secondaryObjectPilot]["Killed"], $event["PrimaryObject"]["Type"], "Count"); 
-						$this->increaseStat($this->stats[$secondaryObjectPilot]["Killed"], $event["PrimaryObject"]["Type"], $event["PrimaryObject"]["Name"]);
+					}							
+						
+					if (!array_key_exists("Killed", $this->stats[$secondaryObjectPilot]))
+					{
+						$this->stats[$secondaryObjectPilot]["Killed"] = array();
+					}
 
-						break;
+					$this->increaseStat($this->stats[$secondaryObjectPilot]["Killed"], $event["PrimaryObject"]["Type"], "Count"); 
+					$this->increaseStat($this->stats[$secondaryObjectPilot]["Killed"], $event["PrimaryObject"]["Type"], $event["PrimaryObject"]["Name"]);						break;
 
 					case "HasBeenHitBy":
 
