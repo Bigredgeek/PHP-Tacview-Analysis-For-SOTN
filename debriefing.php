@@ -6,7 +6,12 @@
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 	</head>
 	<body>
-		<h1>PHP Tacview Debriefing</h1>
+		<div class="header-container">
+			<a href="https://sites.google.com/airgoons.com/songofthenibelungs/home" class="logo-link" target="_blank">
+				<img src="AGWG_ICON.png" alt="AGWG Logo" class="logo" />
+			</a>
+			<h1>PHP Tacview Debriefing</h1>
+		</div>
 		<?php
 
 			require_once "./tacview.php";
@@ -15,25 +20,33 @@
 
 			// Check for XML files
 			$xmlFiles = glob("debriefings/*.xml");
-			echo "<p>Looking for XML files in debriefings folder...</p>";
-			echo "<p>Found " . count($xmlFiles) . " XML files.</p>";
+			
+			// Store status messages to display at the bottom
+			$statusMessages = "<div style='margin-top: 40px; padding: 20px; border-top: 1px solid #333;'>";
+			$statusMessages .= "<p>Looking for XML files in debriefings folder...</p>";
+			$statusMessages .= "<p>Found " . count($xmlFiles) . " XML files.</p>";
 			
 			if (count($xmlFiles) == 0) {
-				echo "<p>No XML files found. Looking for other files...</p>";
+				$statusMessages .= "<p>No XML files found. Looking for other files...</p>";
 				$allFiles = glob("debriefings/*");
-				echo "<ul>";
+				$statusMessages .= "<ul>";
 				foreach ($allFiles as $file) {
-					echo "<li>" . basename($file) . "</li>";
+					$statusMessages .= "<li>" . basename($file) . "</li>";
 				}
-				echo "</ul>";
-				echo "<p><strong>Note:</strong> This application currently processes XML files only. You have an .acmi file which needs to be converted to XML format.</p>";
+				$statusMessages .= "</ul>";
+				$statusMessages .= "<p><strong>Note:</strong> This application currently processes XML files only. You have an .acmi file which needs to be converted to XML format.</p>";
 			}
 
 			foreach ($xmlFiles as $filexml) {
-				echo "<h2>Processing: " . basename($filexml) . "</h2>";
+				$statusMessages .= "<h2>Processed: " . basename($filexml) . "</h2>";
 				$tv->proceedStats("$filexml","Mission Test");
 				echo $tv->getOutput();
 			}
+			
+			$statusMessages .= "</div>";
+			
+			// Output status messages at the bottom
+			echo $statusMessages;
 
 		?>
 	</body>
