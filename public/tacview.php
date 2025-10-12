@@ -171,8 +171,12 @@ class tacview
 		// Convert to array with pilot names as keys for sorting
 		$sortableArray = array();
 		foreach ($stats as $pilotName => $stat) {
-			// Only include entries that have Aircraft data (aircraft/helicopters only, no ground units)
-			if ($pilotName != "" && substr($pilotName, 0, 5) != "Pilot" && isset($stat["Aircraft"])) {
+			// Only include entries that are Aircraft or Helicopter types
+			if ($pilotName != "" && 
+			    substr($pilotName, 0, 5) != "Pilot" && 
+			    isset($stat["Aircraft"]) && 
+			    isset($stat["Type"]) && 
+			    ($stat["Type"] == "Aircraft" || $stat["Type"] == "Helicopter")) {
 				$sortableArray[] = array(
 					'pilotName' => $pilotName,
 					'group' => isset($stat["Group"]) ? $stat["Group"] : "ZZZ_NoGroup", // Put no-group entries at end
@@ -381,6 +385,7 @@ class tacview
 					$primaryObjectPilot = $event["PrimaryObject"]["Pilot"];
 					// crea il ramo per ogni Pilota (di aereo o di elicottero)
 					$this->stats[$primaryObjectPilot]["Aircraft"] = $event["PrimaryObject"]["Name"];
+					$this->stats[$primaryObjectPilot]["Type"] = $event["PrimaryObject"]["Type"];
 				}
 				else
 				{
@@ -660,8 +665,12 @@ class tacview
 		foreach ($sortedStats as $key => $stat)
 		{
 
-			// Only display aircraft and helicopters (entries with Aircraft data)
-			if ($key != "" and substr($key, 0, 5) != "Pilot" and isset($stat["Aircraft"]))
+			// Only display aircraft and helicopters (check both Aircraft field and Type)
+			if ($key != "" and 
+			    substr($key, 0, 5) != "Pilot" and 
+			    isset($stat["Aircraft"]) and 
+			    isset($stat["Type"]) and 
+			    ($stat["Type"] == "Aircraft" or $stat["Type"] == "Helicopter"))
 			{
 				// $this->displayEventRow($event);
 				$this->addOutput('<tr class="statisticsTable">');
