@@ -2,6 +2,10 @@
 // Debriefing API endpoint for Vercel
 // Include the main tacview class and debriefing logic
 
+// Suppress warnings and notices
+error_reporting(E_ERROR | E_PARSE);
+ini_set('display_errors', '0');
+
 // Set the correct paths for includes - tacview.php is now in public directory
 $base_path = __DIR__ . '/../public';
 
