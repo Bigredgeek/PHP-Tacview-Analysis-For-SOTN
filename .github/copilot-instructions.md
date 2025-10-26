@@ -5,10 +5,11 @@ This is a PHP-based Tacview analysis tool for DCS (Digital Combat Simulator) deb
 
 ## Code Style & Standards
  *****THE FOLLOWING IS VERY IMPORTANT*****
-If this project does not have a changelog.md file, make one before making any changes.
-Before making any changes read the changelog.md file and see if what you are planning has already been tried by other developers
- After any changes update the changelog.md file with what was done for future developers to reference.
-Update the changelog as you make changes to the project to avoid recursive loops and ineffective strategies
+- If this project does not have a changelog.md file, make one before making any changes.
+- Before making any changes read the changelog.md file and see if what you are planning has already been tried by other developers
+- After any changes update the changelog.md file with what was done for future developers to reference.
+- Update the changelog as you make changes to the project to avoid recursive loops and ineffective strategies
+- Always run a test on a local server with a real Tacview XML debriefing file after making any PHP changes to ensure no warnings or errors occur.
 
 ### PHP
 - Use PHP 8.2+ syntax and features
@@ -64,6 +65,14 @@ Update the changelog as you make changes to the project to avoid recursive loops
 - Cache parsed data when appropriate
 
 ## Helpful Context
-- This tool is primarily used by the SOTN (Strike Operations Training Network) community
+- This tool is primarily used by the Air Goons Wargame community for the analysis of DCS mission debriefings for Song of the Nibelung community wargame
 - Focus on features that support post-mission debriefing and tactical analysis
 - UI should be clear and focused on mission data visualization
+
+## RECOMMENDATIONS FOR FUTURE DEVELOPERS
+1. Maintain strict typing throughout - don't revert to untyped code
+2. Always check CHANGELOG.md before making modifications
+3. Run test suite after any PHP modifications
+4. Keep all 10 language files in sync between /languages and /public/languages
+5. Test with actual Tacview XML files during development
+6. Ensure type hints are updated when adding new methods

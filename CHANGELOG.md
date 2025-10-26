@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `tools/list_aircraft.php` to scan debriefing XMLs and enumerate unique aircraft names with local icon presence
 - Added `data/aircraft_icons_manifest.json` with suggested Wikimedia Commons category links for each aircraft and fields for file URL, license, and attribution
 - Added `tools/download_icons.php` to download thumbnails defined in the manifest into `objectIcons/`
+- Added placeholder PNGs for missing icons (`Su-25_Frogfoot.png`, `A-50_Mainstay.png`) to verify runtime `.png` fallback
 
 ### Fixed - 2025-10-25
 #### Browser Testing & Runtime Fixes
