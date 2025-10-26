@@ -18,7 +18,6 @@ Thumbs.db
 *~
 
 # Deployment (but keep public directory)
-.wasmer/
 .vercel/
 .netlify/
 dist/

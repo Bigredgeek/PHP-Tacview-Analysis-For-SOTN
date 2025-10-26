@@ -1,6 +1,8 @@
 <?php
 
-	$_LANGUAGE = array();
+declare(strict_types=1);
+
+	$_LANGUAGE = [];
 	$_LANGUAGE['information'] = 'Mission Information';
 	$_LANGUAGE['events'] = 'Events';
 	$_LANGUAGE['missionName'] = 'Name';

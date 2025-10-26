@@ -1,3 +1,10 @@
+<?php
+
+declare(strict_types=1);
+
+require_once "./tacview.php";
+
+?>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -13,8 +20,6 @@
 			<h1>PHP Tacview Debriefing</h1>
 		</div>
 		<?php
-
-			require_once "./tacview.php";
 
 			$tv = new tacview("en");
 

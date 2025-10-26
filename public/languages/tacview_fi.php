@@ -1,6 +1,8 @@
 <?php
 
-	$_LANGUAGE = array();
+declare(strict_types=1);
+
+	$_LANGUAGE = [];
 	$_LANGUAGE['information'] = 'Tehtävätiedot';
 	$_LANGUAGE['events'] = 'Tapahtumat';
 	$_LANGUAGE['missionName'] = 'Tehtävän nimi';

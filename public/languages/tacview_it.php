@@ -1,6 +1,8 @@
 <?php
+
+declare(strict_types=1);
 // Traduzione italiana by Aikanaro
-	$_LANGUAGE = array();
+	$_LANGUAGE = [];
 	$_LANGUAGE['information'] = 'Informazione Missione';
 	$_LANGUAGE['events'] = 'Eventi';
 	$_LANGUAGE['missionName'] = 'Nome Missione';

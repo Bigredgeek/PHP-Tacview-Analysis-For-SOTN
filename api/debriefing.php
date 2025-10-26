@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 // Debriefing API endpoint for Vercel
 // Include the main tacview class and debriefing logic
 
