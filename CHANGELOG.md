@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `data/aircraft_icons_manifest.json` with suggested Wikimedia Commons category links for each aircraft and fields for file URL, license, and attribution
 - Added `tools/download_icons.php` to download thumbnails defined in the manifest into `objectIcons/`
 - Added placeholder PNGs for missing icons (`Su-25_Frogfoot.png`, `A-50_Mainstay.png`) to verify runtime `.png` fallback
+- Added `tools/normalize_icons.php` to auto crop/resize thumbnails to 16:9 at 640px width (JPG preferred, PNG preserved with alpha)
+- Added optional git pre-commit hook in `.githooks/pre-commit` and installer `tools/install-git-hooks.ps1`
+- Added `docs/icons.md` with sourcing guidance, technical specs, and workflow
 
 ### Fixed - 2025-10-25
 #### Browser Testing & Runtime Fixes

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Normalize aircraft thumbnails on commit
+set -euo pipefail
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+cd "$ROOT_DIR"
+
+# Collect staged images under objectIcons
+mapfile -t FILES < <(git diff --cached --name-only --diff-filter=ACMRT | grep -E '^objectIcons/.+\.(png|jpg|jpeg)$' || true)
+if [ ${#FILES[@]} -eq 0 ]; then
+  exit 0
+fi
+
+# Run normalizer and re-stage changed files
+php tools/normalize_icons.php --files="$(printf "%s," "${FILES[@]}" | sed 's/,$//')" || exit 1
+
+git add -- "${FILES[@]}"
+
+exit 0
