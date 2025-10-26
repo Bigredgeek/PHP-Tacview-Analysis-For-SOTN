@@ -2,29 +2,33 @@
 
 declare(strict_types=1);
 
-require_once "./tacview.php";
+// Load configuration
+$config = require_once __DIR__ . "/config.php";
+
+// Load core tacview library
+require_once __DIR__ . "/" . $config['core_path'] . "/tacview.php";
 
 ?>
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>PHPTacview</title>
-		<link rel="stylesheet" href="tacview.css" />
+		<title><?php echo htmlspecialchars($config['page_title']); ?></title>
+		<link rel="stylesheet" href="<?php echo htmlspecialchars($config['core_path']); ?>/tacview.css" />
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 	</head>
 	<body>
 		<div class="header-container">
-			<a href="https://sites.google.com/airgoons.com/songofthenibelungs/home" class="logo-link" target="_blank">
-				<img src="AGWG_ICON.png" alt="AGWG Logo" class="logo" />
+			<a href="<?php echo htmlspecialchars($config['group_link']); ?>" class="logo-link" target="_blank">
+				<img src="<?php echo htmlspecialchars($config['logo_path']); ?>" alt="<?php echo htmlspecialchars($config['logo_alt']); ?>" class="logo" />
 			</a>
-			<h1>PHP Tacview Debriefing</h1>
+			<h1><?php echo htmlspecialchars($config['page_title']); ?></h1>
 		</div>
 		<?php
 
-			$tv = new tacview("en");
+			$tv = new tacview($config['default_language']);
 
 			// Check for XML files
-			$xmlFiles = glob("debriefings/*.xml");
+			$xmlFiles = glob($config['debriefings_path']);
 			
 			// Store status messages to display at the bottom
 			$statusMessages = "<div style='margin-top: 40px; padding: 20px; border-top: 1px solid #333;'>";
