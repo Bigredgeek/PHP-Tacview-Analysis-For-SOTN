@@ -5,28 +5,212 @@
     "notes": "Choose clear side-on profile or clean 3/4 views. Aim ~640px width, landscape crop, minimal background. Prefer CC BY/CC BY-SA from Wikimedia Commons."
   },
   "aircraft": [
-    {"name": "A-4E Skyhawk", "targetFilename": "A-4E_Skyhawk.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Douglas_A-4_Skyhawk", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "A-10A Thunderbolt II", "targetFilename": "A-10A_Thunderbolt_II.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Fairchild-Republic_A-10_Thunderbolt_II", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "A-10C Thunderbolt II", "targetFilename": "A-10C_Thunderbolt_II.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Fairchild-Republic_A-10_Thunderbolt_II", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "A-50 Mainstay", "targetFilename": "A-50_Mainstay.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Beriev_A-50", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "AJS 37 Viggen", "targetFilename": "AJS_37_Viggen.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Saab_37_Viggen", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "AV-8B Harrier II NA", "targetFilename": "AV-8B_Harrier_II_NA.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_AV-8B_Harrier_II", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "F-4E Phantom II", "targetFilename": "F-4E_Phantom_II.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_F-4_Phantom_II", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "F-14B Tomcat", "targetFilename": "F-14B_Tomcat.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Grumman_F-14_Tomcat", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "F-15C Eagle", "targetFilename": "F-15C_Eagle.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_F-15_Eagle", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "F-15E Strike Eagle", "targetFilename": "F-15E_Strike_Eagle.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_F-15E_Strike_Eagle", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "F-16C Fighting Falcon", "targetFilename": "F-16C_Fighting_Falcon.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:General_Dynamics_F-16_Fighting_Falcon", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "F-104 Starfighter", "targetFilename": "F-104_Starfighter.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Lockheed_F-104_Starfighter", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "F/A-18C Hornet", "targetFilename": "F_A-18C_Hornet.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_F/A-18_Hornet", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "MiG-21bis Fishbed-L/N", "targetFilename": "MiG-21bis_Fishbed-L_N.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan-Gurevich_MiG-21", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "MiG-23MLD Flogger-K", "targetFilename": "MiG-23MLD_Flogger-K.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan-Gurevich_MiG-23", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "MiG-25PD Foxbat-E", "targetFilename": "MiG-25PD_Foxbat-E.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan-Gurevich_MiG-25", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "MiG-29 Fulcrum", "targetFilename": "MiG-29_Fulcrum.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan_MiG-29", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "MiG-29A Fulcrum-A", "targetFilename": "MiG-29A_Fulcrum-A.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan_MiG-29", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "Mirage 2000C", "targetFilename": "Mirage_2000C.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Dassault_Mirage_2000", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "Mirage F1 EE", "targetFilename": "Mirage_F1_EE.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Dassault_Mirage_F1", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "Su-17M4 Fitter-K", "targetFilename": "Su-17M4_Fitter-K.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Sukhoi_Su-17", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "Su-25 Frogfoot", "targetFilename": "Su-25_Frogfoot.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Sukhoi_Su-25", "fileUrl": null, "license": null, "attribution": null},
-    {"name": "Su-25T Frogfoot", "targetFilename": "Su-25T_Frogfoot.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Sukhoi_Su-25", "fileUrl": null, "license": null, "attribution": null}
+    {
+      "name": "A-4E Skyhawk",
+      "targetFilename": "A-4E_Skyhawk.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Douglas_A-4_Skyhawk",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f5/Douglas_A-4E_Skyhawk_of_VA-164_in_flight_over_Vietnam_on_21_November_1967_%286430101%29.jpg",
+      "license": "Public domain",
+      "attribution": "USN",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Douglas+A-4+Skyhawk"
+    },
+    {
+      "name": "A-10A Thunderbolt II",
+      "targetFilename": "A-10A_Thunderbolt_II.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Fairchild-Republic_A-10_Thunderbolt_II",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/8/80/Fairchild_Republic_A-10_Thunderbolt_II_-_32156159151.jpg",
+      "license": "GFDL 1.2",
+      "attribution": "<div class=\"fn value\">\nAnthony Noble</div>",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Fairchild+Republic+A-10+Thunderbolt+II"
+    },
+    {
+      "name": "A-10C Thunderbolt II",
+      "targetFilename": "A-10C_Thunderbolt_II.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Fairchild-Republic_A-10_Thunderbolt_II",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/8/80/Fairchild_Republic_A-10_Thunderbolt_II_-_32156159151.jpg",
+      "license": "CC BY-SA 4.0",
+      "attribution": "<a href=\"//commons.wikimedia.org/wiki/User:Noah_Wulf\" title=\"User:Noah Wulf\">Noah Wulf</a>",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Fairchild+Republic+A-10+Thunderbolt+II"
+    },
+    {
+      "name": "A-50 Mainstay",
+      "targetFilename": "A-50_Mainstay.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Beriev_A-50",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/0/02/Airborne_early_warning_and_control_aircraft_A-50U_%28Red_41%29.jpg",
+      "license": "Public domain",
+      "attribution": "Greg Goebel",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Beriev+A-50"
+    },
+    {
+      "name": "AJS 37 Viggen",
+      "targetFilename": "AJS_37_Viggen.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Saab_37_Viggen",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/2/23/Viggen_%2852526298757%29.jpg",
+      "license": "CC BY-SA 2.0",
+      "attribution": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/people/22594688@N08\">Ragnhild&amp;Neil Crawford</a> from Sweden",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Saab+37+Viggen"
+    },
+    {
+      "name": "AV-8B Harrier II NA",
+      "targetFilename": "AV-8B_Harrier_II_NA.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_AV-8B_Harrier_II",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/4/45/Boeing_AV-8B_Harrier_II%2C_Italy_-_Navy_JP7306232.jpg",
+      "license": "CC BY-SA 4.0",
+      "attribution": "<a href=\"//commons.wikimedia.org/wiki/User:Nux\" title=\"User:Nux\">Maciej Nux</a>",
+      "descriptionPage": "https://en.wikipedia.org/wiki/McDonnell+Douglas+AV-8B+Harrier+II"
+    },
+    {
+      "name": "F-4E Phantom II",
+      "targetFilename": "F-4E_Phantom_II.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_F-4_Phantom_II",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2b/QF-4_Holloman_AFB.jpg",
+      "license": "Public domain",
+      "attribution": "United States Air Force",
+      "descriptionPage": "https://en.wikipedia.org/wiki/McDonnell+Douglas+F-4+Phantom+II"
+    },
+    {
+      "name": "F-14B Tomcat",
+      "targetFilename": "F-14B_Tomcat.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Grumman_F-14_Tomcat",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f7/US_Navy_051105-F-5480T-005_An_F-14D_Tomcat_conducts_a_mission_over_the_Persian_Gulf-region.jpg",
+      "license": "CC BY-SA 3.0",
+      "attribution": "<a href=\"//commons.wikimedia.org/wiki/User:Skeet_Shooter\" title=\"User:Skeet Shooter\">Skeet Shooter</a>",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Grumman+F-14+Tomcat"
+    },
+    {
+      "name": "F-15C Eagle",
+      "targetFilename": "F-15C_Eagle.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_F-15_Eagle",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a6/F-15C_Eagle_from_the_44th_Fighter_Squadron_flies_during_a_routine_training_exercise_April_15%2C_2019.jpg",
+      "license": "Public domain",
+      "attribution": "US Air Force",
+      "descriptionPage": "https://en.wikipedia.org/wiki/McDonnell+Douglas+F-15+Eagle"
+    },
+    {
+      "name": "F-15E Strike Eagle",
+      "targetFilename": "F-15E_Strike_Eagle.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_F-15E_Strike_Eagle",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e6/F-15E_takes_on_fuel_from_KC-10.jpg",
+      "license": "Public domain",
+      "attribution": "Senior Airman Brett Clashman",
+      "descriptionPage": "https://en.wikipedia.org/wiki/McDonnell+Douglas+F-15E+Strike+Eagle"
+    },
+    {
+      "name": "F-16C Fighting Falcon",
+      "targetFilename": "F-16C_Fighting_Falcon.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:General_Dynamics_F-16_Fighting_Falcon",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c9/F-16_June_2008.jpg",
+      "license": "Public domain",
+      "attribution": "U.S. Air Force photo/Lance Cheung",
+      "descriptionPage": "https://en.wikipedia.org/wiki/General+Dynamics+F-16+Fighting+Falcon"
+    },
+    {
+      "name": "F-104 Starfighter",
+      "targetFilename": "F-104_Starfighter.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Lockheed_F-104_Starfighter",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/8/86/Lockheed_F-104G_Starfighter_D-8114_%289179542542%29.jpg",
+      "license": "Public domain",
+      "attribution": "Camera Operator: Ken Hackman, USAF",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Lockheed+F-104+Starfighter"
+    },
+    {
+      "name": "F/A-18C Hornet",
+      "targetFilename": "F_A-18C_Hornet.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_F/A-18_Hornet",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/4/44/FA-18C_desert_refueling.jpg",
+      "license": "Public domain",
+      "attribution": "U.S. Navy photo by Photographer's Mate 3rd Class Jonathan Chandler",
+      "descriptionPage": "https://en.wikipedia.org/wiki/McDonnell+Douglas+F%2fA-18+Hornet"
+    },
+    {
+      "name": "MiG-21bis Fishbed-L/N",
+      "targetFilename": "MiG-21bis_Fishbed-L_N.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan-Gurevich_MiG-21",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Croatian_MiG-21_%28cropped%29.jpg",
+      "license": "CC BY-SA 2.0",
+      "attribution": "<bdi><a href=\"https://www.wikidata.org/wiki/Q33132025\" class=\"extiw\" title=\"d:Q33132025\"><span title=\"photographer from the UK\">Alan Wilson</span></a></bdi>",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Mikoyan-Gurevich+MiG-21"
+    },
+    {
+      "name": "MiG-23MLD Flogger-K",
+      "targetFilename": "MiG-23MLD_Flogger-K.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan-Gurevich_MiG-23",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Mig-23-DNST8908431_JPG.jpg",
+      "license": "CC BY 2.0",
+      "attribution": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/people/48046632@N07\">Mike LaChance</a> from Crowley, Tx, USA",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Mikoyan-Gurevich+MiG-23"
+    },
+    {
+      "name": "MiG-25PD Foxbat-E",
+      "targetFilename": "MiG-25PD_Foxbat-E.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan-Gurevich_MiG-25",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a4/Russian_Air_Force_MiG-25.jpg",
+      "license": "Public domain",
+      "attribution": null,
+      "descriptionPage": "https://en.wikipedia.org/wiki/Mikoyan-Gurevich+MiG-25"
+    },
+    {
+      "name": "MiG-29 Fulcrum",
+      "targetFilename": "MiG-29_Fulcrum.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan_MiG-29",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/a/af/VVS_100th_IMG_0691_%287727464290%29_%28cropped%29.jpg",
+      "license": "CC BY 4.0",
+      "attribution": "<a href=\"//commons.wikimedia.org/wiki/User:Julian_Herzog\" title=\"User:Julian Herzog\">Julian Herzog</a> (<a rel=\"nofollow\" class=\"external text\" href=\"http://julianherzog.com\">Website</a>)<br>",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Mikoyan+MiG-29"
+    },
+    {
+      "name": "MiG-29A Fulcrum-A",
+      "targetFilename": "MiG-29A_Fulcrum-A.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan_MiG-29",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/a/af/VVS_100th_IMG_0691_%287727464290%29_%28cropped%29.jpg",
+      "license": "CC BY 4.0",
+      "attribution": "<a href=\"//commons.wikimedia.org/wiki/User:Julian_Herzog\" title=\"User:Julian Herzog\">Julian Herzog</a> (<a rel=\"nofollow\" class=\"external text\" href=\"http://julianherzog.com\">Website</a>)<br>",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Mikoyan+MiG-29"
+    },
+    {
+      "name": "Mirage 2000C",
+      "targetFilename": "Mirage_2000C.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Dassault_Mirage_2000",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Mirage_2000C_in-flight_2_%28cropped%29.jpg",
+      "license": "CC BY-SA 4.0",
+      "attribution": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:MirageC1203&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:MirageC1203 (page does not exist)\">MirageC1203</a>",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Dassault+Mirage+2000"
+    },
+    {
+      "name": "Mirage F1 EE",
+      "targetFilename": "Mirage_F1_EE.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Dassault_Mirage_F1",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/7/79/French_Air_Force_Mirage_F1_returns_to_it%27s_mission_after_receiving_fuel_from_a_KC-10_Extender.jpg",
+      "license": "Public domain",
+      "attribution": "Project Blue Book",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Dassault+Mirage+F1"
+    },
+    {
+      "name": "Su-17M4 Fitter-K",
+      "targetFilename": "Su-17M4_Fitter-K.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Sukhoi_Su-17",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/0/00/Vietnamese_Su-22M4_with_Kh-25s.jpg",
+      "license": "CC BY-SA 3.0",
+      "attribution": "<a href=\"//commons.wikimedia.org/wiki/User:Emoscopes\" title=\"User:Emoscopes\">Emoscopes</a> 22:14, 6 May 2008 (UTC)",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Sukhoi+Su-17"
+    },
+    {
+      "name": "Su-25 Frogfoot",
+      "targetFilename": "Su-25_Frogfoot.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Sukhoi_Su-25",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Sukhoi_Su-25_of_the_Russian_Air_Force_landing_at_Vladivostok_%288683076150%29.jpg",
+      "license": "CC BY-SA 3.0",
+      "attribution": "<a href=\"//commons.wikimedia.org/wiki/User:Altoing\" title=\"User:Altoing\">Altoing</a>",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Sukhoi+Su-25"
+    },
+    {
+      "name": "Su-25T Frogfoot",
+      "targetFilename": "Su-25T_Frogfoot.jpg",
+      "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Sukhoi_Su-25",
+      "fileUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Sukhoi_Su-25_of_the_Russian_Air_Force_landing_at_Vladivostok_%288683076150%29.jpg",
+      "license": "CC BY-SA 3.0",
+      "attribution": "<a href=\"//commons.wikimedia.org/wiki/User:Altoing\" title=\"User:Altoing\">Altoing</a>",
+      "descriptionPage": "https://en.wikipedia.org/wiki/Sukhoi+Su-25"
+    }
   ]
 }

@@ -8,9 +8,40 @@ declare(strict_types=1);
 //   - JPG preferred output; PNG preserved if input is PNG (keeps alpha)
 //   - Skips tiny placeholder files (< 2KB) and images smaller than 128x128
 
-if (!extension_loaded('gd')) {
-    fwrite(STDERR, "GD extension is not loaded. Please enable the GD extension in your PHP CLI (php.ini) to use tools/normalize_icons.php.\n");
-    fwrite(STDERR, "Tip (Windows): uncomment extension=gd in your php.ini used by CLI.\n");
+// Prefer GD; fall back to ImageMagick CLI (magick) if GD is unavailable
+$HAS_GD = extension_loaded('gd');
+function findMagick(): ?string {
+    $isWin = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+    $candidates = $isWin ? ['magick'] : ['magick', 'convert'];
+    foreach ($candidates as $cmd) {
+        $which = $isWin ? "where $cmd" : "command -v $cmd";
+        @exec($which, $out, $code);
+        if ($code === 0 && !empty($out)) {
+            return $cmd; // use as-is; on Windows 'magick' is preferred
+        }
+        $out = [];
+    }
+    // On Windows, check common install paths if not on PATH
+    if ($isWin) {
+        $roots = [
+            getenv('ProgramFiles') ?: 'C:\\Program Files',
+            getenv('ProgramFiles(x86)') ?: 'C:\\Program Files (x86)'
+        ];
+        foreach ($roots as $root) {
+            $pattern = rtrim($root, '\\/') . '\\ImageMagick*';
+            foreach (glob($pattern, GLOB_ONLYDIR) as $dir) {
+                $exe = $dir . '\\magick.exe';
+                if (is_file($exe)) {
+                    return escapeshellarg($exe);
+                }
+            }
+        }
+    }
+    return null;
+}
+$MAGICK = $HAS_GD ? null : findMagick();
+if (!$HAS_GD && !$MAGICK) {
+    fwrite(STDERR, "Neither GD nor ImageMagick CLI found. Enable GD in php.ini or install ImageMagick ('magick').\n");
     exit(2);
 }
 
@@ -55,7 +86,7 @@ function saveImage($img, string $path, int $quality): bool {
     return false;
 }
 
-function normalizeOne(string $srcPath, int $targetW, int $quality, bool $dry): ?string {
+function normalizeOneGD(string $srcPath, int $targetW, int $quality, bool $dry): ?string {
     if (!file_exists($srcPath)) return 'missing';
     $size = filesize($srcPath);
     if ($size !== false && $size < 2048) return 'skip-small-file';
@@ -108,6 +139,26 @@ function normalizeOne(string $srcPath, int $targetW, int $quality, bool $dry): ?
     return $ok ? 'ok' : 'save-failed';
 }
 
+function normalizeOneMagick(string $srcPath, int $targetW, int $quality, bool $dry, string $magickCmd): ?string {
+    if (!file_exists($srcPath)) return 'missing';
+    $size = filesize($srcPath);
+    if ($size !== false && $size < 2048) return 'skip-small-file';
+    [$w, $h] = @getimagesize($srcPath) ?: [0, 0];
+    if ($w < 128 || $h < 128) return 'skip-small-dimension';
+    $targetH = (int)round($targetW / (16/9));
+    $ext = strtolower(pathinfo($srcPath, PATHINFO_EXTENSION));
+    $quality = max(10, min(95, $quality));
+    $common = "-auto-orient -resize {$targetW}x{$targetH}^ -gravity center -extent {$targetW}x{$targetH} -strip";
+    if ($dry) return 'dry-run';
+    if ($ext === 'png') {
+        $cmd = sprintf('%s "%s" %s -define png:compression-level=%d "%s"', $magickCmd, $srcPath, $common, (int)round((100 - $quality) / 100 * 9), $srcPath);
+    } else {
+        $cmd = sprintf('%s "%s" %s -quality %d "%s"', $magickCmd, $srcPath, $common, $quality, $srcPath);
+    }
+    @exec($cmd, $out, $code);
+    return $code === 0 ? 'ok' : 'save-failed';
+}
+
 $args = parseArgs($argv);
 $files = $args['files'];
 if (!$files) {
@@ -131,7 +182,12 @@ foreach ($files as $path) {
         $alt = __DIR__ . '/../' . ltrim($path, '/');
         if (is_file($alt)) $path = realpath($alt) ?: $alt;
     }
-    $status = normalizeOne($path, (int)$args['width'], (int)$args['quality'], (bool)$args['dry']);
+    global $HAS_GD, $MAGICK;
+    if ($HAS_GD) {
+        $status = normalizeOneGD($path, (int)$args['width'], (int)$args['quality'], (bool)$args['dry']);
+    } else {
+        $status = normalizeOneMagick($path, (int)$args['width'], (int)$args['quality'], (bool)$args['dry'], $MAGICK);
+    }
     $results[] = [$path, $status];
 }
 

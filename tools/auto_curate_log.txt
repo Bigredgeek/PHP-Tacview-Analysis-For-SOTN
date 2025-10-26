@@ -1,0 +1,25 @@
+MISS	A-4E Skyhawk
+MISS	A-10A Thunderbolt II
+MISS	A-10C Thunderbolt II
+MISS	A-50 Mainstay
+MISS	AJS 37 Viggen
+MISS	AV-8B Harrier II NA
+MISS	F-4E Phantom II
+MISS	F-14B Tomcat
+MISS	F-15C Eagle
+MISS	F-15E Strike Eagle
+MISS	F-16C Fighting Falcon
+MISS	F-104 Starfighter
+MISS	F/A-18C Hornet
+MISS	MiG-21bis Fishbed-L/N
+MISS	MiG-23MLD Flogger-K
+MISS	MiG-25PD Foxbat-E
+MISS	MiG-29 Fulcrum
+MISS	MiG-29A Fulcrum-A
+MISS	Mirage 2000C
+MISS	Mirage F1 EE
+MISS	Su-17M4 Fitter-K
+MISS	Su-25 Frogfoot
+MISS	Su-25T Frogfoot
+
+Completed. OK=0 FAIL=23

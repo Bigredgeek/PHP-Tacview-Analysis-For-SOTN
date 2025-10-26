@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - 2025-10-26
+#### Automated icon curation
+- PowerShell curator `tools/auto_curate_icons.ps1` now fetches canonical infobox images directly from Wikipedia articles using the pageimages API.
+- Added Wikipedia article title mapping for all 23 aircraft to ensure correct article lookups (e.g., "F-16C Fighting Falcon" → "General Dynamics F-16 Fighting Falcon").
+- Downloaded and normalized high-quality Wikipedia infobox thumbnails for all aircraft (23/23 success).
+
+### Changed - 2025-10-26
+#### Normalization tooling
+- `tools/normalize_icons.php`: added ImageMagick CLI fallback (`magick`) when PHP GD is not available; avoids Windows `convert.exe` collision by restricting to `magick` on Windows.
+- `tools/normalize_icons.php`: enhanced findMagick() to probe common Windows install paths (Program Files) when magick is not on PATH.
+
+### Fixed - 2025-10-26
+#### Curation script robustness
+- Fixed URL interpolation bug in `tools/auto_curate_icons.ps1` where `$Api?` was parsed as a variable; use `$($Api)?...` to disambiguate.
+- Replaced Commons search with Wikipedia pageimages API for more reliable and canonical aircraft photos.
+- Hardened property access checks throughout PowerShell script using PSObject.Properties to avoid "property cannot be found" errors.
+
 ### Added - 2025-10-25
 #### Aircraft icon improvement tooling
 - Added `tools/list_aircraft.php` to scan debriefing XMLs and enumerate unique aircraft names with local icon presence
