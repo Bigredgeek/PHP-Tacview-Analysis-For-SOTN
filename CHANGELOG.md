@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - 2025-10-25
+#### Aircraft icon improvement tooling
+- Added `tools/list_aircraft.php` to scan debriefing XMLs and enumerate unique aircraft names with local icon presence
+- Added `data/aircraft_icons_manifest.json` with suggested Wikimedia Commons category links for each aircraft and fields for file URL, license, and attribution
+- Added `tools/download_icons.php` to download thumbnails defined in the manifest into `objectIcons/`
+
 ### Fixed - 2025-10-25
 #### Browser Testing & Runtime Fixes
 - **Fixed `declare(strict_types=1);` placement in debriefing.php**: Moved strict_types declaration to the very first statement in the file (before HTML output) to comply with PHP's strict type declaration rules. PHP requires this declaration to be the absolute first statement, before any output.
@@ -54,6 +60,9 @@ Complete modernization of codebase to PHP 8.2 standards as per copilot instructi
 - Fixed `$startTime` assignment to cast string to float: `$this->startTime = (float)$this->currentData;`
 - Changed `$xmlParser` initialization from `null` to proper empty string handling in `$currentData`
 - Updated `$xmlParser` property type from `int` to `mixed` to accommodate PHP 8.0+ XMLParser objects
+
+**Icon Handling Improvements:**
+- Updated `getObjectIcon()` to support `.png` fallback and to return existing file type when available (jpg preferred), enabling higher-quality or transparent PNG thumbnails
 
 **Files Modified:**
 - Core PHP files (5):

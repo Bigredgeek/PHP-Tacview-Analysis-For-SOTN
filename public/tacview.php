@@ -172,7 +172,16 @@ class tacview
 			$iconName = $iconMappings[$iconName];
 		}
 		
-		return $iconName . '.jpg';
+		// Prefer jpg, then png
+		$jpg = $iconName . '.jpg';
+		$png = $iconName . '.png';
+		if (file_exists(__DIR__ . '/objectIcons/' . $jpg)) {
+			return $jpg;
+		}
+		if (file_exists(__DIR__ . '/objectIcons/' . $png)) {
+			return $png;
+		}
+		return $jpg; // default convention
 	}
 
 	//

@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "description": "Suggested high-quality aircraft thumbnails (prefer Wikimedia Commons). Fill fileUrl with a specific image link, include license and attribution.",
+    "created": "2025-10-25",
+    "notes": "Choose clear side-on profile or clean 3/4 views. Aim ~640px width, landscape crop, minimal background. Prefer CC BY/CC BY-SA from Wikimedia Commons."
+  },
+  "aircraft": [
+    {"name": "A-4E Skyhawk", "targetFilename": "A-4E_Skyhawk.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Douglas_A-4_Skyhawk", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "A-10A Thunderbolt II", "targetFilename": "A-10A_Thunderbolt_II.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Fairchild-Republic_A-10_Thunderbolt_II", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "A-10C Thunderbolt II", "targetFilename": "A-10C_Thunderbolt_II.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Fairchild-Republic_A-10_Thunderbolt_II", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "A-50 Mainstay", "targetFilename": "A-50_Mainstay.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Beriev_A-50", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "AJS 37 Viggen", "targetFilename": "AJS_37_Viggen.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Saab_37_Viggen", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "AV-8B Harrier II NA", "targetFilename": "AV-8B_Harrier_II_NA.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_AV-8B_Harrier_II", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "F-4E Phantom II", "targetFilename": "F-4E_Phantom_II.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_F-4_Phantom_II", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "F-14B Tomcat", "targetFilename": "F-14B_Tomcat.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Grumman_F-14_Tomcat", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "F-15C Eagle", "targetFilename": "F-15C_Eagle.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_F-15_Eagle", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "F-15E Strike Eagle", "targetFilename": "F-15E_Strike_Eagle.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_F-15E_Strike_Eagle", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "F-16C Fighting Falcon", "targetFilename": "F-16C_Fighting_Falcon.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:General_Dynamics_F-16_Fighting_Falcon", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "F-104 Starfighter", "targetFilename": "F-104_Starfighter.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Lockheed_F-104_Starfighter", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "F/A-18C Hornet", "targetFilename": "F_A-18C_Hornet.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:McDonnell_Douglas_F/A-18_Hornet", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "MiG-21bis Fishbed-L/N", "targetFilename": "MiG-21bis_Fishbed-L_N.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan-Gurevich_MiG-21", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "MiG-23MLD Flogger-K", "targetFilename": "MiG-23MLD_Flogger-K.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan-Gurevich_MiG-23", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "MiG-25PD Foxbat-E", "targetFilename": "MiG-25PD_Foxbat-E.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan-Gurevich_MiG-25", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "MiG-29 Fulcrum", "targetFilename": "MiG-29_Fulcrum.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan_MiG-29", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "MiG-29A Fulcrum-A", "targetFilename": "MiG-29A_Fulcrum-A.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Mikoyan_MiG-29", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "Mirage 2000C", "targetFilename": "Mirage_2000C.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Dassault_Mirage_2000", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "Mirage F1 EE", "targetFilename": "Mirage_F1_EE.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Dassault_Mirage_F1", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "Su-17M4 Fitter-K", "targetFilename": "Su-17M4_Fitter-K.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Sukhoi_Su-17", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "Su-25 Frogfoot", "targetFilename": "Su-25_Frogfoot.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Sukhoi_Su-25", "fileUrl": null, "license": null, "attribution": null},
+    {"name": "Su-25T Frogfoot", "targetFilename": "Su-25T_Frogfoot.jpg", "suggestedCategoryUrl": "https://commons.wikimedia.org/wiki/Category:Sukhoi_Su-25", "fileUrl": null, "license": null, "attribution": null}
+  ]
+}

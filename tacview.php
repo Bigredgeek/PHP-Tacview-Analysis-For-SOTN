@@ -172,7 +172,18 @@ class tacview
 			$iconName = $iconMappings[$iconName];
 		}
 		
-		return $iconName . '.jpg';
+		// Prefer jpg, then png
+		$basePath = $this->image_path . 'objectIcons/';
+		$jpg = $iconName . '.jpg';
+		$png = $iconName . '.png';
+		// When building absolute/relative paths, $this->image_path is used at render time, so here we only return filename
+		if (file_exists(__DIR__ . '/objectIcons/' . $jpg)) {
+			return $jpg;
+		}
+		if (file_exists(__DIR__ . '/objectIcons/' . $png)) {
+			return $png;
+		}
+		return $jpg; // default convention
 	}
 
 	//
