@@ -5,8 +5,8 @@ declare(strict_types=1);
 // Load configuration from parent directory
 $config = require_once __DIR__ . "/../config.php";
 
-// Load core tacview library - adjust path to be relative to parent directory
-require_once __DIR__ . "/../" . $config['core_path'] . "/tacview.php";
+// Load tacview library from public directory (for Vercel deployment)
+require_once __DIR__ . "/../tacview.php";
 
 ?>
 <!DOCTYPE html>

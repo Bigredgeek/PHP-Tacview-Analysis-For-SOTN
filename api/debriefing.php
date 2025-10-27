@@ -5,8 +5,12 @@ declare(strict_types=1);
 // Load configuration from parent directory
 $config = require_once __DIR__ . "/../config.php";
 
-// Load core tacview library - adjust path to be relative to parent directory
-require_once __DIR__ . "/../" . $config['core_path'] . "/tacview.php";
+// Load tacview library - try public first, then core
+if (file_exists(__DIR__ . "/../public/tacview.php")) {
+    require_once __DIR__ . "/../public/tacview.php";
+} else {
+    require_once __DIR__ . "/../" . $config['core_path'] . "/tacview.php";
+}
 
 ?>
 <!DOCTYPE html>
