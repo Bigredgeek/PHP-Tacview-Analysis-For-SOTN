@@ -364,12 +364,26 @@ class tacview
 		// some scripts
 
 		$this->addOutput('<script type="text/javascript">');
-		$this->addOutput('function showDetails(zoneAffiche){');
-		$this->addOutput('	if(document.getElementById(zoneAffiche).style.display==""){');
-		$this->addOutput('		document.getElementById(zoneAffiche).style.display="none";');
+		$this->addOutput('function showDetails(zoneAffiche, rowElement){');
+		$this->addOutput('	var detailRow = document.getElementById(zoneAffiche);');
+		$this->addOutput('	var pilotRow = rowElement || event.currentTarget;');
+		$this->addOutput('	');
+		$this->addOutput('	// Toggle display');
+		$this->addOutput('	if(detailRow.style.display==""){');
+		$this->addOutput('		detailRow.style.display="none";');
+		$this->addOutput('		pilotRow.classList.remove("active-pilot");');
 		$this->addOutput('	}else{');
-		$this->addOutput('		document.getElementById(zoneAffiche).style.display="";');
+		$this->addOutput('		// Hide all other detail rows and remove active class');
+		$this->addOutput('		var allDetails = document.querySelectorAll(".hiddenRow");');
+		$this->addOutput('		var allPilotRows = document.querySelectorAll("tr.statisticsTable");');
+		$this->addOutput('		allDetails.forEach(function(row){ row.style.display="none"; });');
+		$this->addOutput('		allPilotRows.forEach(function(row){ row.classList.remove("active-pilot"); });');
+		$this->addOutput('		');
+		$this->addOutput('		// Show this detail row and add active class');
+		$this->addOutput('		detailRow.style.display="";');
+		$this->addOutput('		pilotRow.classList.add("active-pilot");');
 		$this->addOutput('	}');
+		$this->addOutput('	return false;');
 		$this->addOutput('}');
 		$this->addOutput('</script>');
 
@@ -830,8 +844,8 @@ class tacview
 			    ($stat["Type"] == "Aircraft" or $stat["Type"] == "Helicopter"))
 			{
 				// $this->displayEventRow($event);
-				$this->addOutput('<tr class="statisticsTable">');
-				$this->addOutput('<td class="statisticsTable"><a href="javascript: showDetails(\'' . $key . '\')">' . $key . '</a></td>');
+				$this->addOutput('<tr class="statisticsTable" onclick="showDetails(\'' . $key . '\', this); return false;">');
+				$this->addOutput('<td class="statisticsTable">' . $key . '</td>');
 				$this->addOutput('<td class="statisticsTable"><img class="statisticsTable" src="' . $this->image_path . 'objectIcons/' . $this->getObjectIcon($stat["Aircraft"]) . '" alt=""/></td>');
 				$this->addOutput('<td class="statisticsTable">' . $stat["Aircraft"] . '</td>');
 

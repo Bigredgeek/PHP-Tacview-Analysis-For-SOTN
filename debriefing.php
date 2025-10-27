@@ -15,6 +15,44 @@ require_once __DIR__ . "/" . $config['core_path'] . "/tacview.php";
 		<title><?php echo htmlspecialchars($config['page_title']); ?></title>
 		<link rel="stylesheet" href="<?php echo htmlspecialchars($config['core_path']); ?>/tacview.css" />
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<script type="text/javascript">
+		function showDetails(zoneAffiche, rowElement){
+			console.log("showDetails called with ID:", zoneAffiche);
+			var detailRow = document.getElementById(zoneAffiche);
+			console.log("detailRow found:", detailRow);
+			var pilotRow = rowElement || event.currentTarget;
+			
+			if(!detailRow){
+				console.error("Detail row not found for ID:", zoneAffiche);
+				return false;
+			}
+			
+			// Get computed style to check actual visibility
+			var computedDisplay = window.getComputedStyle(detailRow).display;
+			console.log("Computed display:", computedDisplay);
+			var isHidden = computedDisplay === "none";
+			console.log("isHidden:", isHidden);
+			
+			if(isHidden){
+				console.log("Showing detail row");
+				// Hide all other detail rows first (only target TR elements, not TD)
+				var allDetails = document.querySelectorAll("tr.hiddenRow");
+				var allPilotRows = document.querySelectorAll("tr.statisticsTable");
+				allDetails.forEach(function(row){ row.style.display="none"; });
+				allPilotRows.forEach(function(row){ row.classList.remove("active-pilot"); });
+				
+				// Show this detail row
+				detailRow.style.display="table-row";
+				pilotRow.classList.add("active-pilot");
+			}else{
+				console.log("Hiding detail row");
+				// Hide this detail row
+				detailRow.style.display="none";
+				pilotRow.classList.remove("active-pilot");
+			}
+			return false;
+		}
+		</script>
 	</head>
 	<body>
 		<div class="header-container">

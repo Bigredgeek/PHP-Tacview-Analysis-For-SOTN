@@ -7,6 +7,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - 2025-10-26
+#### Enhanced User Interaction for Pilot Statistics Table
+- **Improved Row Interaction Model**:
+  - Entire pilot row is now clickable (not just pilot name)
+  - Click anywhere in the row to expand/collapse pilot details
+  - Removed distracting hover effects from non-interactive cells
+  - Added whole-row hover highlighting with smooth cyan glow
+- **Active State Management**:
+  - Selected pilot row remains highlighted while details are shown
+  - Active row displays enhanced cyan border and glow effects
+  - Clicking another pilot automatically closes previous details
+  - Visual feedback clearly indicates which pilot's details are displayed
+- **JavaScript Enhancements**:
+  - Updated `showDetails()` function to manage active row state
+  - Fixed toggle logic to properly detect hidden row display state
+  - Automatic cleanup of all other open detail sections
+  - Improved accessibility with cursor pointer on clickable rows
+- **CSS Refinements**:
+  - Removed scale/transform effects that caused text blurring
+  - Added `.active-pilot` class for persistent highlight state
+  - Enhanced row hover with box-shadow and inset glow
+  - Pilot name column now displays with increased font weight
+- **User Experience**: Significantly more intuitive interaction - users can click anywhere in a pilot's row rather than targeting the small name link
+- **Bug Fix**: Corrected JavaScript display toggle logic to check for both `""` and `"none"` states
+
+### Added - 2025-10-26
+#### Cold War Command Center Visual Theme Implementation
+- **MAJOR VISUAL OVERHAUL**: Implemented authentic 1980s military command center aesthetic for debriefing pages
+- **Retro CRT Display Effects**:
+  - Animated horizontal scanlines with phosphor glow
+  - Green monochrome phosphor effect on text elements
+  - CRT screen curvature simulation via subtle distortion
+  - Flicker animation for authentic terminal feel
+  - VHS noise texture overlay
+- **Tactical Grid Background**:
+  - Animated Tron-style neon grid with perspective depth
+  - Moving grid lines in cyan/green spectrum (#00ffff, #39ff14)
+  - Radar sweep animation effect
+  - Layered parallax grid movement
+  - Subtle glow and bloom effects
+- **Military Terminal Aesthetic**:
+  - Neon cyan/electric blue primary colors (#00ffff, #0af)
+  - Neon green accents (#0f0, #39ff14)
+  - Amber warning highlights (#ff6b00)
+  - Monospace terminal font integration
+- **Analog Display Borders**:
+  - Radar screen-style rounded corners with glow
+  - Tactical display bezels on tables
+  - Corner brackets reminiscent of HUD displays
+  - Pulsing status indicators
+- **Typography Enhancements**:
+  - Retro computer terminal font stack (Share Tech Mono, Courier)
+  - Green phosphor text glow effects
+  - CRT-style text rendering with slight blur
+  - Enhanced readability with backdrop filters
+- **Interactive Elements**:
+  - Smooth transitions maintaining period authenticity
+  - Enhanced logo with command center styling
+  - Tactical table highlights in neon colors
+  - Retro hover effects
+- **Period-Accurate Details**:
+  - Film grain texture for 80s authenticity
+  - Color palette restricted to period CRT monitors
+  - Intentional low-fi digital aesthetic
+- **Performance**: All effects optimized for smooth 60fps rendering
+
 ### Added - 2025-10-26
 #### Automated icon curation
 - PowerShell curator `tools/auto_curate_icons.ps1` now fetches canonical infobox images directly from Wikipedia articles using the pageimages API.

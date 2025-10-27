@@ -173,8 +173,10 @@ class tacview
 		}
 		
 		// Prefer jpg, then png
+		$basePath = $this->image_path . 'objectIcons/';
 		$jpg = $iconName . '.jpg';
 		$png = $iconName . '.png';
+		// When building absolute/relative paths, $this->image_path is used at render time, so here we only return filename
 		if (file_exists(__DIR__ . '/objectIcons/' . $jpg)) {
 			return $jpg;
 		}
@@ -362,12 +364,41 @@ class tacview
 		// some scripts
 
 		$this->addOutput('<script type="text/javascript">');
-		$this->addOutput('function showDetails(zoneAffiche){');
-		$this->addOutput('	if(document.getElementById(zoneAffiche).style.display==""){');
-		$this->addOutput('		document.getElementById(zoneAffiche).style.display="none";');
-		$this->addOutput('	}else{');
-		$this->addOutput('		document.getElementById(zoneAffiche).style.display="";');
+		$this->addOutput('function showDetails(zoneAffiche, rowElement){');
+		$this->addOutput('	console.log("showDetails called with ID:", zoneAffiche);');
+		$this->addOutput('	var detailRow = document.getElementById(zoneAffiche);');
+		$this->addOutput('	console.log("detailRow found:", detailRow);');
+		$this->addOutput('	var pilotRow = rowElement || event.currentTarget;');
+		$this->addOutput('	');
+		$this->addOutput('	if(!detailRow){');
+		$this->addOutput('		console.error("Detail row not found for ID:", zoneAffiche);');
+		$this->addOutput('		return false;');
 		$this->addOutput('	}');
+		$this->addOutput('	');
+		$this->addOutput('	// Get computed style to check actual visibility');
+		$this->addOutput('	var computedDisplay = window.getComputedStyle(detailRow).display;');
+		$this->addOutput('	console.log("Computed display:", computedDisplay);');
+		$this->addOutput('	var isHidden = computedDisplay === "none";');
+		$this->addOutput('	console.log("isHidden:", isHidden);');
+		$this->addOutput('	');
+		$this->addOutput('	if(isHidden){');
+		$this->addOutput('		console.log("Showing detail row");');
+		$this->addOutput('		// Hide all other detail rows first');
+		$this->addOutput('		var allDetails = document.querySelectorAll(".hiddenRow");');
+		$this->addOutput('		var allPilotRows = document.querySelectorAll("tr.statisticsTable");');
+		$this->addOutput('		allDetails.forEach(function(row){ row.style.display="none"; });');
+		$this->addOutput('		allPilotRows.forEach(function(row){ row.classList.remove("active-pilot"); });');
+		$this->addOutput('		');
+		$this->addOutput('		// Show this detail row');
+		$this->addOutput('		detailRow.style.display="table-row";');
+		$this->addOutput('		pilotRow.classList.add("active-pilot");');
+		$this->addOutput('	}else{');
+		$this->addOutput('		console.log("Hiding detail row");');
+		$this->addOutput('		// Hide this detail row');
+		$this->addOutput('		detailRow.style.display="none";');
+		$this->addOutput('		pilotRow.classList.remove("active-pilot");');
+		$this->addOutput('	}');
+		$this->addOutput('	return false;');
 		$this->addOutput('}');
 		$this->addOutput('</script>');
 
@@ -828,8 +859,8 @@ class tacview
 			    ($stat["Type"] == "Aircraft" or $stat["Type"] == "Helicopter"))
 			{
 				// $this->displayEventRow($event);
-				$this->addOutput('<tr class="statisticsTable">');
-				$this->addOutput('<td class="statisticsTable"><a href="javascript: showDetails(\'' . $key . '\')">' . $key . '</a></td>');
+				$this->addOutput('<tr class="statisticsTable" onclick="showDetails(\'' . $key . '\', this); return false;">');
+				$this->addOutput('<td class="statisticsTable">' . $key . '</td>');
 				$this->addOutput('<td class="statisticsTable"><img class="statisticsTable" src="' . $this->image_path . 'objectIcons/' . $this->getObjectIcon($stat["Aircraft"]) . '" alt=""/></td>');
 				$this->addOutput('<td class="statisticsTable">' . $stat["Aircraft"] . '</td>');
 
@@ -1040,7 +1071,7 @@ class tacview
 
 				if (!isset($stat["Killed"]["Aircraft"]) or $stat["Killed"]["Aircraft"]["Count"] == "")
 				{
-					$this->addOutput('<p>(' . $this->L("nothing") . ')<p/>');
+					$this->addOutput('<p>(' . $this->L("nothing") . ')</p>');
 				}
 
 				// Kill Helo
