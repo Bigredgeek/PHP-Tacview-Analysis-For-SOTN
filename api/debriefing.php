@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-// Load configuration
-$config = require_once __DIR__ . "/config.php";
+// Load configuration from parent directory
+$config = require_once __DIR__ . "/../config.php";
 
-// Load core tacview library
-require_once __DIR__ . "/" . $config['core_path'] . "/tacview.php";
+// Load core tacview library - adjust path to be relative to parent directory
+require_once __DIR__ . "/../" . $config['core_path'] . "/tacview.php";
 
 ?>
 <!DOCTYPE html>
 <html>
 	<head>
 		<title><?php echo htmlspecialchars($config['page_title']); ?></title>
-		<link rel="stylesheet" href="<?php echo htmlspecialchars($config['core_path']); ?>/tacview.css" />
+		<link rel="stylesheet" href="/tacview.css" />
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 		<script type="text/javascript">
 		function showDetails(zoneAffiche, rowElement){
@@ -57,18 +57,19 @@ require_once __DIR__ . "/" . $config['core_path'] . "/tacview.php";
 	<body>
 		<div class="header-container">
 			<a href="<?php echo htmlspecialchars($config['group_link']); ?>" class="logo-link" target="_blank">
-				<img src="<?php echo htmlspecialchars($config['logo_path']); ?>" alt="<?php echo htmlspecialchars($config['logo_alt']); ?>" class="logo" />
+				<img src="/<?php echo htmlspecialchars($config['logo_path']); ?>" alt="<?php echo htmlspecialchars($config['logo_alt']); ?>" class="logo" />
 			</a>
 			<h1><?php echo htmlspecialchars($config['page_title']); ?></h1>
 		</div>
 		<?php
 
-			$tv = new tacview($config['default_language']);
+		$tv = new tacview($config['default_language']);
 
-			// Check for XML files
-			$xmlFiles = glob($config['debriefings_path']);
-			
-			// Store status messages to display at the bottom
+		// Adjust paths to be relative to parent directory (since we're in /api/)
+		$debriefingsPath = __DIR__ . "/../" . str_replace('debriefings/*.xml', 'debriefings', $config['debriefings_path']) . "/*.xml";
+
+		// Check for XML files
+		$xmlFiles = glob($debriefingsPath);			// Store status messages to display at the bottom
 			$statusMessages = "<div style='margin-top: 40px; padding: 20px; border-top: 1px solid #333;'>";
 			$statusMessages .= "<p>Looking for XML files in debriefings folder...</p>";
 			$statusMessages .= "<p>Found " . count($xmlFiles) . " XML files.</p>";
