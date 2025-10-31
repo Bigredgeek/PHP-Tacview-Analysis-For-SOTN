@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Public Bundle Documentation
 - Created `public/CHANGELOG.md` so downstream consumers can review user-facing updates in the deployment bundle.
 
+#### Mod Aircraft Icon Refresh
+- Replaced the A-4E Skyhawk and F-104 Starfighter thumbnails with freshly normalized 640x360 Wikimedia Commons images and synced the updates across `objectIcons/` and `public/objectIcons/`.
+
 ### Fixed - 2025-10-31
 #### Local Dev Regression (Infinite Refresh)
 - Added `public/debriefing.php` to the bundle so the PHP built-in server serves the real debriefing output instead of looping back to `index.html`.
