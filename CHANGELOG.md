@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Sticky Header Contrast
 - Swapped the statistics header row to an opaque gradient with a cyan edge so scroll-sticky labels stay readable over the data grids.
 
+#### Pilot Row Gradient Regression
+- Restored the Cold War gradient, pointer cursor, and hover easing on `tr.statisticsTable` after the Brownwater port accidentally stripped the selector block braces.
+
 ### Verified - 2025-10-31
 #### Brownwater Migration Checklist
 - Confirmed sticky header semantics remain intact (`<thead>/<tbody>` and `border-collapse: separate`) in `tacview.php` and theme CSS.

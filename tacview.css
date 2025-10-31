@@ -357,10 +357,11 @@ td {
 }
 
 /* Interactive pilot row hover effects */
-
-}
-{
+tr.statisticsTable {
 	background: linear-gradient(180deg, rgba(0, 50, 60, 0.98) 0%, rgba(0, 35, 45, 0.98) 100%);
+	transition: all 0.3s ease;
+	cursor: pointer;
+}
 
 tr.statisticsTable:hover {
 	background: rgba(0, 255, 255, 0.15) !important;
