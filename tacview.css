@@ -357,10 +357,10 @@ td {
 }
 
 /* Interactive pilot row hover effects */
-tr.statisticsTable {
-	transition: all 0.3s ease;
-	cursor: pointer;
+
 }
+{
+	background: linear-gradient(180deg, rgba(0, 50, 60, 0.98) 0%, rgba(0, 35, 45, 0.98) 100%);
 
 tr.statisticsTable:hover {
 	background: rgba(0, 255, 255, 0.15) !important;
@@ -461,6 +461,17 @@ td.presentationTable:nth-child(2)
 
 /* STATISTICS TABLE */
 
+table.statisticsTable {
+	border-collapse: separate;
+	border-spacing: 0;
+	width: 100%;
+	overflow: visible;
+}
+
+thead.statisticsTable-head {
+	position: static;
+}
+
 tr.statisticsTable, th.statisticsTable
 {
 	height: 50px;
@@ -483,7 +494,8 @@ td.statisticsTable:nth-child(n + 4)
 
 th.statisticsTable
 {
-	background: rgba(0, 255, 255, 0.25);
+	background-color: #00343f;
+	background-image: linear-gradient(180deg, rgba(0, 70, 85, 0.98) 0%, rgba(0, 40, 50, 0.98) 100%);
 	text-transform: uppercase;
 	font-weight: 900;
 	letter-spacing: 2px;
@@ -491,6 +503,11 @@ th.statisticsTable
 	text-shadow: 
 		0 0 5px rgba(0, 255, 255, 0.8),
 		0 0 10px rgba(0, 255, 255, 0.5);
+	position: sticky;
+	top: 0;
+	z-index: 120;
+	box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+	border-bottom: 2px solid rgba(0, 255, 255, 0.45);
 }
 
 td.statisticsTable:nth-child(2)

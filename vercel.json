@@ -7,14 +7,21 @@
       "runtime": "vercel-php@0.7.4"
     }
   },
-  "rewrites": [
+  "redirects": [
     {
-      "source": "/",
-      "destination": "/index.html"
-    },
+      "source": "/debriefing.php",
+      "destination": "/api/debriefing",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
     {
       "source": "/debriefing.php",
       "destination": "/api/debriefing"
+    },
+    {
+      "source": "/",
+      "destination": "/index.html"
     }
   ]
 }

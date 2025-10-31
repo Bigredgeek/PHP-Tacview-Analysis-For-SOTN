@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - 2025-10-31
+#### Deployment Hardening Parity
+- Added `.vercelignore` to keep locally mirrored PHP entry points out of Vercel uploads.
+- Introduced temporary `/debriefing.php` redirect to `/api/debriefing` in `vercel.json` to prevent accidental static downloads if a stray file appears.
+
+#### Public Bundle Documentation
+- Created `public/CHANGELOG.md` so downstream consumers can review user-facing updates in the deployment bundle.
+
+### Fixed - 2025-10-31
+#### Local Dev Regression (Infinite Refresh)
+- Added `public/debriefing.php` to the bundle so the PHP built-in server serves the real debriefing output instead of looping back to `index.html`.
+- Normalized glob handling to build absolute paths and avoid warnings when no debriefings exist.
+
+### Changed - 2025-10-31
+#### Sticky Header Contrast
+- Swapped the statistics header row to an opaque gradient with a cyan edge so scroll-sticky labels stay readable over the data grids.
+
+### Verified - 2025-10-31
+#### Brownwater Migration Checklist
+- Confirmed sticky header semantics remain intact (`<thead>/<tbody>` and `border-collapse: separate`) in `tacview.php` and theme CSS.
+- Validated `api/debriefing.php` status messaging by serving the project locally (`php -S localhost:8001 -t public`) and loading `/debriefing.php` with the sanitized Tacview XML.
+- Spot-checked `languages/tacview_en.php` and `public/languages/tacview_en.php` to ensure language file parity across directories.
+
+### Changed - 2025-10-27
+#### Sticky Table Header CSS Implementation
+- **UPDATED**: Converted Aircrew Performance Summary header to pure CSS sticky behavior
+  - Added semantic `<thead>/<tbody>` structure for the statistics table output
+  - Overrode global table overflow to allow `position: sticky` on SOTN header cells
+  - Kept cold-war theme styling while adding cyan glow shadow for the fixed header
+- **REASON**: Align SOTN project with Brownwater sticky-header improvements without cloning rows in JavaScript
+
 ### Changed - 2025-10-26
 #### Enhanced User Interaction for Pilot Statistics Table
 - **Improved Row Interaction Model**:

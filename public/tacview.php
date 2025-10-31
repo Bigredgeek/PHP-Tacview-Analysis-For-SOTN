@@ -824,6 +824,7 @@ class tacview
 
 		$this->addOutput('<h1>' . $this->L('statsByPilot') . '</h1>');
 		$this->addOutput('<table class="statisticsTable">');
+		$this->addOutput('<thead class="statisticsTable-head">');
 		$this->addOutput('<tr class="statisticsTable">');
 		$this->addOutput('<th class="statisticsTable">' . $this->L('pilotName') . '</th>');
 	//  $this->addOutput('<th class="statisticsTable">' . $this->L('model') . '</th>');
@@ -842,6 +843,8 @@ class tacview
 		$this->addOutput('<th class="statisticsTable">' . $this->L('hit') . '</th>');
 		$this->addOutput('<th class="statisticsTable">' . $this->L('destroyed') . '</th>');
 		$this->addOutput('</tr>');
+		$this->addOutput('</thead>');
+		$this->addOutput('<tbody>');
 
 		//$class = "row1";
 
@@ -1216,7 +1219,8 @@ class tacview
 			}
 		}
 
-		$this->addOutput('</table>');
+			$this->addOutput('</tbody>');
+			$this->addOutput('</table>');
 
 		// ***********************************************************
 		// EVENTS TABLE - Display all events
