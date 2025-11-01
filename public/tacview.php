@@ -185,6 +185,39 @@ class tacview
 	}
 
 	//
+	// Correct aircraft name based on group name for mod aircraft misidentified by DCS
+	//
+	public function correctAircraftName(string $aircraftName, string $groupName): string
+	{
+		// Brownwater mod: OV-10A Bronco is misidentified as B-1 Lancer by DCS
+		// Check if group name contains "Bronco" and aircraft is B-1 Lancer
+		if (stripos($groupName, 'Bronco') !== false && stripos($aircraftName, 'B-1') !== false) {
+			return 'OV-10A Bronco';
+		}
+		
+		// Add more corrections here as needed for other mod aircraft
+		
+		return $aircraftName; // Return original if no correction needed
+	}
+
+	private function normalizeAircraftObject(array $object): array
+	{
+		if (!isset($object['Name'])) {
+			return $object;
+		}
+
+		$type = $object['Type'] ?? '';
+		if ($type !== 'Aircraft' && $type !== 'Helicopter') {
+			return $object;
+		}
+
+		$groupName = $object['Group'] ?? '';
+		$object['Name'] = $this->correctAircraftName($object['Name'], $groupName);
+
+		return $object;
+	}
+
+	//
 	// sort statistics by Group first, then by Pilot Name within groups
 	//
 	public function sortStatsByGroupAndPilot(array $stats): array
@@ -426,6 +459,26 @@ class tacview
 
 		foreach ($this->events as $key => $event)
 		{
+			// Ensure primary object exists before processing this event
+			if (!isset($event["PrimaryObject"]))
+			{
+				continue;
+			}
+
+			// Apply aircraft name corrections to primary, secondary, and parent objects
+			$event["PrimaryObject"] = $this->normalizeAircraftObject($event["PrimaryObject"]);
+			$this->events[$key]["PrimaryObject"]["Name"] = $event["PrimaryObject"]["Name"];
+
+			if (isset($event["SecondaryObject"])) {
+				$event["SecondaryObject"] = $this->normalizeAircraftObject($event["SecondaryObject"]);
+				$this->events[$key]["SecondaryObject"]["Name"] = $event["SecondaryObject"]["Name"];
+			}
+
+			if (isset($event["ParentObject"])) {
+				$event["ParentObject"] = $this->normalizeAircraftObject($event["ParentObject"]);
+				$this->events[$key]["ParentObject"]["Name"] = $event["ParentObject"]["Name"];
+			}
+
 			// List pilots of Aircraft and Helicopters
 
 			if ($event["PrimaryObject"]["Type"] == "Aircraft" or $event["PrimaryObject"]["Type"] == "Helicopter") 
@@ -433,8 +486,19 @@ class tacview
 				if(array_key_exists("Pilot",$event["PrimaryObject"]))
 				{
 					$primaryObjectPilot = $event["PrimaryObject"]["Pilot"];
+					
+					// Get group name for aircraft correction
+					$groupName = $event["PrimaryObject"]["Group"] ?? "";
+					
+					// Correct aircraft name based on group (for mod aircraft misidentified by DCS)
+					$correctedAircraftName = $this->correctAircraftName($event["PrimaryObject"]["Name"], $groupName);
+					
+					// Persist corrected name for downstream consumers like event log rendering
+					$this->events[$key]["PrimaryObject"]["Name"] = $correctedAircraftName;
+					$event["PrimaryObject"]["Name"] = $correctedAircraftName;
+					
 					// crea il ramo per ogni Pilota (di aereo o di elicottero)
-					$this->stats[$primaryObjectPilot]["Aircraft"] = $event["PrimaryObject"]["Name"];
+					$this->stats[$primaryObjectPilot]["Aircraft"] = $correctedAircraftName;
 					$this->stats[$primaryObjectPilot]["Type"] = $event["PrimaryObject"]["Type"];
 				}
 				else

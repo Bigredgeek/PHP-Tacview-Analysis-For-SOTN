@@ -8,3 +8,5 @@
 - Made sticky header row fully opaque with a cyan trim so labels stay legible while scrolling.
 - Restored the gradient styling and hover affordance for pilot statistic rows so the retro theme matches Brownwater again.
 - Refreshed the A-4E Skyhawk and F-104 Starfighter thumbnails with normalized Wikimedia imagery for consistent mod aircraft coverage.
+- Normalized event log aircraft names by running `correctAircraftName()` across primary, secondary, and parent objects before persisting events so Bronco flights stay labeled correctly throughout the UI.
+- Skipped Tacview events missing `PrimaryObject` data so support entries no longer trigger PHP analyzer warnings during the public build.

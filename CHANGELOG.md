@@ -24,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Verified the fix by serving `php -S localhost:8001 -t public` with the sanitized Tacview export to confirm icons display without PHP notices.
 - Removed legacy fallback mappings for the A-4E Skyhawk and F-104 Starfighter so the renderer now uses the refreshed Wikimedia thumbnails, and normalized the Mi-24P Hind-F filename case to avoid Linux deployment misses.
 
+#### Event Log Aircraft Name Normalization
+- Added a `normalizeAircraftObject()` helper to `core/tacview.php` and `public/tacview.php` so aircraft, helicopter, and parent objects get corrected through `correctAircraftName()` before stats/event aggregation.
+- Persisted the corrected aircraft names back onto `$this->events` so the mission timeline, stats tables, and weapon attribution all display `OV-10A Bronco` instead of the Tacview-exported `B-1 Lancer` alias.
+- Mirrored the Brownwater verification step by replaying the sanitized debriefing through the local PHP server to ensure no regressions in the event feed or pilot summaries.
+- Safeguarded the event loop by skipping Tacview records without a `PrimaryObject`, eliminating the PHP analyzer warnings triggered by support-only entries.
+
 #### Local Dev Regression (Infinite Refresh)
 - Added `public/debriefing.php` to the bundle so the PHP built-in server serves the real debriefing output instead of looping back to `index.html`.
 - Normalized glob handling to build absolute paths and avoid warnings when no debriefings exist.
