@@ -155,9 +155,7 @@ class tacview
 			'MiG-29_Fulcrum' => 'MiG-29A_Fulcrum-A',
 			'Humvee' => 'HUMMER',
 			'leopard-2A4' => 'LEOPARD2',
-			'F-104_Starfighter' => 'F-16C_Fighting_Falcon', // Similar fighter jet
 			'Mirage_F1_EE' => 'Mirage_2000C', // Similar Mirage variant
-			'A-4E_Skyhawk' => 'AV-8B_Harrier_II_NA', // Similar attack aircraft
 			'BTR-80' => 'BTR70', // Similar APC
 			'T-72B' => 'M60', // Similar tank
 			'MTLB' => 'M113', // Similar APC

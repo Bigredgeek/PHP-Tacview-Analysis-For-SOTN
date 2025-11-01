@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Root-Relative Icon Regression
 - Assigned `$tv->image_path = '/'` across API, root, and public debriefing entry points so mod aircraft thumbnails stay anchored to the site root regardless of routing.
 - Verified the fix by serving `php -S localhost:8001 -t public` with the sanitized Tacview export to confirm icons display without PHP notices.
+- Removed legacy fallback mappings for the A-4E Skyhawk and F-104 Starfighter so the renderer now uses the refreshed Wikimedia thumbnails, and normalized the Mi-24P Hind-F filename case to avoid Linux deployment misses.
 
 #### Local Dev Regression (Infinite Refresh)
 - Added `public/debriefing.php` to the bundle so the PHP built-in server serves the real debriefing output instead of looping back to `index.html`.
