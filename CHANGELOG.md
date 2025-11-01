@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed - 2025-11-01
 - Pulled in the core `resolveCategoryIcon()` fallback so building events gracefully fall back to coalition/neutral glyphs instead of producing 404s; verified by rendering `php public/debriefing.php` after the cleanup.
+- Adopted the shared asset resolver helpers across root, public, and API entry points so `$tv->image_path` now prefers the bundled `public/` icons and CSS before falling back to the core pack; spot-checked by dumping `/public/categoryIcons` references from the rebuilt container.
 
 ### Added - 2025-10-31
 #### Deployment Hardening Parity

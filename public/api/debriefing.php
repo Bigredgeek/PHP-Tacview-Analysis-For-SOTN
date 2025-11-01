@@ -8,12 +8,180 @@ $config = require_once __DIR__ . '/../config.php';
 // Load the shared Tacview engine from the core submodule
 require_once __DIR__ . '/../../' . $config['core_path'] . '/tacview.php';
 
+if (!function_exists('tacview_normalize_url_path')) {
+	function tacview_normalize_url_path(?string $path): string
+	{
+		if ($path === null || $path === '' || $path === '.' || $path === DIRECTORY_SEPARATOR) {
+			return '/';
+		}
+
+		$normalized = str_replace('\\', '/', $path);
+		if ($normalized === '/' || $normalized === '') {
+			return '/';
+		}
+
+		return '/' . trim($normalized, '/');
+	}
+}
+
+if (!function_exists('tacview_url_parent')) {
+	function tacview_url_parent(string $url): string
+	{
+		if ($url === '' || $url === '/' || $url === '\\') {
+			return '/';
+		}
+
+		$trimmed = trim($url, '/');
+		if ($trimmed === '') {
+			return '/';
+		}
+
+		$segments = explode('/', $trimmed);
+		array_pop($segments);
+
+		if (empty($segments)) {
+			return '/';
+		}
+
+		return '/' . implode('/', $segments);
+	}
+}
+
+if (!function_exists('tacview_with_trailing_slash')) {
+	function tacview_with_trailing_slash(?string $url): string
+	{
+		if ($url === null || $url === '' || $url === '/' || $url === '\\') {
+			return '/';
+		}
+
+		return rtrim($url, '/') . '/';
+	}
+}
+
+if (!function_exists('tacview_join_url')) {
+	function tacview_join_url(?string $base, string $append): string
+	{
+		$base = $base ?? '/';
+		$append = trim($append, '/');
+
+		if ($append === '') {
+			return $base === '' ? '/' : $base;
+		}
+
+		if ($base === '' || $base === '/' || $base === '\\') {
+			return '/' . $append;
+		}
+
+		return rtrim($base, '/') . '/' . $append;
+	}
+}
+
+if (!function_exists('tacview_build_directory_levels')) {
+	function tacview_build_directory_levels(string $startFs, string $startUrl, int $maxDepth = 4): array
+	{
+		$levels = [];
+		$currentFs = $startFs;
+		$currentUrl = $startUrl;
+
+		for ($i = 0; $i < $maxDepth; $i++) {
+			$levels[] = [
+				'fs' => $currentFs,
+				'url' => $currentUrl,
+			];
+
+			$parentFs = dirname($currentFs);
+			$parentUrl = tacview_url_parent($currentUrl);
+
+			if ($parentFs === $currentFs || $parentFs === '' || $parentUrl === $currentUrl) {
+				break;
+			}
+
+			$currentFs = $parentFs;
+			$currentUrl = $parentUrl;
+		}
+
+		return $levels;
+	}
+}
+
+if (!function_exists('tacview_resolve_asset_paths')) {
+	function tacview_resolve_asset_paths(string $baseDir, string $scriptName, string $corePath): array
+	{
+		$scriptDirUrl = tacview_normalize_url_path(dirname($scriptName));
+		$levels = tacview_build_directory_levels($baseDir, $scriptDirUrl);
+		$assetUrl = null;
+
+		foreach ($levels as $level) {
+			if (is_dir($level['fs'] . DIRECTORY_SEPARATOR . 'categoryIcons')) {
+				$assetUrl = tacview_with_trailing_slash($level['url']);
+				break;
+			}
+
+			$publicFs = $level['fs'] . DIRECTORY_SEPARATOR . 'public';
+			if (is_dir($publicFs . DIRECTORY_SEPARATOR . 'categoryIcons')) {
+				$assetUrl = tacview_with_trailing_slash(tacview_join_url($level['url'], 'public'));
+				break;
+			}
+		}
+
+		$corePathTrimmed = trim($corePath, DIRECTORY_SEPARATOR . '/');
+
+		if ($assetUrl === null && $corePathTrimmed !== '') {
+			foreach ($levels as $level) {
+				$coreFs = rtrim($level['fs'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $corePathTrimmed;
+				if (is_dir($coreFs . DIRECTORY_SEPARATOR . 'categoryIcons')) {
+					$assetUrl = tacview_with_trailing_slash(tacview_join_url($level['url'], $corePathTrimmed));
+					break;
+				}
+			}
+		}
+
+		if ($assetUrl === null) {
+			$assetUrl = '/';
+		}
+
+		$cssHref = null;
+
+		foreach ($levels as $level) {
+			if (is_file($level['fs'] . DIRECTORY_SEPARATOR . 'tacview.css')) {
+				$cssHref = tacview_join_url($level['url'], 'tacview.css');
+				break;
+			}
+
+			$publicFs = $level['fs'] . DIRECTORY_SEPARATOR . 'public';
+			if (is_file($publicFs . DIRECTORY_SEPARATOR . 'tacview.css')) {
+				$cssHref = tacview_join_url(tacview_join_url($level['url'], 'public'), 'tacview.css');
+				break;
+			}
+		}
+
+		if ($cssHref === null && $corePathTrimmed !== '') {
+			foreach ($levels as $level) {
+				$coreFs = rtrim($level['fs'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $corePathTrimmed;
+				if (is_file($coreFs . DIRECTORY_SEPARATOR . 'tacview.css')) {
+					$cssHref = tacview_join_url(tacview_join_url($level['url'], $corePathTrimmed), 'tacview.css');
+					break;
+				}
+			}
+		}
+
+		if ($cssHref === null) {
+			$cssHref = '/tacview.css';
+		}
+
+		return [$assetUrl, $cssHref];
+	}
+}
+
+$scriptName = $_SERVER['SCRIPT_NAME'] ?? '/api/debriefing.php';
+[$assetBaseUrl, $cssHref] = tacview_resolve_asset_paths(__DIR__, $scriptName, $config['core_path']);
+
 ?>
 <!DOCTYPE html>
 <html>
 	<head>
 		<title><?php echo htmlspecialchars($config['page_title']); ?></title>
-		<link rel="stylesheet" href="/tacview.css" />
+		<link rel="stylesheet" href="<?php echo htmlspecialchars($cssHref); ?>" />
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 		<script type="text/javascript">
 		function showDetails(zoneAffiche, rowElement){
@@ -64,7 +232,7 @@ require_once __DIR__ . '/../../' . $config['core_path'] . '/tacview.php';
 		<?php
 
 		$tv = new tacview($config['default_language']);
-		$tv->image_path = '/'; // Ensure asset paths resolve from root when served under /api
+		$tv->image_path = $assetBaseUrl;
 
 		// Use the absolute glob from the public configuration
 		$xmlFiles = glob($config['debriefings_path']);

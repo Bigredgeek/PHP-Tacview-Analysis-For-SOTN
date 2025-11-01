@@ -1,6 +1,7 @@
 # SOTN Public Bundle Changelog
 
 ## [Unreleased]
+- Updated the public PHP entry points to use the shared asset resolver so deployment favors packaged `/public` icons and styles before falling back to the core bundle.
 - Added coalition-aware fallbacks for building category icons so mission timelines no longer request missing `Building_*` sprites.
 - Added `.vercelignore` and `vercel.json` redirect to keep `/debriefing.php` served by the API.
 - Introduced `public/debriefing.php` for local PHP dev servers so the main view loads without refresh loops.
