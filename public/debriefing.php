@@ -64,6 +64,7 @@ require_once __DIR__ . '/../' . $config['core_path'] . '/tacview.php';
 		<?php
 
 			$tv = new tacview($config['default_language']);
+			$tv->image_path = '/'; // Align with API handler so CDN paths remain absolute after deployment
 
 			// Resolve the glob relative to the project root so local static serving works.
 			$debriefingsGlob = __DIR__ . '/../' . ltrim($config['debriefings_path'], '/');

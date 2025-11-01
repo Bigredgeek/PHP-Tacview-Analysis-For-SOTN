@@ -68,6 +68,7 @@ if (file_exists(__DIR__ . "/../public/tacview.php")) {
 		<?php
 
 		$tv = new tacview($config['default_language']);
+		$tv->image_path = '/'; // Force icon lookups to start at document root, even under /api
 
 		// Adjust paths to be relative to parent directory (since we're in /api/)
 		$debriefingsPath = __DIR__ . "/../" . str_replace('debriefings/*.xml', 'debriefings', $config['debriefings_path']) . "/*.xml";
