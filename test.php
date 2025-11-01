@@ -22,7 +22,8 @@ echo "  Status: PASS ✓\n\n";
 // Test 3: Load and instantiate the tacview class
 echo "✓ Test 3: Load Tacview Class\n";
 try {
-    require_once __DIR__ . '/tacview.php';
+    // Load the shared Tacview engine from the core submodule
+    require_once __DIR__ . '/core/tacview.php';
     echo "  Tacview class loaded successfully\n";
     
     // Test type declarations are recognized

@@ -1,7 +1,0 @@
-SKIP	A-10A Thunderbolt II	A-10A_Thunderbolt_II.jpg (exists)
-SKIP	A-10C Thunderbolt II	A-10C_Thunderbolt_II.jpg (exists)
-[31;1mInvalidOperation: [0mC:\Users\User\Documents\Coding\php-tacview\php-tacview\tools\auto_curate_icons.ps1:46:11[0m
-[31;1m[0m[36;1mLine |[0m
-[31;1m[0m[36;1m[36;1m  46 | [0m   $uri = "[36;1m$Api?[0m$(($params.GetEnumerator() | ForEach-Object { "{0}={1} .[0m
-[31;1m[0m[36;1m[36;1m[0m[36;1m[0m[36;1m     | [31;1m           ~~~~~[0m
-[31;1m[0m[36;1m[36;1m[0m[36;1m[0m[36;1m[31;1m[31;1m[36;1m     | [31;1mThe variable '$Api?' cannot be retrieved because it has not been set.[0m

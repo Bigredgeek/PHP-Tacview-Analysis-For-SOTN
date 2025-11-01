@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed - 2025-11-01
+- Mirrored the Brownwater cleanup by deleting the local copies of `tacview.php`, `tacview.css`, language packs, icon bundles, tooling, and docs so the `core/` submodule stays the single source of truth for shared assets.
+- Dropped the bundled `public/tacview.php` and language pack duplicates; the deployment build now loads everything through the shared core just like local development.
+
+### Changed - 2025-11-01
+- Hardened `.gitignore` to block reintroducing the shared engine files, languages, icons, data, tooling, docs, and public PHP shims that are now supplied by the submodule.
+
+### Fixed - 2025-11-01
+- Pulled in the core `resolveCategoryIcon()` fallback so building events gracefully fall back to coalition/neutral glyphs instead of producing 404s; verified by rendering `php public/debriefing.php` after the cleanup.
+
 ### Added - 2025-10-31
 #### Deployment Hardening Parity
 - Added `.vercelignore` to keep locally mirrored PHP entry points out of Vercel uploads.

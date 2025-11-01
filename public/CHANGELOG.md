@@ -1,6 +1,7 @@
 # SOTN Public Bundle Changelog
 
 ## [Unreleased]
+- Added coalition-aware fallbacks for building category icons so mission timelines no longer request missing `Building_*` sprites.
 - Added `.vercelignore` and `vercel.json` redirect to keep `/debriefing.php` served by the API.
 - Introduced `public/debriefing.php` for local PHP dev servers so the main view loads without refresh loops.
 - Forced Tacview to build root-relative icon URLs from every debriefing entry point and smoke-tested via `php -S localhost:8001 -t public` with the sanitized mission export.

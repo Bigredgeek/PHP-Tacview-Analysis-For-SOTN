@@ -5,12 +5,8 @@ declare(strict_types=1);
 // Load configuration from parent directory
 $config = require_once __DIR__ . "/../config.php";
 
-// Load tacview library - try public first, then core
-if (file_exists(__DIR__ . "/../public/tacview.php")) {
-    require_once __DIR__ . "/../public/tacview.php";
-} else {
-    require_once __DIR__ . "/../" . $config['core_path'] . "/tacview.php";
-}
+// Load tacview library directly from the shared core submodule
+require_once __DIR__ . "/../" . $config['core_path'] . "/tacview.php";
 
 ?>
 <!DOCTYPE html>

@@ -13,7 +13,7 @@ require_once __DIR__ . "/" . $config['core_path'] . "/tacview.php";
 <html>
 	<head>
 		<title><?php echo htmlspecialchars($config['page_title']); ?></title>
-		<link rel="stylesheet" href="<?php echo htmlspecialchars($config['core_path']); ?>/tacview.css" />
+		<link rel="stylesheet" href="/tacview.css" />
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 		<script type="text/javascript">
 		function showDetails(zoneAffiche, rowElement){

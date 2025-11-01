@@ -23,3 +23,15 @@ Thumbs.db
 dist/
 build/
 !public/
+
+# Shared core assets live in submodule
+tacview.php
+tacview.css
+/languages/
+/categoryIcons/
+/objectIcons/
+/data/
+/tools/
+/docs/
+/public/languages/
+/public/tacview.php
