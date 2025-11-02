@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - 2025-11-01
+- Authored `planning/canonical-model-blueprint.md` detailing the staged ingestion → normalization → reconciliation pipeline for the canonical multi-Tacview aggregator; implementation deferred until event-graph exploration completes.
+- Drafted `planning/event-graph-plan.md` outlining the ingestion → graph construction → inference approach for the probabilistic event graph aggregator that will replace the legacy multi-file loop.
+
 ### Removed - 2025-11-01
 - Mirrored the Brownwater cleanup by deleting the local copies of `tacview.php`, `tacview.css`, language packs, icon bundles, tooling, and docs so the `core/` submodule stays the single source of truth for shared assets.
 - Dropped the bundled `public/tacview.php` and language pack duplicates; the deployment build now loads everything through the shared core just like local development.
