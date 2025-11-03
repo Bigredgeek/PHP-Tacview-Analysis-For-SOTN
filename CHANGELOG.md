@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reworked pilot stats so `Targets Hit` now reflects strikes the pilot delivered, paired with a new `Times Hit` column that captures incoming enemy hits.
 
 ### Fixed - 2025-11-02
+- Resolved remote deployments that lacked `/core` by probing for the shared Tacview engine in sibling `php-tacview-core` directories or an environment override before bootstrapping the debriefing endpoints, eliminating the Vercel fatal error.
+- Updated `test.php` to exercise the runtime aggregator workflow across every XML in `debriefings/`, matching deployment behaviour and catching core-path issues during local validation.
 - Recreated `src/EventGraph/EventGraphAggregator.php` from scratch so the event merge, coalition validation, orphan tagging, and disconnect pruning pipeline runs without the previously corrupted file.
 - Let the EventGraph anchor chooser pick the highest-evidence cluster even when it sits beyond the primary tolerance window, so recordings like `Tacview-20251025-144445` realign at the ~4,900 second offset instead of the spurious 12-second match that was reintroducing duplicate Menton 2-1 kill rows.
 - Pruned HasFired timeline rows whose coalition and icon attribution contradict higher-evidence events, removing single-source misfires like Nitro 2-1 inheriting `weapons.shells.2A7` from the opposing ground unit while retaining multi-source SHORAD volleys.

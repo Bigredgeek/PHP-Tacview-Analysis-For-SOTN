@@ -5,8 +5,11 @@ declare(strict_types=1);
 // Load configuration from the public bundle
 $config = require_once __DIR__ . '/config.php';
 
+require_once __DIR__ . '/../src/core_path.php';
+$corePath = tacview_resolve_core_path($config['core_path'] ?? 'core', dirname(__DIR__));
+
 // Load core tacview library from the project root
-require_once __DIR__ . '/../' . $config['core_path'] . '/tacview.php';
+require_once $corePath . '/tacview.php';
 require_once __DIR__ . '/../src/EventGraph/autoload.php';
 
 use EventGraph\EventGraphAggregator;
