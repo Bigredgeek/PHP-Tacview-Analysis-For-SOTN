@@ -41,6 +41,15 @@ final class EventGraphAggregator
         'HasLanded' => 45.0,
         'HasEnteredTheArea' => 45.0,
         'HasLeftTheArea' => 45.0,
+        'HasBeenHitBy' => 4.0,
+        'HasBeenDestroyed' => 5.0,
+    ];
+    private const MISSING_SECONDARY_MERGE_TYPES = [
+        'hasbeenhitby',
+        'hasbeendestroyed',
+        'hasbeenshotdown',
+        'hasbeenkilled',
+        'hascrashed',
     ];
     private const COALITION_MISMATCH_EXEMPT_TYPES = [
         'hasbeenhitby',
@@ -57,6 +66,7 @@ final class EventGraphAggregator
     private readonly int $anchorMinimumMatches;
     private readonly float $maxFallbackOffset;
     private readonly float $maxAnchorOffset;
+    private readonly float $missionTimeCongruenceTolerance;
 
     /** @var list<SourceRecording> */
     private array $recordings = [];
@@ -87,6 +97,8 @@ final class EventGraphAggregator
     private ?float $startTime = null;
     private ?float $endTime = null;
     private bool $built = false;
+    /** @var list<float> */
+    private array $startTimeSamples = [];
 
     /** @var array<string, mixed> */
     private array $metrics = [
@@ -120,6 +132,9 @@ final class EventGraphAggregator
         $this->maxFallbackOffset = isset($options['max_fallback_offset']) ? (float)$options['max_fallback_offset'] : 600.0;
         $defaultAnchorOffset = max($this->maxFallbackOffset, 7200.0);
         $this->maxAnchorOffset = isset($options['max_anchor_offset']) ? (float)$options['max_anchor_offset'] : $defaultAnchorOffset;
+        $this->missionTimeCongruenceTolerance = isset($options['mission_time_congruence_tolerance'])
+            ? max(0.0, (float)$options['mission_time_congruence_tolerance'])
+            : 1800.0;
     }
 
     public function ingestFile(string $path): void
@@ -225,6 +240,9 @@ final class EventGraphAggregator
 
         $this->missionName = $this->resolveMissionName($this->missionName, $recording->missionName);
         $this->startTime = $this->resolveStartTime($recording);
+        if ($recording->startTime !== null) {
+            $this->startTimeSamples[] = $recording->startTime;
+        }
         $this->endTime = $this->resolveEndTime($recording);
 
         $this->pendingEvents[$recording->id] = $recording->events;
@@ -357,6 +375,7 @@ final class EventGraphAggregator
         }
 
         $this->pendingEvents = [];
+        $this->applyStartTimeConsensus();
         $this->metrics['merged_events'] = count($this->events);
     }
 
@@ -392,7 +411,7 @@ final class EventGraphAggregator
             return false;
         }
 
-        if (!$this->objectsComparable($left->getSecondary(), $right->getSecondary())) {
+        if (!$this->secondaryComparable($left, $right)) {
             return false;
         }
 
@@ -447,6 +466,53 @@ final class EventGraphAggregator
         }
 
         return null;
+    }
+
+    private function secondaryComparable(NormalizedEvent $left, NormalizedEvent $right): bool
+    {
+        $secondaryLeft = $left->getSecondary();
+        $secondaryRight = $right->getSecondary();
+
+        if ($this->objectsComparable($secondaryLeft, $secondaryRight)) {
+            return true;
+        }
+
+        if (!$this->allowsMissingSecondary($left->getType())) {
+            return false;
+        }
+
+        $leftMissing = $this->isObjectEffectivelyMissing($secondaryLeft);
+        $rightMissing = $this->isObjectEffectivelyMissing($secondaryRight);
+
+        if ($leftMissing && !$rightMissing) {
+            return true;
+        }
+
+        if ($rightMissing && !$leftMissing) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function allowsMissingSecondary(string $eventType): bool
+    {
+        return in_array(strtolower($eventType), self::MISSING_SECONDARY_MERGE_TYPES, true);
+    }
+
+    private function isObjectEffectivelyMissing(?array $object): bool
+    {
+        if ($object === null) {
+            return true;
+        }
+
+        foreach ($object as $value) {
+            if ($value !== null && $value !== '') {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function timeToleranceForEvent(NormalizedEvent $event): float
@@ -1603,6 +1669,68 @@ final class EventGraphAggregator
         }
 
         $this->metrics['merged_events'] = count($this->events);
+    }
+
+    private function applyStartTimeConsensus(): void
+    {
+        if ($this->startTimeSamples === []) {
+            return;
+        }
+
+        $consensus = $this->computeCongruentStartTime();
+        if ($consensus !== null) {
+            $this->startTime = $consensus;
+        } elseif ($this->startTime === null) {
+            $this->startTime = min($this->startTimeSamples);
+        }
+    }
+
+    private function computeCongruentStartTime(): ?float
+    {
+        $samples = array_filter(
+            $this->startTimeSamples,
+            static fn (float $value): bool => $value >= 0.0
+        );
+
+        if ($samples === []) {
+            return null;
+        }
+
+        sort($samples);
+
+        $count = count($samples);
+        if ($count === 1) {
+            return $samples[0];
+        }
+
+        $bestSize = 0;
+        $bestIndex = 0;
+        $left = 0;
+        $tolerance = $this->missionTimeCongruenceTolerance;
+
+        for ($right = 0; $right < $count; $right++) {
+            while ($samples[$right] - $samples[$left] > $tolerance && $left < $right) {
+                $left++;
+            }
+
+            $windowSize = $right - $left + 1;
+            if (
+                $windowSize > $bestSize
+                || (
+                    $windowSize === $bestSize
+                    && $samples[$left] < $samples[$bestIndex]
+                )
+            ) {
+                $bestSize = $windowSize;
+                $bestIndex = $left;
+            }
+        }
+
+        if ($bestSize <= 1) {
+            return $samples[0];
+        }
+
+        return $samples[$bestIndex];
     }
 
     private function resolveMissionName(?string $current, string $candidate): string

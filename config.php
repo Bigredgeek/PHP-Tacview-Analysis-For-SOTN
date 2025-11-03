@@ -28,5 +28,6 @@ return [
         'anchor_min_matches' => 3,
         'max_fallback_offset' => 900.0,
         'max_anchor_offset' => 14400.0,
+        'mission_time_congruence_tolerance' => 1800.0,
     ],
 ];

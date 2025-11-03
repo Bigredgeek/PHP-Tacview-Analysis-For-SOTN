@@ -16,10 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Synced the embedded core submodule so every language pack exposes `disconnects`, `confidence`, and `sources` labels for the new mission timeline and pilot statistics columns.
 
 ### Changed - 2025-11-02
+- Rebased mission start time on the earliest consensus MissionTime pulled from the Tacview headers (within a 30-minute window) so timezone-skewed recordings like the 08:05 export no longer drag the site clock and duration several hours early; exposed the new `mission_time_congruence_tolerance` option across root/API/public configs.
+- Expanded the EventGraph merge window for `HasBeenHitBy`/`HasBeenDestroyed` actions to 4–5 seconds so multi-source recordings collapse into a single damage/killed row instead of duplicating Tincan-style double hits when timestamps drift by a couple seconds.
 - Hardened the offset diagnostic helper to pull every Tacview XML (including the SOTN GT2 flight log) straight from the debriefings directory, so source comparisons stay in sync without manual lists.
 - Trimmed mission timeline source badges to display numeric counts only while keeping full per-recording tooltips for analysts who need the detail on hover.
 - Styled the mission timeline confidence and evidence columns with centered layouts and pill badges so the numeric-only indicators remain readable in the retro UI theme.
 - Removed the embedded `core/` submodule so the workspace only tracks the standalone `php-tacview-core` repository next to SOTN.
+- Reworked pilot stats so `Targets Hit` now reflects strikes the pilot delivered, paired with a new `Times Hit` column that captures incoming enemy hits.
 
 ### Fixed - 2025-11-02
 - Recreated `src/EventGraph/EventGraphAggregator.php` from scratch so the event merge, coalition validation, orphan tagging, and disconnect pruning pipeline runs without the previously corrupted file.
@@ -29,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ignored mid-air disconnect destruction rows during stats aggregation while still recording them as disconnect events, eliminating false aircraft loss tallies for clients that simply dropped connection.
 - Reset the tacview renderer state and normalized aggregated event lists before rendering so `proceedAggregatedStats()` once again yields pilot statistics and the mission event log.
 - Restored EventGraph confidence percentages and source badges in the mission timeline (including the pilot detail panes) with tier-aware tooltips sourced from aggregated evidence.
+- Treated `HasBeenDestroyed`/`HasBeenHitBy` duplicates that only differ by a missing attacker as the same engagement, collapsing Nomad-style pairs where one recording lacks the secondary object data.
 
 ### Added - 2025-11-01
 - Authored `planning/canonical-model-blueprint.md` detailing the staged ingestion → normalization → reconciliation pipeline for the canonical multi-Tacview aggregator; implementation deferred until event-graph exploration completes.

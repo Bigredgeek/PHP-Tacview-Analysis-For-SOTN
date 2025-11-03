@@ -1,6 +1,10 @@
 # SOTN Public Bundle Changelog
 
 ## [Unreleased]
+- Anchor the Mission Information clock to the earliest Tacview MissionTime agreed upon by the majority of recordings (30-minute consensus window) so timezone-skewed files stop displaying 08:05Z starts and inflated durations; the new `mission_time_congruence_tolerance` knob is wired through public configs.
+- Let EventGraph treat `HasBeenHitBy`/`HasBeenDestroyed` rows within a 4–5 second window as the same engagement, eliminating duplicate damage and kill lines when multi-source Tacviews disagree by a couple seconds.
+- Updated pilot stats so `Targets Hit` only counts damage inflicted while a new `Times Hit` column tallies how often the pilot was struck.
+- Merge `HasBeenDestroyed` rows that only differ because one Tacview lacks attacker metadata, so Nomad's aircraft loss now displays as a single destruction entry with the richer source evidence.
 - Pulled updated core translations for disconnect, confidence, and source labels so the new mission and pilot table columns display across every supported language.
 - Reset the tacview renderer before aggregated playback and normalize merged event arrays so pilot stats and the mission timeline render when `proceedAggregatedStats()` runs in the public bundle.
 - Restored EventGraph confidence percentages and source badges in both mission and pilot-level tables, complete with tier-aware tooltips sourced from aggregated evidence.
