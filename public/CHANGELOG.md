@@ -1,6 +1,7 @@
 # SOTN Public Bundle Changelog
 
 ## [Unreleased]
+- Pulled updated core translations for disconnect, confidence, and source labels so the new mission and pilot table columns display across every supported language.
 - Reset the tacview renderer before aggregated playback and normalize merged event arrays so pilot stats and the mission timeline render when `proceedAggregatedStats()` runs in the public bundle.
 - Restored EventGraph confidence percentages and source badges in both mission and pilot-level tables, complete with tier-aware tooltips sourced from aggregated evidence.
 - Updated mission timeline source badges to show only the numeric count while retaining hover tooltips listing each contributing recording.

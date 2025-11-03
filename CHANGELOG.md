@@ -13,10 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Weighted each recording by coverage and event volume, feeding those reliabilities into the merge logic and the new confidence calculator.
 - Replaced the linear confidence formula with a tiered model that distinguishes rich (Tier A) weapon attributions from partial (Tier B) and inferred (Tier C) evidence, reaching 100% when two high-detail recordings agree and scaling down through 88%, 75%, 70%, and 62% according to the user-defined thresholds.
 - Extended the pilot statistics grid with a disconnect counter and detail drilldown so sortie summaries highlight mid-mission client drops alongside takeoffs and landings.
+- Synced the embedded core submodule so every language pack exposes `disconnects`, `confidence`, and `sources` labels for the new mission timeline and pilot statistics columns.
 
 ### Changed - 2025-11-02
 - Hardened the offset diagnostic helper to pull every Tacview XML (including the SOTN GT2 flight log) straight from the debriefings directory, so source comparisons stay in sync without manual lists.
 - Trimmed mission timeline source badges to display numeric counts only while keeping full per-recording tooltips for analysts who need the detail on hover.
+- Styled the mission timeline confidence and evidence columns with centered layouts and pill badges so the numeric-only indicators remain readable in the retro UI theme.
 
 ### Fixed - 2025-11-02
 - Recreated `src/EventGraph/EventGraphAggregator.php` from scratch so the event merge, coalition validation, orphan tagging, and disconnect pruning pipeline runs without the previously corrupted file.
