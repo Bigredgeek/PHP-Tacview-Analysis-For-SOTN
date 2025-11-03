@@ -64,6 +64,16 @@ This project is configured for seamless deployment to Vercel:
 
 **Live Demo**: [Deploy to Vercel](https://vercel.com/new/clone?repository-url=https://github.com/Bigredgeek/PHP-Tacview-Analysis-For-SOTN)
 
+## EventGraph Aggregator Configuration
+
+- Tuning lives under the `aggregator` key inside `config.php`, `api/config.php`, `public/config.php`, and `public/api/config.php`.
+- `time_tolerance` (seconds) controls how aggressively identical events from separate Tacview exports get merged.
+- `hit_backtrack_window` (seconds) defines how far back the inference engine looks when linking destruction events to earlier hits.
+- `anchor_tolerance` (seconds) determines the maximum delta allowed when auto-aligning recordings by matching anchor events (takeoffs, kills, etc.).
+- `anchor_min_matches` is the number of matching anchors required before trusting the auto-aligned offset; falls back to file start-time differences otherwise.
+- Adjust these floats if multi-pilot missions need looser or stricter attribution windows; leave them as-is to keep parity with the core defaults.
+- The mission timeline now surfaces EventGraph confidence percentages and a source count badge; hover the badge to see which recordings corroborated each merged event.
+
 ## Project Structure
 
 ### For Local Development

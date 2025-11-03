@@ -968,13 +968,33 @@ final class EventGraphAggregator
             }
 
             $classification = $this->classifyDestructionDisconnect($event);
-            if ($classification === 'landed_disconnect') {
+            if ($classification === null) {
+                continue;
+            }
+
+            $status = $classification['status'];
+
+            if ($status === 'landed_disconnect') {
                 $remove[$index] = true;
                 $this->metrics['disconnect_destructions_pruned']++;
+
+                if (isset($classification['landing'])) {
+                    $landingEvent = $classification['landing'];
+                    $delay = isset($classification['sinceLanding']) ? (float)$classification['sinceLanding'] : 0.0;
+                    $this->annotateLandingDisconnect($landingEvent, $event, $delay);
+                }
+
                 $this->annotateRelatedDeparture($event, 'landed');
-            } elseif ($classification === 'midair_disconnect') {
-                $event->addGraphLink('disconnectStatus', ['status' => 'midair']);
+            } elseif ($status === 'midair_disconnect') {
+                $event->addGraphLink('disconnectStatus', [
+                    'status' => 'midair',
+                    'reference' => $event->getId(),
+                    'time' => $classification['destroyTime'] ?? $event->getMissionTime(),
+                    'windowStart' => $classification['windowStart'] ?? null,
+                    'role' => 'destruction',
+                ]);
                 $this->metrics['disconnect_midair_flagged']++;
+                $this->annotateRelatedDeparture($event, 'midair');
             }
         }
 
@@ -994,41 +1014,49 @@ final class EventGraphAggregator
         $this->rebuildEventIndex();
     }
 
-    private function classifyDestructionDisconnect(NormalizedEvent $event): ?string
+    /**
+     * @return array{
+     *     status: 'landed_disconnect'|'midair_disconnect',
+     *     landing?: NormalizedEvent,
+     *     sinceLanding?: float,
+     *     destroyTime: float,
+     *     windowStart?: float
+     * }|null
+     */
+    private function classifyDestructionDisconnect(NormalizedEvent $event): ?array
     {
         $primary = $event->getPrimary();
-        if ($primary === null) {
+        if ($primary === null || $event->getParent() !== null) {
             return null;
         }
 
         $destroyTime = $event->getMissionTime();
-        $recentHitWindowStart = $destroyTime - 180.0;
+        $windowStart = $destroyTime - 180.0;
 
-        if ($this->hasCombatAgainstTarget($primary, $recentHitWindowStart, $destroyTime + 5.0)) {
+        if ($this->hasCombatAgainstTarget($primary, $windowStart, $destroyTime + 5.0)) {
             return null;
         }
 
-        $departure = $this->findNearestFutureEventForPrimary('HasLeftTheArea', $primary, $destroyTime, 45.0);
         $landing = $this->findMostRecentEventForPrimary('HasLanded', $primary, $destroyTime);
-
         if ($landing !== null) {
             $landTime = $landing->getMissionTime();
-            if (($destroyTime - $landTime) <= 1500.0 && !$this->hasCombatAgainstTarget($primary, $landTime, $destroyTime + 5.0)) {
-                if ($departure !== null) {
-                    return 'landed_disconnect';
-                }
-
-                if (count($event->getEvidence()) === 1) {
-                    return 'landed_disconnect';
-                }
+            $sinceLanding = $destroyTime - $landTime;
+            if ($sinceLanding <= 1500.0 && !$this->hasCombatAgainstTarget($primary, $landTime, $destroyTime + 5.0)) {
+                return [
+                    'status' => 'landed_disconnect',
+                    'landing' => $landing,
+                    'sinceLanding' => $sinceLanding,
+                    'destroyTime' => $destroyTime,
+                    'windowStart' => $landTime,
+                ];
             }
         }
 
-        if ($departure !== null) {
-            return 'midair_disconnect';
-        }
-
-        return null;
+        return [
+            'status' => 'midair_disconnect',
+            'destroyTime' => $destroyTime,
+            'windowStart' => $windowStart,
+        ];
     }
 
     private function hasCombatAgainstTarget(array $primary, float $windowStart, float $windowEnd): bool
@@ -1118,6 +1146,19 @@ final class EventGraphAggregator
         $departure->addGraphLink('disconnectStatus', [
             'status' => $status,
             'reference' => $destroyEvent->getId(),
+            'time' => $destroyEvent->getMissionTime(),
+            'role' => 'departure',
+        ]);
+    }
+
+    private function annotateLandingDisconnect(NormalizedEvent $landing, NormalizedEvent $destroyEvent, float $delaySinceLanding): void
+    {
+        $landing->addGraphLink('disconnectStatus', [
+            'status' => 'landed',
+            'reference' => $destroyEvent->getId(),
+            'time' => $destroyEvent->getMissionTime(),
+            'delay' => $delaySinceLanding,
+            'role' => 'landing',
         ]);
     }
 

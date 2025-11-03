@@ -20,4 +20,13 @@ return [
     // Paths (relative to project root)
     'debriefings_path' => 'debriefings/*.xml',
     'core_path' => 'core',  // Path to the submodule
+    // EventGraph aggregator tuning
+    'aggregator' => [
+        'time_tolerance' => 1.5,
+        'hit_backtrack_window' => 5.0,
+        'anchor_tolerance' => 120.0,
+        'anchor_min_matches' => 3,
+        'max_fallback_offset' => 900.0,
+        'max_anchor_offset' => 14400.0,
+    ],
 ];
