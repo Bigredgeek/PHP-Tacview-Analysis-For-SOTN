@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardened the offset diagnostic helper to pull every Tacview XML (including the SOTN GT2 flight log) straight from the debriefings directory, so source comparisons stay in sync without manual lists.
 - Trimmed mission timeline source badges to display numeric counts only while keeping full per-recording tooltips for analysts who need the detail on hover.
 - Styled the mission timeline confidence and evidence columns with centered layouts and pill badges so the numeric-only indicators remain readable in the retro UI theme.
+- Removed the embedded `core/` submodule so the workspace only tracks the standalone `php-tacview-core` repository next to SOTN.
 
 ### Fixed - 2025-11-02
 - Recreated `src/EventGraph/EventGraphAggregator.php` from scratch so the event merge, coalition validation, orphan tagging, and disconnect pruning pipeline runs without the previously corrupted file.

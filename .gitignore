@@ -35,3 +35,6 @@ tacview.css
 /docs/
 /public/languages/
 /public/tacview.php
+
+# Local copy of the shared core lives next door; keep it out of this repo
+/core/
