@@ -12,15 +12,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Surfaced coalition voting tallies and per-source reliability in the aggregator output so mixed-side evidence (e.g., two blue vs. one red Tacview) is easy to spot in downstream tooling.
 - Weighted each recording by coverage and event volume, feeding those reliabilities into the merge logic and the new confidence calculator.
 - Replaced the linear confidence formula with a tiered model that distinguishes rich (Tier A) weapon attributions from partial (Tier B) and inferred (Tier C) evidence, reaching 100% when two high-detail recordings agree and scaling down through 88%, 75%, 70%, and 62% according to the user-defined thresholds.
+- Extended the pilot statistics grid with a disconnect counter and detail drilldown so sortie summaries highlight mid-mission client drops alongside takeoffs and landings.
 
 ### Changed - 2025-11-02
 - Hardened the offset diagnostic helper to pull every Tacview XML (including the SOTN GT2 flight log) straight from the debriefings directory, so source comparisons stay in sync without manual lists.
+- Trimmed mission timeline source badges to display numeric counts only while keeping full per-recording tooltips for analysts who need the detail on hover.
 
 ### Fixed - 2025-11-02
 - Recreated `src/EventGraph/EventGraphAggregator.php` from scratch so the event merge, coalition validation, orphan tagging, and disconnect pruning pipeline runs without the previously corrupted file.
 - Let the EventGraph anchor chooser pick the highest-evidence cluster even when it sits beyond the primary tolerance window, so recordings like `Tacview-20251025-144445` realign at the ~4,900 second offset instead of the spurious 12-second match that was reintroducing duplicate Menton 2-1 kill rows.
 - Pruned HasFired timeline rows whose coalition and icon attribution contradict higher-evidence events, removing single-source misfires like Nitro 2-1 inheriting `weapons.shells.2A7` from the opposing ground unit while retaining multi-source SHORAD volleys.
 - Extended the coalition mismatch guard so any non-hit, non-destruction event with conflicting factional icons (primary, secondary, or parent objects) is discarded, preventing cross-coalition takeoff/kill artefacts while leaving `HasBeenDestroyed`/kill events intact.
+- Ignored mid-air disconnect destruction rows during stats aggregation while still recording them as disconnect events, eliminating false aircraft loss tallies for clients that simply dropped connection.
+- Reset the tacview renderer state and normalized aggregated event lists before rendering so `proceedAggregatedStats()` once again yields pilot statistics and the mission event log.
+- Restored EventGraph confidence percentages and source badges in the mission timeline (including the pilot detail panes) with tier-aware tooltips sourced from aggregated evidence.
 
 ### Added - 2025-11-01
 - Authored `planning/canonical-model-blueprint.md` detailing the staged ingestion → normalization → reconciliation pipeline for the canonical multi-Tacview aggregator; implementation deferred until event-graph exploration completes.
