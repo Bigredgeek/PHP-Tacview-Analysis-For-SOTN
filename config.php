@@ -19,7 +19,7 @@ return [
     
     // Paths (relative to project root)
     'debriefings_path' => 'debriefings/*.xml',
-    'core_path' => 'core',  // Path to the submodule
+    'core_path' => 'core',  // Path to the bundled core assets
     // EventGraph aggregator tuning
     'aggregator' => [
         'time_tolerance' => 1.5,
