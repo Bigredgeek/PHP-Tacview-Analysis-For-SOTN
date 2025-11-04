@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reset the tacview renderer state and normalized aggregated event lists before rendering so `proceedAggregatedStats()` once again yields pilot statistics and the mission event log.
 - Restored EventGraph confidence percentages and source badges in the mission timeline (including the pilot detail panes) with tier-aware tooltips sourced from aggregated evidence.
 - Treated `HasBeenDestroyed`/`HasBeenHitBy` duplicates that only differ by a missing attacker as the same engagement, collapsing Nomad-style pairs where one recording lacks the secondary object data.
+- Formatted per-pilot disconnect annotations with the mission start offset so the labels mirror the corrected event timeline instead of raw recording clocks.
 
 ### Added - 2025-11-01
 - Authored `planning/canonical-model-blueprint.md` detailing the staged ingestion → normalization → reconciliation pipeline for the canonical multi-Tacview aggregator; implementation deferred until event-graph exploration completes.
