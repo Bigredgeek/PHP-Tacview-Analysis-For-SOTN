@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added - 2025-11-02
+- Introduced `scripts/fetch-core.php` and wired it into the build pipeline so deployments automatically fetch the `php-tacview-core` bundle when the shared assets are absent.
 - Flagged orphan timeline events by tagging `HasFired` rows with no matching hits inside a type-aware time-of-flight window and `HasBeenDestroyed` kills without a preceding launch, surfacing potential recording gaps without deleting legitimate misses.
 - Surfaced coalition voting tallies and per-source reliability in the aggregator output so mixed-side evidence (e.g., two blue vs. one red Tacview) is easy to spot in downstream tooling.
 - Weighted each recording by coverage and event volume, feeding those reliabilities into the merge logic and the new confidence calculator.

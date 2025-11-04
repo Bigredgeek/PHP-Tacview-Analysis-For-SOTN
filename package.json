@@ -4,7 +4,7 @@
   "description": "PHP Tacview Analysis Tool for Song of the Nibelungs",
   "main": "public/index.html",
   "scripts": {
-    "build": "echo 'Build completed - static files ready in public directory'",
+    "build": "php scripts/fetch-core.php && echo 'Build completed - static files ready in public directory'",
     "start": "php -S 0.0.0.0:8000",
     "dev": "php -S localhost:8000"
   },
