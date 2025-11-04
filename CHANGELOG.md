@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - 2025-11-03
+- Removed duplicate Franz 1-2 sorties by pruning takeoff/landing pairs under two minutes with matching airfields and no intervening events during Tacview event normalization, ensuring the mission timeline mirrors the deduplicated core renderer.
+- Rebased aggregated event mission clocks to start at the consensus mission time so timeline rows follow the master time sync instead of the earliest outlier recording, fixing 09:52Z entries under an 11:14Z Mission Information header.
+
+### Changed - 2025-11-03
+- Renamed the pilot statistics "Targets Destroyed" column to "Airframes Lost" to match the dataset now tracking sorties lost instead of kills.
+- Updated the Russian and Ukrainian language packs so the new "Airframes Lost" label appears correctly in every localized pilot statistics view.
+
+### Added - 2025-11-02
+- Introduced build-time core fetchers (`scripts/fetch-core.js` for CI and `scripts/fetch-core.php` for local CLI) so deployments automatically clone the `php-tacview-core` bundle when the shared assets are absent.
+- Flagged orphan timeline events by tagging `HasFired` rows with no matching hits inside a type-aware time-of-flight window and `HasBeenDestroyed` kills without a preceding launch, surfacing potential recording gaps without deleting legitimate misses.
+- Surfaced coalition voting tallies and per-source reliability in the aggregator output so mixed-side evidence (e.g., two blue vs. one red Tacview) is easy to spot in downstream tooling.
+- Weighted each recording by coverage and event volume, feeding those reliabilities into the merge logic and the new confidence calculator.
+- Replaced the linear confidence formula with a tiered model that distinguishes rich (Tier A) weapon attributions from partial (Tier B) and inferred (Tier C) evidence, reaching 100% when two high-detail recordings agree and scaling down through 88%, 75%, 70%, and 62% according to the user-defined thresholds.
+- Extended the pilot statistics grid with a disconnect counter and detail drilldown so sortie summaries highlight mid-mission client drops alongside takeoffs and landings.
+- Synced the embedded core submodule so every language pack exposes `disconnects`, `confidence`, and `sources` labels for the new mission timeline and pilot statistics columns.
+
+### Changed - 2025-11-02
+- Rebased mission start time on the earliest consensus MissionTime pulled from the Tacview headers (within a 30-minute window) so timezone-skewed recordings like the 08:05 export no longer drag the site clock and duration several hours early; exposed the new `mission_time_congruence_tolerance` option across root/API/public configs.
+- Expanded the EventGraph merge window for `HasBeenHitBy`/`HasBeenDestroyed` actions to 4–5 seconds so multi-source recordings collapse into a single damage/killed row instead of duplicating Tincan-style double hits when timestamps drift by a couple seconds.
+- Hardened the offset diagnostic helper to pull every Tacview XML (including the SOTN GT2 flight log) straight from the debriefings directory, so source comparisons stay in sync without manual lists.
+- Trimmed mission timeline source badges to display numeric counts only while keeping full per-recording tooltips for analysts who need the detail on hover.
+- Styled the mission timeline confidence and evidence columns with centered layouts and pill badges so the numeric-only indicators remain readable in the retro UI theme.
+- Removed the embedded `core/` submodule so the workspace only tracks the standalone `php-tacview-core` repository next to SOTN.
+- Reworked pilot stats so `Targets Hit` now reflects strikes the pilot delivered, paired with a new `Times Hit` column that captures incoming enemy hits.
+
+### Fixed - 2025-11-02
+- Resolved remote deployments that lacked `/core` by probing for the shared Tacview engine in sibling `php-tacview-core` directories or an environment override before bootstrapping the debriefing endpoints, eliminating the Vercel fatal error.
+- Updated `test.php` to exercise the runtime aggregator workflow across every XML in `debriefings/`, matching deployment behaviour and catching core-path issues during local validation.
+- Recreated `src/EventGraph/EventGraphAggregator.php` from scratch so the event merge, coalition validation, orphan tagging, and disconnect pruning pipeline runs without the previously corrupted file.
+- Let the EventGraph anchor chooser pick the highest-evidence cluster even when it sits beyond the primary tolerance window, so recordings like `Tacview-20251025-144445` realign at the ~4,900 second offset instead of the spurious 12-second match that was reintroducing duplicate Menton 2-1 kill rows.
+- Pruned HasFired timeline rows whose coalition and icon attribution contradict higher-evidence events, removing single-source misfires like Nitro 2-1 inheriting `weapons.shells.2A7` from the opposing ground unit while retaining multi-source SHORAD volleys.
+- Extended the coalition mismatch guard so any non-hit, non-destruction event with conflicting factional icons (primary, secondary, or parent objects) is discarded, preventing cross-coalition takeoff/kill artefacts while leaving `HasBeenDestroyed`/kill events intact.
+- Ignored mid-air disconnect destruction rows during stats aggregation while still recording them as disconnect events, eliminating false aircraft loss tallies for clients that simply dropped connection.
+- Reset the tacview renderer state and normalized aggregated event lists before rendering so `proceedAggregatedStats()` once again yields pilot statistics and the mission event log.
+- Restored EventGraph confidence percentages and source badges in the mission timeline (including the pilot detail panes) with tier-aware tooltips sourced from aggregated evidence.
+- Treated `HasBeenDestroyed`/`HasBeenHitBy` duplicates that only differ by a missing attacker as the same engagement, collapsing Nomad-style pairs where one recording lacks the secondary object data.
+- Formatted per-pilot disconnect annotations with the mission start offset so the labels mirror the corrected event timeline instead of raw recording clocks.
+
+### Added - 2025-11-01
+- Authored `planning/canonical-model-blueprint.md` detailing the staged ingestion → normalization → reconciliation pipeline for the canonical multi-Tacview aggregator; implementation deferred until event-graph exploration completes.
+- Drafted `planning/event-graph-plan.md` outlining the ingestion → graph construction → inference approach for the probabilistic event graph aggregator that will replace the legacy multi-file loop.
+- Surfaced default `time_tolerance` and `hit_backtrack_window` settings in every environment config so EventGraph tuning stays consistent across root, API, and public bundles.
+- Extended the mission timeline tables with EventGraph-derived confidence percentages and source counts, complete with tooltips listing contributing recordings for each merged event.
+- Added automatic cross-recording time alignment: the aggregator now detects matching anchor events, computes per-file offsets, and merges multi-pilot kills without duplicating entries.
+
 ### Removed - 2025-11-01
 - Mirrored the Brownwater cleanup by deleting the local copies of `tacview.php`, `tacview.css`, language packs, icon bundles, tooling, and docs so the `core/` submodule stays the single source of truth for shared assets.
 - Dropped the bundled `public/tacview.php` and language pack duplicates; the deployment build now loads everything through the shared core just like local development.
@@ -15,8 +61,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hardened `.gitignore` to block reintroducing the shared engine files, languages, icons, data, tooling, docs, and public PHP shims that are now supplied by the submodule.
 
 ### Fixed - 2025-11-01
+- Clustered EventGraph anchor detection so late-start Tacviews still derive a consistent offset when three matching events align, eliminating residual duplicate kill rows (e.g., CAROL 11 vs DEFEKT 1-1) while capping adjustments at 900 seconds.
+- Let the EventGraph offset solver chain anchors through already-aligned recordings, picking the strongest match set before falling back and surfacing the delta/match count in the source summary so single-source Tacviews no longer reset to a zero offset.
+- Expanded EventGraph duplicate suppression for low-frequency timeline actions (takeoff/landing/area transitions) by relaxing their merge window to 30–45 seconds so tiny inter-recording offset errors no longer show Twin copies like the Sting 2 takeoff pair.
+- Promoted the EventGraph baseline recording to whichever file offers the strongest anchor connectivity, preventing outlier Tacviews from setting the zero point and duplicating launches such as the Sting 2 Sparrow volley.
+- Raised the EventGraph anchor offset ceiling to a configurable multi-hour window so shared events like the 08:50:33 MiG-21 hit can sync recordings that start hours apart without spawning duplicate timeline rows.
 - Pulled in the core `resolveCategoryIcon()` fallback so building events gracefully fall back to coalition/neutral glyphs instead of producing 404s; verified by rendering `php public/debriefing.php` after the cleanup.
 - Adopted the shared asset resolver helpers across root, public, and API entry points so `$tv->image_path` now prefers the bundled `public/` icons and CSS before falling back to the core pack; spot-checked by dumping `/public/categoryIcons` references from the rebuilt container.
+- Normalized EventGraph object key generation to ignore Tacview per-recording numeric IDs when richer metadata is present, allowing multi-track events (e.g., Menton 1 kills) to merge into unified rows with combined source evidence; confirmed by rerunning the aggregator CLI metrics.
+- Guarded EventGraph's fallback offset logic behind a 10-minute threshold so unrelated sorties (like the 23:25 recording) stay on their native timeline instead of snapping to T+0; exposed the limit as `max_fallback_offset` in every config bundle and surfaced the applied strategy in the source summary readout.
 
 ### Added - 2025-10-31
 #### Deployment Hardening Parity

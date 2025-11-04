@@ -2,129 +2,144 @@
 
 declare(strict_types=1);
 
-// Test script to verify PHP 8.2 modernized code works
+require_once __DIR__ . '/src/core_path.php';
+require_once __DIR__ . '/src/EventGraph/autoload.php';
 
 echo "========================================\n";
-echo "PHP Tacview Modernization Test\n";
+echo "PHP Tacview Deployment Simulation\n";
 echo "========================================\n\n";
 
 // Test 1: Check PHP version
 echo "✓ Test 1: PHP Version Check\n";
 echo "  PHP Version: " . phpversion() . "\n";
 echo "  Required: PHP 8.2+\n";
-echo "  Status: " . (version_compare(phpversion(), '8.2.0', '>=') ? "PASS ✓" : "FAIL ✗") . "\n\n";
-
-// Test 2: Check if strict types are enforced
-echo "✓ Test 2: Strict Types Declaration\n";
-echo "  This script has declare(strict_types=1);\n";
+if (!version_compare(phpversion(), '8.2.0', '>=')) {
+    echo "  Status: FAIL ✗\n\n";
+    exit(1);
+}
 echo "  Status: PASS ✓\n\n";
 
-// Test 3: Load and instantiate the tacview class
-echo "✓ Test 3: Load Tacview Class\n";
+// Test 2: Strict types declaration
+echo "✓ Test 2: Strict Types Declaration\n";
+echo "  Script declares strict_types=1\n";
+echo "  Status: PASS ✓\n\n";
+
+// Test 3: Load configuration
+echo "✓ Test 3: Configuration\n";
 try {
-    // Load the shared Tacview engine from the core submodule
-    require_once __DIR__ . '/core/tacview.php';
-    echo "  Tacview class loaded successfully\n";
-    
-    // Test type declarations are recognized
-    $tv = new tacview("en");
-    echo "  Tacview object instantiated with language 'en'\n";
-    
-    // Test property types exist
-    echo "  Properties initialized:\n";
-    echo "    - htmlOutput type: " . gettype($tv->htmlOutput) . "\n";
-    echo "    - stats type: " . gettype($tv->stats) . "\n";
-    echo "    - language type: " . gettype($tv->language) . "\n";
+    $config = require __DIR__ . '/config.php';
+    $defaultLanguage = $config['default_language'] ?? 'en';
+    $corePathSetting = $config['core_path'] ?? 'core';
+    echo "  Config loaded, default language: {$defaultLanguage}\n";
+    echo "  Requested core path: {$corePathSetting}\n";
     echo "  Status: PASS ✓\n\n";
-} catch (Exception $e) {
-    echo "  ERROR: " . $e->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo "  ERROR: " . $exception->getMessage() . "\n";
     echo "  Status: FAIL ✗\n\n";
     exit(1);
 }
 
-// Test 4: Check XML file exists
-echo "✓ Test 4: XML Test File Availability\n";
-$xmlFile = __DIR__ . '/debriefings/SOTN_gameday1.xml';
-if (file_exists($xmlFile)) {
-    $fileSize = filesize($xmlFile);
-    echo "  Found: " . basename($xmlFile) . "\n";
-    echo "  Size: " . number_format($fileSize) . " bytes\n";
+// Test 4: Resolve Tacview core path
+echo "✓ Test 4: Resolve Tacview Core\n";
+try {
+    $corePath = tacview_resolve_core_path($corePathSetting, __DIR__);
+    echo "  Core located at: {$corePath}\n";
     echo "  Status: PASS ✓\n\n";
-} else {
-    echo "  ERROR: XML file not found\n";
+} catch (Throwable $exception) {
+    echo "  ERROR: " . $exception->getMessage() . "\n";
     echo "  Status: FAIL ✗\n\n";
     exit(1);
 }
 
-// Test 5: Parse XML file
-echo "✓ Test 5: XML Parsing\n";
+// Test 5: Load Tacview engine
+echo "✓ Test 5: Load Tacview Engine\n";
 try {
-    $tv->proceedStats($xmlFile, "Test Mission");
-    echo "  XML parsed successfully\n";
+    require_once $corePath . '/tacview.php';
+    $tv = new tacview($defaultLanguage);
+    $tv->image_path = '/';
+    echo "  Tacview class instantiated\n";
+    echo "  Properties: htmlOutput(" . gettype($tv->htmlOutput) . "), stats(" . gettype($tv->stats) . "), language(" . gettype($tv->language) . ")\n";
     echo "  Status: PASS ✓\n\n";
-} catch (Exception $e) {
-    echo "  ERROR: " . $e->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo "  ERROR: " . $exception->getMessage() . "\n";
     echo "  Status: FAIL ✗\n\n";
     exit(1);
 }
 
-// Test 6: Generate output
-echo "✓ Test 6: Output Generation\n";
+// Test 6: Discover Tacview XML debriefings
+echo "✓ Test 6: Locate Debriefings\n";
+$pattern = __DIR__ . '/' . str_replace('*.xml', '*.xml', $config['debriefings_path'] ?? 'debriefings/*.xml');
+$xmlFiles = glob($pattern) ?: [];
+if ($xmlFiles === []) {
+    echo "  ERROR: No XML files found using pattern {$pattern}\n";
+    echo "  Status: FAIL ✗\n\n";
+    exit(1);
+}
+echo "  Found " . count($xmlFiles) . " XML file(s)\n";
+foreach ($xmlFiles as $file) {
+    echo "    - " . basename($file) . " (" . number_format(filesize($file)) . " bytes)\n";
+}
+echo "  Status: PASS ✓\n\n";
+
+// Test 7: Aggregate mission data
+echo "✓ Test 7: Aggregate Mission\n";
 try {
+    $aggregatorOptions = $config['aggregator'] ?? [];
+    $aggregator = new \EventGraph\EventGraphAggregator($defaultLanguage, $aggregatorOptions);
+    foreach ($xmlFiles as $filexml) {
+        $aggregator->ingestFile($filexml);
+    }
+    $mission = $aggregator->toAggregatedMission();
+    $metrics = $aggregator->getMetrics();
+    echo "  Mission name: " . ($mission->getMissionName() ?: '[unknown]') . "\n";
+    echo "  Duration (s): " . (int) $mission->getDuration() . "\n";
+    echo "  Raw events: " . (int) ($metrics['raw_event_count'] ?? 0) . "\n";
+    echo "  Merged events: " . (int) ($metrics['merged_events'] ?? 0) . "\n";
+    echo "  Status: PASS ✓\n\n";
+} catch (Throwable $exception) {
+    echo "  ERROR: " . $exception->getMessage() . "\n";
+    echo "  Status: FAIL ✗\n\n";
+    exit(1);
+}
+
+// Test 8: Render aggregated output
+echo "✓ Test 8: Render Output\n";
+try {
+    $tv->proceedAggregatedStats(
+        $mission->getMissionName(),
+        $mission->getStartTime(),
+        $mission->getDuration(),
+        $mission->getEvents()
+    );
     $output = $tv->getOutput();
-    $outputLength = strlen($output);
-    if ($outputLength > 0) {
-        echo "  Output generated: " . number_format($outputLength) . " characters\n";
-        echo "  Output contains HTML: " . (strpos($output, '<table') !== false ? "YES" : "NO") . "\n";
-        echo "  Status: PASS ✓\n\n";
-    } else {
-        echo "  ERROR: Empty output\n";
+    $length = strlen($output);
+    if ($length <= 0) {
+        echo "  ERROR: Empty renderer output\n";
         echo "  Status: FAIL ✗\n\n";
         exit(1);
     }
-} catch (Exception $e) {
-    echo "  ERROR: " . $e->getMessage() . "\n";
-    echo "  Status: FAIL ✗\n\n";
-    exit(1);
-}
-
-// Test 7: Type system verification
-echo "✓ Test 7: Type System Verification\n";
-try {
-    // Test that passing wrong types fails with strict types enabled
-    $testValue = "test";
-    
-    // This should work - correct types
-    $tv->addOutput("<p>Test</p>");
-    echo "  Type-safe method calls working\n";
-    
-    // Test array type hint
-    $stats = [];
-    $tv->increaseStat($stats, "Test", "Count");
-    echo "  Array type hints working\n";
-    
+    echo "  Output length: " . number_format($length) . " characters\n";
+    echo "  Contains table markup: " . (strpos($output, '<table') !== false ? 'YES' : 'NO') . "\n";
     echo "  Status: PASS ✓\n\n";
-} catch (Exception $e) {
-    echo "  ERROR: " . $e->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo "  ERROR: " . $exception->getMessage() . "\n";
     echo "  Status: FAIL ✗\n\n";
     exit(1);
 }
 
-// Test 8: Language support
-echo "✓ Test 8: Language Support\n";
+// Test 9: Language support
+echo "✓ Test 9: Language Support\n";
 try {
-    // Check if English language was loaded
-    $missionLabel = $tv->L('missionName');
-    if ($missionLabel && $missionLabel !== 'missionName') {
-        echo "  Language loaded: 'en'\n";
-        echo "  Sample translation: 'missionName' => '" . $missionLabel . "'\n";
+    $label = $tv->L('missionName');
+    if ($label && $label !== 'missionName') {
+        echo "  Translation sample: missionName => {$label}\n";
         echo "  Status: PASS ✓\n\n";
     } else {
-        echo "  WARNING: Language not loaded properly\n";
+        echo "  WARNING: Language key unresolved\n";
         echo "  Status: PARTIAL ⚠\n\n";
     }
-} catch (Exception $e) {
-    echo "  ERROR: " . $e->getMessage() . "\n";
+} catch (Throwable $exception) {
+    echo "  ERROR: " . $exception->getMessage() . "\n";
     echo "  Status: FAIL ✗\n\n";
     exit(1);
 }
@@ -133,14 +148,10 @@ try {
 echo "========================================\n";
 echo "Test Results Summary\n";
 echo "========================================\n";
-echo "✓ All critical tests PASSED!\n";
-echo "✓ PHP 8.2+ modernization successful\n";
-echo "✓ Strict types enabled and working\n";
-echo "✓ Type declarations recognized\n";
-echo "✓ XML parsing functional\n";
-echo "✓ Output generation working\n";
-echo "✓ Language system operational\n";
-echo "\nThe application is ready for deployment!\n";
+echo "✓ Core path resolver exercised\n";
+echo "✓ Aggregator merged multi-file mission data\n";
+echo "✓ Renderer emitted deployment-ready HTML\n";
+echo "\nDeployment simulation completed successfully.\n";
 echo "========================================\n";
 
 exit(0);

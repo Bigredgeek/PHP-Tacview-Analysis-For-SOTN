@@ -1,11 +1,32 @@
 # SOTN Public Bundle Changelog
 
 ## [Unreleased]
+- Remove duplicate short sorties by discarding takeoff/landing pairs under two minutes at the same airfield when no other events occur, aligning the public render with Franz 1-2’s deduped timeline.
+- Hardened public PHP entrypoints to auto-locate the shared Tacview core (including sibling `php-tacview-core` directories) so Vercel uploads without `/core` no longer throw fatal errors during bootstrap.
+- Anchor the Mission Information clock to the earliest Tacview MissionTime agreed upon by the majority of recordings (30-minute consensus window) so timezone-skewed files stop displaying 08:05Z starts and inflated durations; the new `mission_time_congruence_tolerance` knob is wired through public configs.
+- Renamed the pilot statistics "Targets Destroyed" column to "Airframes Lost" so the label matches the airframe-loss metric shown in the UI.
+- Pulled the refreshed Russian and Ukrainian translations so the "Airframes Lost" wording propagates across localized pilot statistics tables.
+- Rebased mission timeline rows against the consensus mission start so early events from outlier Tacviews (e.g., 09:52Z) now render at 11:14Z alongside the Mission Information header.
+- Format per-pilot disconnect annotations with the mission start offset so the drilldown timestamps mirror the corrected event log alignment.
+- Let EventGraph treat `HasBeenHitBy`/`HasBeenDestroyed` rows within a 4–5 second window as the same engagement, eliminating duplicate damage and kill lines when multi-source Tacviews disagree by a couple seconds.
+- Updated pilot stats so `Targets Hit` only counts damage inflicted while a new `Times Hit` column tallies how often the pilot was struck.
+- Merge `HasBeenDestroyed` rows that only differ because one Tacview lacks attacker metadata, so Nomad's aircraft loss now displays as a single destruction entry with the richer source evidence.
+- Pulled updated core translations for disconnect, confidence, and source labels so the new mission and pilot table columns display across every supported language.
+- Reset the tacview renderer before aggregated playback and normalize merged event arrays so pilot stats and the mission timeline render when `proceedAggregatedStats()` runs in the public bundle.
+- Restored EventGraph confidence percentages and source badges in both mission and pilot-level tables, complete with tier-aware tooltips sourced from aggregated evidence.
+- Updated mission timeline source badges to show only the numeric count while retaining hover tooltips listing each contributing recording.
+- Added `aggregator` configuration block with default `time_tolerance` and `hit_backtrack_window` values to mirror the core runtime options.
+- Clustered EventGraph anchor detection so late-start Tacviews still align on a shared offset when three matching events agree, removing the duplicate kill rows that ghosted in from the `Tacview-20251025-232536` recording and capping adjustments at 900 seconds.
+- Displaying EventGraph confidence percentages and source counts beside each mission event, including tooltips that enumerate the contributing Tacview recordings.
+- Synced with core auto-alignment logic so the public bundle resolves per-recording offsets before merging events.
+- Corrected EventGraph deduplication so per-recording Tacview IDs no longer prevent multi-source events from merging; Menton 1's kill log now shows the appropriate combined source counts.
+- Limited EventGraph fallback time shifts to ±10 minutes so disconnected recordings (e.g., late-night Tacviews) no longer get forced onto the baseline timeline; added `max_fallback_offset` to public configs and annotate the source summary with the applied offset strategy.
 - Updated the public PHP entry points to use the shared asset resolver so deployment favors packaged `/public` icons and styles before falling back to the core bundle.
 - Added coalition-aware fallbacks for building category icons so mission timelines no longer request missing `Building_*` sprites.
 - Added `.vercelignore` and `vercel.json` redirect to keep `/debriefing.php` served by the API.
 - Introduced `public/debriefing.php` for local PHP dev servers so the main view loads without refresh loops.
 - Forced Tacview to build root-relative icon URLs from every debriefing entry point and smoke-tested via `php -S localhost:8001 -t public` with the sanitized mission export.
+- Added a disconnect column and drilldown list to the pilot statistics table so mid-mission client dropouts surface alongside sortie totals without counting as kills.
 - Pointed the A-4E Skyhawk and F-104 Starfighter back to their dedicated thumbnails and lowercased the Mi-24P Hind-F asset so Linux deployments pick up the file.
 - Made sticky header row fully opaque with a cyan trim so labels stay legible while scrolling.
 - Restored the gradient styling and hover affordance for pilot statistic rows so the retro theme matches Brownwater again.

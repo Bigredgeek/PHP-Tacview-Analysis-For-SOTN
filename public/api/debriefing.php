@@ -5,8 +5,11 @@ declare(strict_types=1);
 // Load configuration from the public bundle
 $config = require_once __DIR__ . '/../config.php';
 
+require_once __DIR__ . '/../../src/core_path.php';
+$corePath = tacview_resolve_core_path($config['core_path'] ?? 'core', dirname(__DIR__, 2));
+
 // Load the shared Tacview engine from the core submodule
-require_once __DIR__ . '/../../' . $config['core_path'] . '/tacview.php';
+require_once $corePath . '/tacview.php';
 
 if (!function_exists('tacview_normalize_url_path')) {
 	function tacview_normalize_url_path(?string $path): string
