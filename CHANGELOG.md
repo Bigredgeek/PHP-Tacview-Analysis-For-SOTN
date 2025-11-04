@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - 2025-11-03
+- Removed duplicate Franz 1-2 sorties by pruning takeoff/landing pairs under two minutes with matching airfields and no intervening events during Tacview event normalization, ensuring the mission timeline mirrors the deduplicated core renderer.
+- Rebased aggregated event mission clocks to start at the consensus mission time so timeline rows follow the master time sync instead of the earliest outlier recording, fixing 09:52Z entries under an 11:14Z Mission Information header.
+
+### Changed - 2025-11-03
+- Renamed the pilot statistics "Targets Destroyed" column to "Airframes Lost" to match the dataset now tracking sorties lost instead of kills.
+- Updated the Russian and Ukrainian language packs so the new "Airframes Lost" label appears correctly in every localized pilot statistics view.
+
 ### Added - 2025-11-02
 - Introduced build-time core fetchers (`scripts/fetch-core.js` for CI and `scripts/fetch-core.php` for local CLI) so deployments automatically clone the `php-tacview-core` bundle when the shared assets are absent.
 - Flagged orphan timeline events by tagging `HasFired` rows with no matching hits inside a type-aware time-of-flight window and `HasBeenDestroyed` kills without a preceding launch, surfacing potential recording gaps without deleting legitimate misses.

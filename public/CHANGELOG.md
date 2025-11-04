@@ -1,8 +1,12 @@
 # SOTN Public Bundle Changelog
 
 ## [Unreleased]
+- Remove duplicate short sorties by discarding takeoff/landing pairs under two minutes at the same airfield when no other events occur, aligning the public render with Franz 1-2’s deduped timeline.
 - Hardened public PHP entrypoints to auto-locate the shared Tacview core (including sibling `php-tacview-core` directories) so Vercel uploads without `/core` no longer throw fatal errors during bootstrap.
 - Anchor the Mission Information clock to the earliest Tacview MissionTime agreed upon by the majority of recordings (30-minute consensus window) so timezone-skewed files stop displaying 08:05Z starts and inflated durations; the new `mission_time_congruence_tolerance` knob is wired through public configs.
+- Renamed the pilot statistics "Targets Destroyed" column to "Airframes Lost" so the label matches the airframe-loss metric shown in the UI.
+- Pulled the refreshed Russian and Ukrainian translations so the "Airframes Lost" wording propagates across localized pilot statistics tables.
+- Rebased mission timeline rows against the consensus mission start so early events from outlier Tacviews (e.g., 09:52Z) now render at 11:14Z alongside the Mission Information header.
 - Format per-pilot disconnect annotations with the mission start offset so the drilldown timestamps mirror the corrected event log alignment.
 - Let EventGraph treat `HasBeenHitBy`/`HasBeenDestroyed` rows within a 4–5 second window as the same engagement, eliminating duplicate damage and kill lines when multi-source Tacviews disagree by a couple seconds.
 - Updated pilot stats so `Targets Hit` only counts damage inflicted while a new `Times Hit` column tallies how often the pilot was struck.

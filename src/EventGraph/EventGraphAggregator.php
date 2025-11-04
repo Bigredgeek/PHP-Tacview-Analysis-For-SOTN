@@ -1683,6 +1683,11 @@ final class EventGraphAggregator
         } elseif ($this->startTime === null) {
             $this->startTime = min($this->startTimeSamples);
         }
+
+        $minimumEventTime = $this->getMinimumEventMissionTime();
+        if ($minimumEventTime < 0.0) {
+            $this->shiftAllEvents(-$minimumEventTime);
+        }
     }
 
     private function computeCongruentStartTime(): ?float
@@ -1731,6 +1736,28 @@ final class EventGraphAggregator
         }
 
         return $samples[$bestIndex];
+    }
+
+    private function getMinimumEventMissionTime(): float
+    {
+        $minimum = 0.0;
+
+        foreach ($this->events as $event) {
+            $minimum = min($minimum, $event->getMissionTime());
+        }
+
+        return $minimum;
+    }
+
+    private function shiftAllEvents(float $delta): void
+    {
+        if ($delta === 0.0) {
+            return;
+        }
+
+        foreach ($this->events as $event) {
+            $event->shiftMissionTime($delta);
+        }
     }
 
     private function resolveMissionName(?string $current, string $candidate): string
