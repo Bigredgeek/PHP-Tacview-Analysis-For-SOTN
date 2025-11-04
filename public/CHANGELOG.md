@@ -1,6 +1,7 @@
 # SOTN Public Bundle Changelog
 
 ## [Unreleased]
+- Hide the aggregator status overlay by default, surfacing the metrics pane only when `show_status_overlay` is enabled or `?debug=1` is appended while keeping ingest failures visible to end users.
 - Remove duplicate short sorties by discarding takeoff/landing pairs under two minutes at the same airfield when no other events occur, aligning the public render with Franz 1-2’s deduped timeline.
 - Hardened public PHP entrypoints to auto-locate the shared Tacview core (including sibling `php-tacview-core` directories) so Vercel uploads without `/core` no longer throw fatal errors during bootstrap.
 - Anchor the Mission Information clock to the earliest Tacview MissionTime agreed upon by the majority of recordings (30-minute consensus window) so timezone-skewed files stop displaying 08:05Z starts and inflated durations; the new `mission_time_congruence_tolerance` knob is wired through public configs.

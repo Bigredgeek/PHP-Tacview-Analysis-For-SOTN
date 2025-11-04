@@ -10,10 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed - 2025-11-03
 - Removed duplicate Franz 1-2 sorties by pruning takeoff/landing pairs under two minutes with matching airfields and no intervening events during Tacview event normalization, ensuring the mission timeline mirrors the deduplicated core renderer.
 - Rebased aggregated event mission clocks to start at the consensus mission time so timeline rows follow the master time sync instead of the earliest outlier recording, fixing 09:52Z entries under an 11:14Z Mission Information header.
+- Restored proper spacing and bracket closures around flight group names in mission events so strings render as `[Axeman 3] has entered the area` instead of `Axeman 3has entered the area`.
+- Replaced the debug-heavy inline `showDetails` stub with the streamlined core helper to eliminate the `Unexpected end of input` console error on the API output.
 
 ### Changed - 2025-11-03
 - Renamed the pilot statistics "Targets Destroyed" column to "Airframes Lost" to match the dataset now tracking sorties lost instead of kills.
 - Updated the Russian and Ukrainian language packs so the new "Airframes Lost" label appears correctly in every localized pilot statistics view.
+- Hid the aggregator status overlay on the root/API/public debriefing routes by default, keeping ingest failures visible while exposing the full metrics panel only when `show_status_overlay` is enabled or `?debug=1` is supplied.
 
 ### Added - 2025-11-02
 - Introduced build-time core fetchers (`scripts/fetch-core.js` for CI and `scripts/fetch-core.php` for local CLI) so deployments automatically clone the `php-tacview-core` bundle when the shared assets are absent.

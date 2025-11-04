@@ -16,6 +16,7 @@ return [
     // Page settings
     'page_title' => 'PHP Tacview Debriefing',
     'default_language' => 'en',
+    'show_status_overlay' => false, // Toggle to surface aggregator debug output by default
     
     // Paths (relative to project root)
     'debriefings_path' => 'debriefings/*.xml',
