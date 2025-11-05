@@ -5,8 +5,8 @@
   "main": "public/index.html",
   "scripts": {
     "build": "node scripts/fetch-core.js && node scripts/preprocess-debriefings.js",
-    "prebuild": "echo '🚀 Starting build process...'",
-    "postbuild": "echo '✓ Build completed successfully'",
+    "prebuild": "echo 'Starting build process...'",
+    "postbuild": "echo 'Build completed successfully'",
     "start": "php -S 0.0.0.0:8000",
     "dev": "php -S localhost:8000"
   },

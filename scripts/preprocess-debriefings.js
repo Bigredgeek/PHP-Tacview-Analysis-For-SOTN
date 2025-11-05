@@ -17,7 +17,7 @@ const path = require('node:path');
 function isPhpAvailable() {
     const result = spawnSync('php', ['--version'], {
         stdio: 'pipe',
-        encoding: 'utf-8',
+        encoding: 'utf8',
     });
     
     // If there's an error (e.g., ENOENT), PHP is not available
