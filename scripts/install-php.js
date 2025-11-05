@@ -141,9 +141,9 @@ async function installPhp() {
         }
         
         if (!extractedPhp) {
-            // Fallback: search for any 'php' file in phpDir
+            // Fallback: search for exact 'php' file (executable binary only)
             const files = fs.readdirSync(phpDir);
-            const phpFile = files.find(f => f === 'php' || f.startsWith('php'));
+            const phpFile = files.find(f => f === 'php');
             if (phpFile) {
                 extractedPhp = path.join(phpDir, phpFile);
             } else {
@@ -207,11 +207,12 @@ async function installPhp() {
 }
 
 // Main execution
+// Always exit with status 0 to prevent build failures even if PHP installation is unsuccessful
 installPhp()
     .then(() => {
-        process.exit(0); // Always exit 0 to not fail the build
+        process.exit(0);
     })
     .catch((err) => {
         console.error('Error during PHP installation:', err);
-        process.exit(0); // Don't fail the build
+        process.exit(0);
     });
