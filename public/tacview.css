@@ -5,6 +5,29 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
 
+/* Performance Optimization: Disable animations for users who prefer reduced motion or on mobile devices */
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+/* Disable heavy animations on mobile for better performance and battery life */
+@media (max-width: 768px) {
+	body {
+		animation: none !important;
+	}
+	body::before {
+		animation: none !important;
+		opacity: 0.2;
+	}
+	body::after {
+		animation: none !important;
+	}
+}
+
 /* CRT Scanline Animation */
 @keyframes scanline {
 	0% {
@@ -467,10 +490,14 @@ table.statisticsTable {
 	border-spacing: 0;
 	width: 100%;
 	overflow: visible;
+	/* Performance: Use CSS containment for better rendering */
+	contain: layout style;
 }
 
 thead.statisticsTable-head {
 	position: static;
+	/* Performance: Optimize sticky header */
+	contain: layout style;
 }
 
 tr.statisticsTable, th.statisticsTable

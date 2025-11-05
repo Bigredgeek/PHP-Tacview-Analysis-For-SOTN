@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - 2025-11-05
+#### Performance Investigation
+- Conducted comprehensive performance analysis for mobile and weaker PC issues reported by users
+- Created detailed performance analysis document (`planning/performance-analysis-2025-11-05.md`) with findings and recommendations
+- Identified root causes:
+  - EventGraphAggregator processing ~1.3s per page load (parsing 4 XML files)
+  - Large HTML payload of 1.6MB (mission events with inline tooltips)
+  - CSS animation overhead from Cold War Command Center theme
+  - Large DOM with thousands of table rows
+- Proposed four solution approaches:
+  - **Solution A (Recommended):** Build-time pre-processing of debriefings (98%+ performance improvement)
+  - **Solution B:** Client-side lazy loading with AJAX
+  - **Solution C:** Payload optimization and caching (quick wins)
+  - **Solution D:** Hybrid approach combining A and C (best overall)
+- Recommended immediate quick wins: HTTP compression, CSS performance optimizations, lazy image loading
+- Documented implementation plan with phases, success criteria, and testing approach
+
 ### Fixed - 2025-11-03
 - Removed duplicate Franz 1-2 sorties by pruning takeoff/landing pairs under two minutes with matching airfields and no intervening events during Tacview event normalization, ensuring the mission timeline mirrors the deduplicated core renderer.
 - Rebased aggregated event mission clocks to start at the consensus mission time so timeline rows follow the master time sync instead of the earliest outlier recording, fixing 09:52Z entries under an 11:14Z Mission Information header.
