@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - 2025-11-05
+#### Vercel Build Failure Resolution
+- Fixed Vercel build failure caused by missing PHP in Node.js build environment
+- Created `scripts/preprocess-debriefings.js` Node.js wrapper that gracefully handles environments without PHP
+- Updated `package.json` build script to use Node.js wrapper instead of calling PHP directly
+- Build now succeeds on Vercel by skipping pre-processing when PHP is unavailable
+- Application automatically falls back to runtime processing via vercel-php runtime functions
+- Pre-processing still runs in environments with PHP available (local development, Docker)
+- **Issue**: Previously, `npm run build` would fail with exit code 127 ("php: command not found") on Vercel
+- **Solution**: Node.js wrapper detects PHP availability and skips pre-processing gracefully on Vercel while maintaining build-time optimization for environments with PHP
+
 ### Added - 2025-11-05
 #### Performance Investigation
 - Conducted comprehensive performance analysis for mobile and weaker PC issues reported by users
