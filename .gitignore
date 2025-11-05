@@ -32,7 +32,7 @@ tacview.css
 /objectIcons/
 /data/
 /tools/
-/docs/
+# /docs/ - Keep our own docs, but ignore core docs from submodule
 /public/languages/
 /public/tacview.php
 
