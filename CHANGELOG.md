@@ -8,15 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed - 2025-11-05
-#### Vercel Build Failure Resolution
-- Fixed Vercel build failure caused by missing PHP in Node.js build environment
-- Created `scripts/preprocess-debriefings.js` Node.js wrapper that gracefully handles environments without PHP
-- Updated `package.json` build script to use Node.js wrapper instead of calling PHP directly
-- Build now succeeds on Vercel by skipping pre-processing when PHP is unavailable
-- Application automatically falls back to runtime processing via vercel-php runtime functions
-- Pre-processing still runs in environments with PHP available (local development, Docker)
-- **Issue**: Previously, `npm run build` would fail with exit code 127 ("php: command not found") on Vercel
-- **Solution**: Node.js wrapper detects PHP availability and skips pre-processing gracefully on Vercel while maintaining build-time optimization for environments with PHP
+#### Vercel Build with PHP Pre-Processing Enabled
+- Fixed Vercel build to actually perform pre-processing during build time for optimal performance
+- Created `scripts/install-php.js` that downloads and installs a static PHP binary during build
+  - Downloads portable PHP from static-php-cli project (no root access required)
+  - Works in Vercel's restricted build environment
+  - Supports both x86_64 and aarch64 architectures
+- Updated `scripts/preprocess-debriefings.js` to detect and use custom-installed PHP
+  - Checks custom PHP location first, then falls back to system PHP
+  - Automatically updates PATH to include custom PHP binary
+- Updated `package.json` build script to: install PHP → fetch core → pre-process debriefings
+- **Result**: Vercel builds now generate pre-processed files for 97% faster page loads (1.3s → 46ms)
+- **Previous approach**: Skipped pre-processing on Vercel, defeating the performance optimization
+- **New approach**: Installs PHP during build so pre-processing actually runs on Vercel
 
 ### Added - 2025-11-05
 #### Performance Investigation

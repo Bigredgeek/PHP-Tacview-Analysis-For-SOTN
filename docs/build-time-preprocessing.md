@@ -13,7 +13,15 @@ This feature dramatically improves performance for mobile and weaker PCs by movi
 
 ## How It Works
 
-### 1. Pre-Processing Script
+### 1. PHP Installation (Vercel/Cloud Builds)
+The `scripts/install-php.js` script:
+- Downloads a static PHP binary from static-php-cli project
+- Installs PHP without requiring root/sudo access
+- Works in restricted build environments like Vercel
+- Supports x86_64 and aarch64 architectures
+- Skips if PHP is already available
+
+### 2. Pre-Processing Script
 The `scripts/preprocess-debriefings.php` script:
 - Loads all XML files from `debriefings/`
 - Runs EventGraphAggregator at build time
@@ -21,12 +29,12 @@ The `scripts/preprocess-debriefings.php` script:
 - Saves metadata for cache invalidation
 
 The `scripts/preprocess-debriefings.js` wrapper:
-- Detects if PHP is available in the build environment
-- Runs pre-processing when PHP is available (local, Docker, GitHub Actions)
-- Gracefully skips when PHP is not available (Vercel)
-- Ensures builds succeed in all environments
+- Checks for custom-installed PHP first (from install-php.js)
+- Falls back to system PHP if available
+- Runs pre-processing when PHP is found
+- Provides helpful messages if PHP is unavailable
 
-### 2. Optimized Debriefing Page
+### 3. Optimized Debriefing Page
 The `debriefing-optimized.php` page:
 - Checks for pre-processed data
 - If available: loads static HTML (fast path)
@@ -44,7 +52,8 @@ npm run build
 
 This executes:
 1. `node scripts/fetch-core.js` - Fetches php-tacview-core
-2. `node scripts/preprocess-debriefings.js` - Pre-processes debriefings (when PHP available)
+2. `node scripts/install-php.js` - Installs portable PHP if not available
+3. `node scripts/preprocess-debriefings.js` - Pre-processes debriefings with installed PHP
 
 Or run the pre-processor directly (requires PHP):
 ```bash
@@ -57,15 +66,16 @@ Pre-processed data is saved to:
 - `public/debriefings/aggregated.html` - Rendered HTML (1.5MB)
 - `public/debriefings/aggregated.json` - Metadata with cache info
 
-**Note:** These files are only generated when PHP is available during build. On Vercel and similar platforms without PHP in the build environment, the application will use runtime processing instead.
+**Note:** These files are generated when PHP is available during build. The install-php.js script ensures PHP is available even in restricted environments like Vercel.
 
 ### Deployment
 
 #### Vercel
-The build is automatically triggered on deployment. The build will succeed even without PHP:
+The build automatically installs PHP and performs pre-processing:
 
-- **With PHP in build environment:** Pre-processes debriefings at build time for optimal performance
-- **Without PHP (default Vercel):** Skips pre-processing, uses runtime processing via vercel-php runtime
+1. **PHP Installation**: Downloads static PHP binary during build (no root required)
+2. **Pre-Processing**: Generates aggregated files for optimal performance
+3. **Result**: 97% faster page loads on Vercel deployments
 
 Configure in Vercel project settings:
 ```
