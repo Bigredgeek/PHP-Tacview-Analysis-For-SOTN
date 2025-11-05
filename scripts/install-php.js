@@ -90,9 +90,9 @@ async function installPhp() {
     // Determine architecture
     let phpArch;
     if (arch === 'x64') {
-        phpArch = 'x86_64';
+        phpArch = 'x64';
     } else if (arch === 'arm64') {
-        phpArch = 'aarch64';
+        phpArch = 'arm64';
     } else {
         console.log(`⚠ Unsupported architecture: ${arch}`);
         return false;
@@ -103,17 +103,20 @@ async function installPhp() {
     
     const phpBinary = path.join(phpDir, 'php');
     
-    // Download static PHP binary from static-php-cli project
+    // Download static PHP binary from swoole/build-static-php project
     // This provides truly static PHP binaries that work anywhere
-    const downloadUrl = `https://dl.static-php.dev/static-php-cli/common/php-8.2-cli-linux-${phpArch}.tar.gz`;
-    const archivePath = path.join(phpDir, 'php.tar.gz');
+    // Using PHP 8.2.28 from the latest stable release
+    const phpVersion = 'v8.2.28';
+    const releaseVersion = 'v1.10.0';
+    const downloadUrl = `https://github.com/swoole/build-static-php/releases/download/${releaseVersion}/php-cli-${phpVersion}-linux-${phpArch}.tar.xz`;
+    const archivePath = path.join(phpDir, 'php.tar.xz');
     
     try {
         console.log(`Downloading static PHP binary from ${downloadUrl}...`);
         await downloadFile(downloadUrl, archivePath);
         
         console.log('Extracting PHP...');
-        const extractResult = spawnSync('tar', ['-xzf', archivePath, '-C', phpDir], {
+        const extractResult = spawnSync('tar', ['-xJf', archivePath, '-C', phpDir], {
             stdio: 'inherit',
         });
         
@@ -121,16 +124,32 @@ async function installPhp() {
             throw new Error('Failed to extract PHP archive');
         }
         
-        // The extracted binary should be in phpDir
-        // Find the PHP binary
-        const files = fs.readdirSync(phpDir);
-        const phpFile = files.find(f => f === 'php' || f.startsWith('php'));
+        // The swoole build-static-php archive extracts to bin/runtime/php
+        // Find the PHP binary in the extracted structure
+        let extractedPhp;
+        const possiblePaths = [
+            path.join(phpDir, 'bin', 'runtime', 'php'),
+            path.join(phpDir, 'bin', 'php'),
+            path.join(phpDir, 'php')
+        ];
         
-        if (!phpFile) {
-            throw new Error('PHP binary not found after extraction');
+        for (const possiblePath of possiblePaths) {
+            if (fs.existsSync(possiblePath)) {
+                extractedPhp = possiblePath;
+                break;
+            }
         }
         
-        const extractedPhp = path.join(phpDir, phpFile);
+        if (!extractedPhp) {
+            // Fallback: search for any 'php' file in phpDir
+            const files = fs.readdirSync(phpDir);
+            const phpFile = files.find(f => f === 'php' || f.startsWith('php'));
+            if (phpFile) {
+                extractedPhp = path.join(phpDir, phpFile);
+            } else {
+                throw new Error('PHP binary not found after extraction');
+            }
+        }
         
         // Make it executable
         fs.chmodSync(extractedPhp, 0o755);
@@ -173,14 +192,24 @@ async function installPhp() {
     } catch (error) {
         console.error('✗ Failed to install PHP:', error.message);
         console.log('  Pre-processing will be skipped');
+        
+        // Clean up downloaded archive if it exists
+        if (fs.existsSync(archivePath)) {
+            try {
+                fs.unlinkSync(archivePath);
+            } catch (unlinkErr) {
+                // Ignore cleanup errors
+            }
+        }
+        
         return false;
     }
 }
 
 // Main execution
 installPhp()
-    .then((success) => {
-        process.exit(success ? 0 : 0); // Always exit 0 to not fail the build
+    .then(() => {
+        process.exit(0); // Always exit 0 to not fail the build
     })
     .catch((err) => {
         console.error('Error during PHP installation:', err);

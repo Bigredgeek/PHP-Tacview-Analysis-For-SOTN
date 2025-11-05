@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - 2025-11-05
+#### PHP Installation Script Improvements
+- Updated `scripts/install-php.js` to use swoole/build-static-php instead of static-php-cli for better reliability
+  - Changed from `dl.static-php.dev` to `github.com/swoole/build-static-php` releases
+  - Added specific version pinning (PHP 8.2.28 from release v1.10.0) for reproducible builds
+  - Updated architecture handling from `x86_64`/`aarch64` to `x64`/`arm64` to match swoole release naming
+  - Changed archive format from `.tar.gz` to `.tar.xz` (xz compression)
+  - Enhanced PHP binary detection with multiple possible paths (bin/runtime/php, bin/php, php)
+  - Added archive cleanup on installation failure to prevent disk space issues
+  - Simplified exit handler for consistency with Brownwater repository
+- **Rationale**: Aligns SOTN build process with proven Brownwater implementation for more reliable Vercel deployments
+- **Benefit**: More reliable PHP installation during Vercel builds, ensuring pre-caching works consistently
+
 ### Fixed - 2025-11-05
 #### Vercel Deployment Header Pattern
 - Fixed invalid source pattern in `vercel.json` that prevented Vercel deployments
