@@ -1,7 +1,7 @@
 ---
-# Copilot Instructions for PHP Tacview Analysis For SOTN
-# These instructions apply to the entire repository
-# See: https://docs.github.com/en/copilot/customizing-copilot/adding-custom-instructions-for-github-copilot
+title: "Copilot Instructions for PHP Tacview Analysis For SOTN"
+description: "These instructions apply to the entire repository"
+reference: "https://docs.github.com/en/copilot/customizing-copilot/adding-custom-instructions-for-github-copilot"
 applies_to:
   - "**/*.php"
   - "**/*.css"
