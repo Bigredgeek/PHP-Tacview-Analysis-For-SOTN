@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed - 2025-11-05
+#### Vercel Deployment Header Pattern
+- Fixed invalid source pattern in `vercel.json` that prevented Vercel deployments
+- Changed header pattern from `/(.*\\.(jpg|jpeg|...))` (invalid regex) to `/:path*.:ext(jpg|jpeg|...)` (valid path-to-regexp format)
+- Error message: "Header at index 2 has invalid source pattern"
+- Pattern now correctly matches static assets for cache control headers
+
 #### Vercel Build with PHP Pre-Processing Enabled
 - Fixed Vercel build to actually perform pre-processing during build time for optimal performance
 - Created `scripts/install-php.js` that downloads and installs a static PHP binary during build
