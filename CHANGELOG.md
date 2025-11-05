@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - 2025-11-05
+#### Copilot Instructions Enhancement
+- Enhanced `.github/copilot-instructions.md` with YAML frontmatter for better scope definition
+- Added comprehensive validation checklist for code changes
+- Added detailed testing instructions with bash commands
+- Added common task guidelines for adding features, fixing bugs, performance improvements, and internationalization
+- Added "Issue Requirements & Best Practices" section to guide issue-based development
+- Added helpful links section with references to GitHub Copilot best practices, changelog format, PSR-12 standards, and Tacview documentation
+- Improved structure to follow GitHub Copilot coding agent best practices
+- Enhanced instructions now provide clearer guidance for surgical, minimal changes
+- All enhancements align with recommendations from https://docs.github.com/en/copilot/tutorials/coding-agent/get-the-best-results
+
 ### Added - 2025-11-05
 #### Performance Investigation
 - Conducted comprehensive performance analysis for mobile and weaker PC issues reported by users
