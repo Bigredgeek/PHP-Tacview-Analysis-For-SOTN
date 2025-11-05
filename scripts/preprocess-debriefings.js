@@ -49,7 +49,7 @@ if (result.error) {
     process.exit(1);
 }
 
-if (typeof result.status === 'number' && result.status !== 0) {
+if (result.status !== 0) {
     console.error(`PHP pre-processor exited with status ${result.status}`);
     process.exit(result.status);
 }
