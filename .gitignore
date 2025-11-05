@@ -39,3 +39,6 @@ tacview.css
 # Local copy of the shared core lives next door; keep it out of this repo
 /core/
 /php-tacview-core/
+# Build-time generated files (regenerated during build)
+public/debriefings/aggregated.html
+public/debriefings/aggregated.json
