@@ -81,15 +81,17 @@ Before finalizing any changes, ensure:
 
 ### Running Tests
 ```bash
-# Start local PHP server
+# Start local PHP server from repository root
+cd /path/to/PHP-Tacview-Analysis-For-SOTN
 php -S localhost:8000
 
-# Test in browser
-# Navigate to http://localhost:8000/debriefing.php
+# Test in browser - navigate to:
+# http://localhost:8000/debriefing.php
 
-# Check for PHP errors
+# Check PHP syntax
 php -l tacview.php
 php -l debriefing.php
+php -l api/debriefing.php
 ```
 
 ## Security Considerations

@@ -34,5 +34,3 @@ The copilot-instructions.md file should be updated when:
 - New coding standards are adopted
 - Deployment targets change
 - New critical workflows are established
-
-Last Updated: November 5, 2025

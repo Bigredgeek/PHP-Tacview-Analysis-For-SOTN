@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - 2025-11-05
+#### GitHub Configuration Documentation
+- Created `.github/README.md` to document the Copilot instructions setup and configuration
+- Added overview of what's configured, developer guidance, and maintenance notes
+- Provided links to relevant GitHub Copilot documentation for future reference
+
 ### Changed - 2025-11-05
 #### Copilot Instructions Enhancement
 - Enhanced `.github/copilot-instructions.md` with YAML frontmatter for better scope definition
@@ -20,12 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All enhancements align with recommendations from https://docs.github.com/en/copilot/tutorials/coding-agent/get-the-best-results
 
 ### Added - 2025-11-05
-#### GitHub Configuration Documentation
-- Created `.github/README.md` to document the Copilot instructions setup and configuration
-- Added overview of what's configured, developer guidance, and maintenance notes
-- Provided links to relevant GitHub Copilot documentation for future reference
-
-#### Performance Investigation
 - Conducted comprehensive performance analysis for mobile and weaker PC issues reported by users
 - Created detailed performance analysis document (`planning/performance-analysis-2025-11-05.md`) with findings and recommendations
 - Identified root causes:
