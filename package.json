@@ -4,7 +4,9 @@
   "description": "PHP Tacview Analysis Tool for Song of the Nibelungs",
   "main": "public/index.html",
   "scripts": {
-  "build": "node scripts/fetch-core.js && echo 'Build completed - static files ready in public directory'",
+    "build": "node scripts/fetch-core.js && php scripts/preprocess-debriefings.php && echo 'Build completed - debriefings pre-processed'",
+    "prebuild": "echo 'Starting build process...'",
+    "postbuild": "echo 'Static files and pre-processed debriefings ready in public directory'",
     "start": "php -S 0.0.0.0:8000",
     "dev": "php -S localhost:8000"
   },

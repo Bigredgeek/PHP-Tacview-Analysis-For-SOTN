@@ -32,10 +32,13 @@ tacview.css
 /objectIcons/
 /data/
 /tools/
-/docs/
+# /docs/ - Keep our own docs, but ignore core docs from submodule
 /public/languages/
 /public/tacview.php
 
 # Local copy of the shared core lives next door; keep it out of this repo
 /core/
 /php-tacview-core/
+# Build-time generated files (regenerated during build)
+public/debriefings/aggregated.html
+public/debriefings/aggregated.json
