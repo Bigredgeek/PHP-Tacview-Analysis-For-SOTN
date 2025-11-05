@@ -82,7 +82,7 @@ Before finalizing any changes, ensure:
 ### Running Tests
 ```bash
 # Start local PHP server from repository root
-cd /path/to/PHP-Tacview-Analysis-For-SOTN
+cd <repository-root>
 php -S localhost:8000
 
 # Test in browser - navigate to:
