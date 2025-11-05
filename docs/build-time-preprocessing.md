@@ -20,6 +20,12 @@ The `scripts/preprocess-debriefings.php` script:
 - Generates static HTML output
 - Saves metadata for cache invalidation
 
+The `scripts/preprocess-debriefings.js` wrapper:
+- Detects if PHP is available in the build environment
+- Runs pre-processing when PHP is available (local, Docker, GitHub Actions)
+- Gracefully skips when PHP is not available (Vercel)
+- Ensures builds succeed in all environments
+
 ### 2. Optimized Debriefing Page
 The `debriefing-optimized.php` page:
 - Checks for pre-processed data
@@ -38,9 +44,9 @@ npm run build
 
 This executes:
 1. `node scripts/fetch-core.js` - Fetches php-tacview-core
-2. `php scripts/preprocess-debriefings.php` - Pre-processes debriefings
+2. `node scripts/preprocess-debriefings.js` - Pre-processes debriefings (when PHP available)
 
-Or run the pre-processor directly:
+Or run the pre-processor directly (requires PHP):
 ```bash
 php scripts/preprocess-debriefings.php
 ```
@@ -51,15 +57,23 @@ Pre-processed data is saved to:
 - `public/debriefings/aggregated.html` - Rendered HTML (1.5MB)
 - `public/debriefings/aggregated.json` - Metadata with cache info
 
+**Note:** These files are only generated when PHP is available during build. On Vercel and similar platforms without PHP in the build environment, the application will use runtime processing instead.
+
 ### Deployment
 
 #### Vercel
-The build is automatically triggered on deployment. Add this to your Vercel project settings if not using the default build command:
+The build is automatically triggered on deployment. The build will succeed even without PHP:
 
+- **With PHP in build environment:** Pre-processes debriefings at build time for optimal performance
+- **Without PHP (default Vercel):** Skips pre-processing, uses runtime processing via vercel-php runtime
+
+Configure in Vercel project settings:
 ```
 Build Command: npm run build
 Output Directory: public
 ```
+
+The application automatically falls back to runtime processing when pre-processed files are not available, ensuring the site works correctly in all deployment scenarios.
 
 #### Docker
 Build the image with pre-processed data:
