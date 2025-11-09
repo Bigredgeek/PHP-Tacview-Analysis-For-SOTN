@@ -2376,7 +2376,8 @@
 				<Altitude>50.88</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -13257,7 +13258,8 @@
 				<Altitude>51.9</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -24118,7 +24120,8 @@
 				<Altitude>235.74</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -24149,7 +24152,8 @@
 				<Altitude>231.38</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -24253,7 +24257,8 @@
 				<Altitude>202.13</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -24407,7 +24412,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -24438,7 +24444,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -24462,7 +24469,8 @@
 			</PrimaryObject>
 			<Action>HasBeenDestroyed</Action>
 			<SecondaryObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -24503,7 +24511,8 @@
 			</PrimaryObject>
 			<Action>HasBeenDestroyed</Action>
 			<SecondaryObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -24534,7 +24543,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -24566,7 +24576,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -24907,7 +24918,8 @@
 				<Altitude>339.04</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -25199,7 +25211,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -25354,7 +25367,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -26177,7 +26191,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -26251,7 +26266,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -26283,7 +26299,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -26315,7 +26332,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -26437,7 +26455,8 @@
 			</PrimaryObject>
 			<Action>HasBeenDestroyed</Action>
 			<SecondaryObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -26519,7 +26538,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -26551,7 +26571,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -26689,7 +26710,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -26844,7 +26866,8 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -33115,7 +33138,8 @@
 				<Altitude>85.09</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
@@ -35542,7 +35566,8 @@
 				<Altitude>85.11</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Type>Aircraft</Type>
+				<Name>A-4E Skyhawk</Name>
 				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
