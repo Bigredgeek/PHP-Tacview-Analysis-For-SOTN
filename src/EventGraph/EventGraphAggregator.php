@@ -1684,6 +1684,9 @@ final class EventGraphAggregator
             $this->startTime = min($this->startTimeSamples);
         }
 
+        // Some Tacview exports have misaligned MissionTime headers (e.g., negative or far in past).
+        // Detect and correct by shifting all events forward to ensure a non-negative timeline.
+        // This commonly occurs when combining recordings with different start time conventions.
         $minimumEventTime = $this->getMinimumEventMissionTime();
         if ($minimumEventTime < 0.0) {
             $this->shiftAllEvents(-$minimumEventTime);
@@ -1740,6 +1743,12 @@ final class EventGraphAggregator
 
     private function getMinimumEventMissionTime(): float
     {
+        // Guard against empty event array; this shouldn't occur in practice after filtering,
+        // but explicit check prevents silent logic errors.
+        if ($this->events === []) {
+            return 0.0;
+        }
+
         $minimum = 0.0;
 
         foreach ($this->events as $event) {

@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored `scripts/fetch-core.php` to use explicit `main(): int` function wrapper with exit semantics, improving code clarity and maintaining idiomatic PHP exit code patterns.
 - Updated temporary file rename fallback in fetch-core to log a warning instead of silently continuing, surfacing potential issues with filesystem permissions or cross-device constraints.
 - Enhanced `scripts/fetch-core.js` with explicit git availability check before attempting clone, surfacing missing dependencies early with helpful installation instructions instead of spawn errors.
+- Added explicit empty-array guard to `EventGraphAggregator::getMinimumEventMissionTime()` to prevent implicit behavior and clarify the no-events case always returns 0.0.
+- Enhanced `EventGraphAggregator::applyStartTimeConsensus()` with detailed comments explaining how negative mission times can occur when Tacview recordings use different reference points for MissionTime headers, and how the aggregator normalizes to positive timeline.
 
 ### Fixed - 2025-11-03
 - Removed duplicate Franz 1-2 sorties by pruning takeoff/landing pairs under two minutes with matching airfields and no intervening events during Tacview event normalization, ensuring the mission timeline mirrors the deduplicated core renderer.
