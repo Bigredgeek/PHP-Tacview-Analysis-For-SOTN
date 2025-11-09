@@ -4,6 +4,26 @@ const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 
+// Pre-flight check: ensure git is available
+const gitCheckResult = spawnSync('git', ['--version'], {
+    stdio: 'pipe',
+    shell: true,
+});
+
+if (gitCheckResult.error || (typeof gitCheckResult.status === 'number' && gitCheckResult.status !== 0)) {
+    console.error('Error: git is not available in PATH.');
+    console.error('');
+    console.error('The build process requires git to be installed and available on your system.');
+    console.error('');
+    console.error('Installation instructions:');
+    console.error('  - macOS: brew install git');
+    console.error('  - Ubuntu/Debian: sudo apt-get install git');
+    console.error('  - Windows: https://git-scm.com/download/win');
+    console.error('  - Fedora/RHEL: sudo yum install git');
+    console.error('');
+    process.exit(1);
+}
+
 const root = path.resolve(__dirname, '..');
 const targetDir = path.join(root, 'php-tacview-core');
 const fallbackLocalCore = path.join(root, 'core');
