@@ -8233,7 +8233,7 @@
 			<PrimaryObject ID="1039">
 				<Type>Aircraft</Type>
 				<Name>F-104 Starfighter</Name>
-				<Pilot>F-104 Starfighter (Smoke 1-3 | Mederlock)</Pilot>
+				<Pilot>Smoke 1-3 | Mederlock</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
 				<Group>Smoke 1</Group>
@@ -8253,7 +8253,7 @@
 			<PrimaryObject ID="1039">
 				<Type>Aircraft</Type>
 				<Name>F-104 Starfighter</Name>
-				<Pilot>F-104 Starfighter (Smoke 1-3 | Mederlock)</Pilot>
+				<Pilot>Smoke 1-3 | Mederlock</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
 				<Group>Smoke 1</Group>
@@ -8704,7 +8704,7 @@
 			<PrimaryObject ID="1049">
 				<Type>Aircraft</Type>
 				<Name>F-104 Starfighter</Name>
-				<Pilot>Smoke 1-3 - Mederlock</Pilot>
+				<Pilot>Smoke 1-3 | Mederlock</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
 				<Group>Smoke 1</Group>
@@ -13890,7 +13890,7 @@
 			<PrimaryObject ID="1049">
 				<Type>Aircraft</Type>
 				<Name>F-104 Starfighter</Name>
-				<Pilot>Smoke 1-3 - Mederlock</Pilot>
+				<Pilot>Smoke 1-3 | Mederlock</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
 				<Group>Smoke 1</Group>
@@ -22467,7 +22467,7 @@
 			<PrimaryObject ID="1049">
 				<Type>Aircraft</Type>
 				<Name>F-104 Starfighter</Name>
-				<Pilot>Smoke 1-3 - Mederlock</Pilot>
+				<Pilot>Smoke 1-3 | Mederlock</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
 				<Group>Smoke 1</Group>
@@ -35166,4 +35166,6 @@
 		</Event>
 	</Events>
 </TacviewDebriefing>
+
+
 
