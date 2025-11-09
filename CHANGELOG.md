@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - 2025-11-08
+- Fixed cross-device filesystem rename failure in `scripts/fetch-core.php` that blocked Vercel deployments; the script now falls back to recursive copy when the temp directory is on a different volume than the project workspace.
+- Removed error suppression from core download operation and added SSL certificate verification (`verify_peer` and `verify_peer_name`), preventing silent failures and MITM attacks during automated builds.
+- Enhanced error logging throughout fetch-core to capture and display network failures, permission errors, and filesystem constraints, improving troubleshooting for deployment issues.
+
+### Changed - 2025-11-08
+- Refactored `scripts/fetch-core.php` to use explicit `main(): int` function wrapper with exit semantics, improving code clarity and maintaining idiomatic PHP exit code patterns.
+- Updated temporary file rename fallback in fetch-core to log a warning instead of silently continuing, surfacing potential issues with filesystem permissions or cross-device constraints.
+
 ### Fixed - 2025-11-03
 - Removed duplicate Franz 1-2 sorties by pruning takeoff/landing pairs under two minutes with matching airfields and no intervening events during Tacview event normalization, ensuring the mission timeline mirrors the deduplicated core renderer.
 - Rebased aggregated event mission clocks to start at the consensus mission time so timeline rows follow the master time sync instead of the earliest outlier recording, fixing 09:52Z entries under an 11:14Z Mission Information header.
