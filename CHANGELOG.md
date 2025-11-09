@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed - 2025-11-08
+- Fixed logo spacing in header by adding `margin-top: 40px` to `.header-container`, providing proper visual breathing room matching Brownwater's layout and preventing logo from running out of viewport.
 - Fixed cross-device filesystem rename failure in `scripts/fetch-core.php` that blocked Vercel deployments; the script now falls back to recursive copy when the temp directory is on a different volume than the project workspace.
 - Removed error suppression from core download operation and added SSL certificate verification (`verify_peer` and `verify_peer_name`), preventing silent failures and MITM attacks during automated builds.
 - Enhanced error logging throughout fetch-core to capture and display network failures, permission errors, and filesystem constraints, improving troubleshooting for deployment issues.
