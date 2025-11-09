@@ -2376,12 +2376,11 @@
 				<Altitude>50.88</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</PrimaryObject>
 			<Action>HasEnteredTheArea</Action>
 			<Airport ID="ICAO:ETNW">
@@ -13258,12 +13257,11 @@
 				<Altitude>51.9</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</PrimaryObject>
 			<Action>HasTakenOff</Action>
 			<Airport ID="ICAO:ETNW">
@@ -24120,12 +24118,11 @@
 				<Altitude>235.74</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</PrimaryObject>
 			<Action>HasBeenHitBy</Action>
 			<SecondaryObject ID="5110">
@@ -24152,12 +24149,11 @@
 				<Altitude>231.38</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</PrimaryObject>
 			<Action>HasFired</Action>
 			<Occurrences>6</Occurrences>
@@ -24257,12 +24253,11 @@
 				<Altitude>202.13</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</PrimaryObject>
 			<Action>HasFired</Action>
 			<Occurrences>15</Occurrences>
@@ -24412,12 +24407,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -24444,12 +24438,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -24469,12 +24462,11 @@
 			</PrimaryObject>
 			<Action>HasBeenDestroyed</Action>
 			<SecondaryObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</SecondaryObject>
 		</Event>
 		<Event>
@@ -24511,12 +24503,11 @@
 			</PrimaryObject>
 			<Action>HasBeenDestroyed</Action>
 			<SecondaryObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</SecondaryObject>
 		</Event>
 		<Event>
@@ -24543,12 +24534,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -24576,12 +24566,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -24918,12 +24907,11 @@
 				<Altitude>339.04</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</PrimaryObject>
 			<Action>HasFired</Action>
 			<Occurrences>138</Occurrences>
@@ -25211,12 +25199,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -25367,12 +25354,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -26191,12 +26177,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -26266,12 +26251,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -26299,12 +26283,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -26332,12 +26315,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -26455,12 +26437,11 @@
 			</PrimaryObject>
 			<Action>HasBeenDestroyed</Action>
 			<SecondaryObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</SecondaryObject>
 		</Event>
 		<Event>
@@ -26538,12 +26519,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -26571,12 +26551,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -26710,12 +26689,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -26866,12 +26844,11 @@
 				<Parent>843</Parent>
 			</SecondaryObject>
 			<ParentObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</ParentObject>
 		</Event>
 		<Event>
@@ -33138,12 +33115,11 @@
 				<Altitude>85.09</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</PrimaryObject>
 			<Action>HasLanded</Action>
 			<Airport ID="ICAO:EDVE">
@@ -35566,12 +35542,11 @@
 				<Altitude>85.11</Altitude>
 			</Location>
 			<PrimaryObject ID="843">
-				<Type>Aircraft</Type>
-				<Name>A-4E Skyhawk</Name>
-				<Pilot>Smoke 1-2 [Jimbo]</Pilot>
+				<Type>Aircraft</Type>				<Name>A-4E Skyhawk</Name>
+				<Pilot>Franz 1-2</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
-				<Group>Smoke 1</Group>
+				<Group>Franz 1</Group>
 			</PrimaryObject>
 			<Action>HasLeftTheArea</Action>
 			<Airport ID="ICAO:EDVE">
