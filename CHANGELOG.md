@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - 2025-11-08
+- Fixed cross-device filesystem rename failure in `scripts/fetch-core.php` that blocked Vercel deployments; the script now falls back to recursive copy when the temp directory is on a different volume than the project workspace.
+- Removed error suppression from core download operation and added SSL certificate verification (`verify_peer` and `verify_peer_name`), preventing silent failures and MITM attacks during automated builds.
+- Enhanced error logging throughout fetch-core to capture and display network failures, permission errors, and filesystem constraints, improving troubleshooting for deployment issues.
+- Added git availability pre-flight check to `scripts/fetch-core.js` with platform-specific installation guidance (macOS, Ubuntu, Windows, Fedora), preventing cryptic ENOENT errors when git is missing from CI environments.
+
+### Changed - 2025-11-08
+- Refactored `scripts/fetch-core.php` to use explicit `main(): int` function wrapper with exit semantics, improving code clarity and maintaining idiomatic PHP exit code patterns.
+- Updated temporary file rename fallback in fetch-core to log a warning instead of silently continuing, surfacing potential issues with filesystem permissions or cross-device constraints.
+- Enhanced `scripts/fetch-core.js` with explicit git availability check before attempting clone, surfacing missing dependencies early with helpful installation instructions instead of spawn errors.
+- Added explicit empty-array guard to `EventGraphAggregator::getMinimumEventMissionTime()` to prevent implicit behavior and clarify the no-events case always returns 0.0.
+- Enhanced `EventGraphAggregator::applyStartTimeConsensus()` with detailed comments explaining how negative mission times can occur when Tacview recordings use different reference points for MissionTime headers, and how the aggregator normalizes to positive timeline.
+- Updated `vercel.json` with compression and cache control headers for Vercel deployments
+- Enhanced `public/tacview.css` with performance optimizations:
+  - Added `@media (prefers-reduced-motion)` to disable animations for accessibility
+  - Disabled heavy animations on mobile devices (≤768px width) for better battery life
+  - Added CSS containment (`contain: layout style`) to statistics tables for improved rendering
+  - Maintained Cold War aesthetic while respecting user performance preferences
+- Updated `.gitignore` to exclude build-time generated files
+
 ### Changed - 2025-11-05
 #### PHP Installation Script Improvements
 - Updated `scripts/install-php.js` to use swoole/build-static-php instead of static-php-cli for better reliability
@@ -40,70 +60,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Result**: Vercel builds now generate pre-processed files for 97% faster page loads (1.3s → 46ms)
 - **Previous approach**: Skipped pre-processing on Vercel, defeating the performance optimization
 - **New approach**: Installs PHP during build so pre-processing actually runs on Vercel
-
-### Added - 2025-11-05
-#### GitHub Configuration Documentation
-- Created `.github/README.md` to document the Copilot instructions setup and configuration
-- Added overview of what's configured, developer guidance, and maintenance notes
-- Provided links to relevant GitHub Copilot documentation for future reference
-
-#### Performance Investigation
-- Conducted comprehensive performance analysis for mobile and weaker PC issues reported by users
-- Created detailed performance analysis document (`planning/performance-analysis-2025-11-05.md`) with findings and recommendations
-- Identified root causes:
-  - EventGraphAggregator processing ~1.3s per page load (parsing 4 XML files)
-  - Large HTML payload of 1.6MB (mission events with inline tooltips)
-  - CSS animation overhead from Cold War Command Center theme
-  - Large DOM with thousands of table rows
-- Proposed four solution approaches:
-  - **Solution A (Recommended):** Build-time pre-processing of debriefings (98%+ performance improvement)
-  - **Solution B:** Client-side lazy loading with AJAX
-  - **Solution C:** Payload optimization and caching (quick wins)
-  - **Solution D:** Hybrid approach combining A and C (best overall)
-- Recommended immediate quick wins: HTTP compression, CSS performance optimizations, lazy image loading
-- Documented implementation plan with phases, success criteria, and testing approach
-
-#### Build-Time Pre-Processing Implementation (Solution D - Hybrid)
-- Created `scripts/preprocess-debriefings.php` to process Tacview XML files at build time instead of runtime
-- Implemented `debriefing-optimized.php` that loads pre-processed data with automatic fallback to runtime processing
-- Updated `package.json` build script to include pre-processing step
-- Added comprehensive documentation in `docs/build-time-preprocessing.md`
-- Performance improvements achieved:
-  - **Page load time:** 1.3s → 46ms (97% reduction) when using pre-processed data
-  - **Server CPU load:** Eliminated per-request XML parsing and aggregation
-  - **Scalability:** Same performance regardless of concurrent user count
-  - **Mobile experience:** Near-instant load times
-- Pre-processor generates:
-  - `public/debriefings/aggregated.html` - Static HTML output (~1.5MB)
-  - `public/debriefings/aggregated.json` - Metadata with file hashes, timestamps, and metrics
-- Optimized page intelligently selects fast path (pre-processed) or fallback (runtime)
-- Debug mode shows performance metrics and data source information
-- Added build artifacts to `.gitignore` (regenerated during build/deploy)
-
-### Changed - 2025-11-05
-#### Copilot Instructions Enhancement
-- Enhanced `.github/copilot-instructions.md` with YAML frontmatter for better scope definition
-- Added comprehensive validation checklist for code changes
-- Added detailed testing instructions with bash commands
-- Added common task guidelines for adding features, fixing bugs, performance improvements, and internationalization
-- Added "Issue Requirements & Best Practices" section to guide issue-based development
-- Added helpful links section with references to GitHub Copilot best practices, changelog format, PSR-12 standards, and Tacview documentation
-- Improved structure to follow GitHub Copilot coding agent best practices
-- Enhanced instructions now provide clearer guidance for surgical, minimal changes
-- All enhancements align with recommendations from https://docs.github.com/en/copilot/tutorials/coding-agent/get-the-best-results
-
-#### Quick-Win Performance Optimizations
-- Added `.htaccess` with gzip/brotli compression configuration
-  - Expected payload reduction: 1.6MB → ~200KB (87.5%)
-  - Configured cache headers for static assets (1 year) and HTML (1 hour)
-  - Added security headers: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection
-- Updated `vercel.json` with compression and cache control headers for Vercel deployments
-- Enhanced `public/tacview.css` with performance optimizations:
-  - Added `@media (prefers-reduced-motion)` to disable animations for accessibility
-  - Disabled heavy animations on mobile devices (≤768px width) for better battery life
-  - Added CSS containment (`contain: layout style`) to statistics tables for improved rendering
-  - Maintained Cold War aesthetic while respecting user performance preferences
-- Updated `.gitignore` to exclude build-time generated files
 
 ### Fixed - 2025-11-03
 - Removed duplicate Franz 1-2 sorties by pruning takeoff/landing pairs under two minutes with matching airfields and no intervening events during Tacview event normalization, ensuring the mission timeline mirrors the deduplicated core renderer.
