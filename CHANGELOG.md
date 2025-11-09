@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed - 2025-11-08
+- Fixed Vercel caching issue where API endpoints (`/api/*`) were serving stale debriefing data: changed `Cache-Control` header from `public, max-age=3600` (1 hour) to `no-cache, must-revalidate`. This ensures that when new debriefing files are added to `/debriefings/`, the aggregator picks them up on the next request instead of serving cached data from 1 hour ago. The old 1-hour cache was causing API to serve only old mission data even after new XML files were uploaded.
 - Fixed logo spacing in header by adding `margin-top: 40px` to `.header-container`, providing proper visual breathing room matching Brownwater's layout and preventing logo from running out of viewport.
 - Fixed cross-device filesystem rename failure in `scripts/fetch-core.php` that blocked Vercel deployments; the script now falls back to recursive copy when the temp directory is on a different volume than the project workspace.
 - Removed error suppression from core download operation and added SSL certificate verification (`verify_peer` and `verify_peer_name`), preventing silent failures and MITM attacks during automated builds.
