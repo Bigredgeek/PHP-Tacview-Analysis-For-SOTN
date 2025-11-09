@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <TacviewDebriefing Version="1.2.6">
 	<!--Flight Recording Properties-->
 	<FlightRecording>
@@ -8006,7 +8006,7 @@
 			<PrimaryObject ID="1039">
 				<Type>Aircraft</Type>
 				<Name>F-104 Starfighter</Name>
-				<Pilot>RAT - AIR PATROL</Pilot>
+				<Pilot>F-104 Starfighter (Smoke 1-3 | Mederlock)</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
 				<Group>Smoke 1</Group>
@@ -8026,7 +8026,7 @@
 			<PrimaryObject ID="1039">
 				<Type>Aircraft</Type>
 				<Name>F-104 Starfighter</Name>
-				<Pilot>RAT - AIR PATROL</Pilot>
+				<Pilot>F-104 Starfighter (Smoke 1-3 | Mederlock)</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
 				<Group>Smoke 1</Group>
@@ -8477,7 +8477,7 @@
 			<PrimaryObject ID="1049">
 				<Type>Aircraft</Type>
 				<Name>F-104 Starfighter</Name>
-				<Pilot>RAT - AIR PATROL</Pilot>
+				<Pilot>F-104 Starfighter (Smoke 1-3 | Mederlock)</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
 				<Group>Smoke 1</Group>
@@ -13518,7 +13518,7 @@
 			<PrimaryObject ID="1049">
 				<Type>Aircraft</Type>
 				<Name>F-104 Starfighter</Name>
-				<Pilot>RAT - AIR PATROL</Pilot>
+				<Pilot>F-104 Starfighter (Smoke 1-3 | Mederlock)</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
 				<Group>Smoke 1</Group>
@@ -22462,7 +22462,7 @@
 			<PrimaryObject ID="1049">
 				<Type>Aircraft</Type>
 				<Name>F-104 Starfighter</Name>
-				<Pilot>RAT - AIR PATROL</Pilot>
+				<Pilot>F-104 Starfighter (Smoke 1-3 | Mederlock)</Pilot>
 				<Coalition>Enemies</Coalition>
 				<Country>de</Country>
 				<Group>Smoke 1</Group>
@@ -37799,3 +37799,4 @@
 		</Event>
 	</Events>
 </TacviewDebriefing>
+
