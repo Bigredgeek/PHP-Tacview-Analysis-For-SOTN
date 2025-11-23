@@ -7,6 +7,7 @@ namespace EventGraph;
 use tacview;
 
 use function arsort;
+use function array_key_first;
 use function array_values;
 use function basename;
 use function count;
@@ -38,12 +39,12 @@ final class SourceRecording
         $this->id = pathinfo($this->filename, PATHINFO_FILENAME) ?: $this->filename;
 
         $parser = new tacview($language);
-        $parser->htmlOutput = "";
+        $parser->htmlOutput = '';
         $parser->objects = [];
         $parser->events = [];
         $parser->stats = [];
         $parser->weaponOwners = [];
-        $parser->missionName = "";
+        $parser->missionName = '';
         $parser->startTime = null;
         $parser->duration = null;
 
@@ -67,7 +68,6 @@ final class SourceRecording
                 continue;
             }
             if (!isset($event['PrimaryObject']) || !is_array($event['PrimaryObject'])) {
-                // Skip support entries with no primary object
                 continue;
             }
 

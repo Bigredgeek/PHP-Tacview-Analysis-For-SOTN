@@ -36,6 +36,19 @@ PHP Tacview transforms your XML flight log into a visually understandable, inter
 4. The application will automatically detect and process available XML files
 5. View detailed mission timelines with unit movements, weapons firing, and combat events
 
+## Testing
+
+1. Install PHP dependencies once:
+  ```bash
+  composer install
+  ```
+2. Execute the regression suite (also available via `npm run test`):
+  ```bash
+  vendor/bin/phpunit
+  ```
+
+The PHPUnit suite hydrates lightweight Tacview fixtures that mirror the Menton/Olympus duplicate-destruction scenario, ensuring the EventGraph composite signatures and reconciliation windows stay locked down before shipping changes.
+
 ## File Structure
 
 - `debriefing.php` - Main web interface

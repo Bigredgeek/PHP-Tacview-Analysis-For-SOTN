@@ -2,14 +2,61 @@
 
 declare(strict_types=1);
 
-// Load configuration from the public bundle
-$config = require_once __DIR__ . '/../config.php';
+// Load root configuration and layer any public/public-api overrides on top
+$rootConfigPath = dirname(__DIR__, 2) . '/config.php';
+$config = [];
+if (is_file($rootConfigPath)) {
+	$rootConfig = require $rootConfigPath;
+	$config = is_array($rootConfig) ? $rootConfig : [];
+}
 
-require_once __DIR__ . '/../../src/core_path.php';
-$corePath = tacview_resolve_core_path($config['core_path'] ?? 'core', dirname(__DIR__, 2));
+$configOverridePaths = [
+	dirname(__DIR__) . '/config.php', // public bundle defaults
+	__DIR__ . '/config.php', // public/api specific overrides
+];
+
+foreach ($configOverridePaths as $overridePath) {
+	if (!is_file($overridePath)) {
+		continue;
+	}
+
+	$override = require $overridePath;
+	if (!is_array($override)) {
+		continue;
+	}
+
+	$config = $config === [] ? $override : array_replace_recursive($config, $override);
+}
+
+if ($config === []) {
+	throw new \RuntimeException('Failed to load configuration for public/api/debriefing.php');
+}
 
 // Load the shared Tacview engine from the core submodule
-require_once $corePath . '/tacview.php';
+require_once __DIR__ . '/../../' . $config['core_path'] . '/tacview.php';
+
+$eventGraphAutoloadCandidates = [
+	__DIR__ . '/../../src/EventGraph/autoload.php',
+	__DIR__ . '/../src/EventGraph/autoload.php',
+	__DIR__ . '/../../public/src/EventGraph/autoload.php',
+	__DIR__ . '/../EventGraph/autoload.php',
+];
+
+$eventGraphAutoloadPath = null;
+foreach ($eventGraphAutoloadCandidates as $candidate) {
+	if (is_file($candidate)) {
+		$eventGraphAutoloadPath = $candidate;
+		break;
+	}
+}
+
+if ($eventGraphAutoloadPath === null) {
+	throw new \RuntimeException('Unable to locate EventGraph autoloader. Checked: ' . implode(', ', $eventGraphAutoloadCandidates));
+}
+
+require_once $eventGraphAutoloadPath;
+
+use EventGraph\EventGraphAggregator;
 
 if (!function_exists('tacview_normalize_url_path')) {
 	function tacview_normalize_url_path(?string $path): string
@@ -188,36 +235,21 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/api/debriefing.php';
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 		<script type="text/javascript">
 		function showDetails(zoneAffiche, rowElement){
-			console.log('showDetails called with ID:', zoneAffiche);
 			var detailRow = document.getElementById(zoneAffiche);
-			console.log('detailRow found:', detailRow);
-			var pilotRow = rowElement || event.currentTarget;
-			
 			if(!detailRow){
-				console.error('Detail row not found for ID:', zoneAffiche);
 				return false;
 			}
-			
-			// Get computed style to check actual visibility
-			var computedDisplay = window.getComputedStyle(detailRow).display;
-			console.log('Computed display:', computedDisplay);
-			var isHidden = computedDisplay === 'none';
-			console.log('isHidden:', isHidden);
-			
+			var pilotRow = rowElement || (typeof event !== 'undefined' ? event.currentTarget : null);
+			if(!pilotRow){
+				return false;
+			}
+			var isHidden = window.getComputedStyle(detailRow).display === 'none';
+			document.querySelectorAll('tr.hiddenRow').forEach(function(row){ row.style.display='none'; });
+			document.querySelectorAll('tr.statisticsTable').forEach(function(row){ row.classList.remove('active-pilot'); });
 			if(isHidden){
-				console.log('Showing detail row');
-				// Hide all other detail rows first (only target TR elements, not TD)
-				var allDetails = document.querySelectorAll('tr.hiddenRow');
-				var allPilotRows = document.querySelectorAll('tr.statisticsTable');
-				allDetails.forEach(function(row){ row.style.display='none'; });
-				allPilotRows.forEach(function(row){ row.classList.remove('active-pilot'); });
-				
-				// Show this detail row
 				detailRow.style.display='table-row';
 				pilotRow.classList.add('active-pilot');
 			}else{
-				console.log('Hiding detail row');
-				// Hide this detail row
 				detailRow.style.display='none';
 				pilotRow.classList.remove('active-pilot');
 			}
@@ -237,35 +269,98 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/api/debriefing.php';
 		$tv = new tacview($config['default_language']);
 		$tv->image_path = $assetBaseUrl;
 
-		// Use the absolute glob from the public configuration
-		$xmlFiles = glob($config['debriefings_path']);
 
-		// Store status messages to display at the bottom
-		$statusMessages = "<div style='margin-top: 40px; padding: 20px; border-top: 1px solid #333;'>";
-		$statusMessages .= "<p>Looking for XML files in debriefings folder...</p>";
-		$statusMessages .= "<p>Found " . count($xmlFiles) . " XML files.</p>";
+		$debriefingsGlob = __DIR__ . '/../../' . ltrim($config['debriefings_path'], '/');
+		$xmlFiles = glob($debriefingsGlob) ?: [];
+		$debriefingsDir = rtrim(dirname($debriefingsGlob), DIRECTORY_SEPARATOR);
 
-		if (count($xmlFiles) == 0) {
-		    $statusMessages .= "<p>No XML files found. Looking for other files...</p>";
-		    $allFiles = glob(dirname($config['debriefings_path']) . '/*');
-		    $statusMessages .= "<ul>";
-		    foreach ($allFiles as $file) {
-		        $statusMessages .= "<li>" . basename($file) . "</li>";
+		$showStatusOverlay = ($config['show_status_overlay'] ?? false) || (isset($_GET['debug']) && $_GET['debug'] === '1');
+		$debugMessages = [];
+		$criticalMessages = [];
+
+		if ($showStatusOverlay) {
+			$debugMessages[] = '<p>Looking for XML files in debriefings folder...</p>';
+			$debugMessages[] = '<p>Found ' . count($xmlFiles) . ' XML files.</p>';
+		}
+
+		if ($xmlFiles === []) {
+			$criticalMessages[] = '<p>No Tacview XML debriefings found in <code>' . htmlspecialchars($debriefingsDir) . '</code>.</p>';
+			$allFiles = glob($debriefingsDir . '/*') ?: [];
+			if ($allFiles !== []) {
+				$listItems = '';
+				foreach ($allFiles as $file) {
+					$listItems .= '<li>' . htmlspecialchars(basename($file)) . '</li>';
+				}
+				$criticalMessages[] = '<p>Files present:</p><ul>' . $listItems . '</ul>';
+			}
+			$criticalMessages[] = '<p><strong>Note:</strong> This application currently processes XML files only. You may have an .acmi file which needs to be converted to XML format.</p>';
+		} else {
+		    $aggregatorOptions = $config['aggregator'] ?? [];
+		    $aggregator = new EventGraphAggregator($config['default_language'], $aggregatorOptions);
+
+		    foreach ($xmlFiles as $filexml) {
+			        if ($showStatusOverlay) {
+			        	$debugMessages[] = '<p>Aggregating ' . htmlspecialchars(basename($filexml)) . '...</p>';
+			        }
+		        try {
+		            $aggregator->ingestFile($filexml);
+		        } catch (\Throwable $exception) {
+			            $criticalMessages[] = "<p style='color: #ff6b6b;'>Failed to ingest " . htmlspecialchars(basename($filexml)) . ': ' . htmlspecialchars($exception->getMessage()) . '</p>';
+		        }
 		    }
-		    $statusMessages .= "</ul>";
-		    $statusMessages .= "<p><strong>Note:</strong> This application currently processes XML files only. You may have an .acmi file which needs to be converted to XML format.</p>";
-		}
 
-		foreach ($xmlFiles as $filexml) {
-		    $statusMessages .= "<h2>Processed: " . basename($filexml) . "</h2>";
-		    $tv->proceedStats($filexml, 'Mission Test');
+		    $mission = $aggregator->toAggregatedMission();
+		    $tv->proceedAggregatedStats(
+		        $mission->getMissionName(),
+		        $mission->getStartTime(),
+		        $mission->getDuration(),
+		        $mission->getEvents()
+		    );
 		    echo $tv->getOutput();
+
+		    if ($showStatusOverlay) {
+		    	$metrics = $aggregator->getMetrics();
+		    	$debugMessages[] = '<h2>Aggregation Summary</h2>';
+		    	$debugMessages[] = '<ul>'
+		    		. '<li>Total raw events: ' . (int)($metrics['raw_event_count'] ?? 0) . '</li>'
+		    		. '<li>Merged events: ' . (int)($metrics['merged_events'] ?? 0) . '</li>'
+		    		. '<li>Duplicates suppressed: ' . (int)($metrics['duplicates_suppressed'] ?? 0) . '</li>'
+		    		. '<li>Inferred links: ' . (int)($metrics['inferred_links'] ?? 0) . '</li>'
+		    		. '</ul>';
+
+		    	$sources = $mission->getSources();
+		    	if ($sources !== []) {
+		    		$debugMessages[] = '<h3>Source Recordings</h3><ul>';
+		    		$sourceItems = '';
+		    		foreach ($sources as $source) {
+		    			$label = htmlspecialchars($source['filename'] ?? $source['id'] ?? 'unknown');
+		    			$eventsCount = (int)($source['events'] ?? 0);
+		    			$offsetSeconds = isset($source['offset']) && is_numeric($source['offset']) ? (float)$source['offset'] : 0.0;
+		    			$offsetLabel = sprintf('%+.2fs', $offsetSeconds);
+		    			$offsetHtml = htmlspecialchars($offsetLabel, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+		    			$strategy = $source['offsetStrategy'] ?? null;
+		    			$strategyLabel = '';
+		    			if ($strategy === 'anchor') {
+		    				$strategyLabel = ' via anchor match';
+		    			} elseif ($strategy === 'fallback-applied') {
+		    				$strategyLabel = ' via fallback';
+		    			} elseif ($strategy === 'fallback-skipped') {
+		    				$strategyLabel = ' (fallback skipped)';
+		    			}
+		    			$baselineMarker = !empty($source['baseline']) ? ' <strong>(baseline)</strong>' : '';
+		    			$sourceItems .= "<li>{$label}{$baselineMarker} ({$eventsCount} events, offset {$offsetHtml}{$strategyLabel})</li>";
+		    		}
+		    		$debugMessages[] = $sourceItems . '</ul>';
+		    	}
+		    }
 		}
 
-		$statusMessages .= "</div>";
-
-		// Output status messages at the bottom
-		echo $statusMessages;
+		if ($showStatusOverlay || $criticalMessages !== []) {
+			$statusHtml = implode('', array_merge($criticalMessages, $showStatusOverlay ? $debugMessages : []));
+			if ($statusHtml !== '') {
+				echo '<div class="status-overlay" style="margin-top: 40px; padding: 20px; border-top: 1px solid #333;">' . $statusHtml . '</div>';
+			}
+		}
 		?>
 	</body>
 </html>

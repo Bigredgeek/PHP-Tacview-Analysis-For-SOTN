@@ -2,15 +2,33 @@
 
 declare(strict_types=1);
 
-// Load configuration from the public bundle
+// Load configuration
 $config = require_once __DIR__ . '/config.php';
 
 require_once __DIR__ . '/../src/core_path.php';
 $corePath = tacview_resolve_core_path($config['core_path'] ?? 'core', dirname(__DIR__));
 
-// Load core tacview library from the project root
+// Load core tacview library and event graph autoloader
 require_once $corePath . '/tacview.php';
-require_once __DIR__ . '/../src/EventGraph/autoload.php';
+
+$eventGraphAutoloadCandidates = [
+	__DIR__ . '/../src/EventGraph/autoload.php',
+	__DIR__ . '/src/EventGraph/autoload.php',
+];
+
+$eventGraphAutoloadPath = null;
+foreach ($eventGraphAutoloadCandidates as $candidate) {
+	if (is_file($candidate)) {
+		$eventGraphAutoloadPath = $candidate;
+		break;
+	}
+}
+
+if ($eventGraphAutoloadPath === null) {
+	throw new \RuntimeException('Unable to locate EventGraph autoloader. Checked: ' . implode(', ', $eventGraphAutoloadCandidates));
+}
+
+require_once $eventGraphAutoloadPath;
 
 use EventGraph\EventGraphAggregator;
 
@@ -189,6 +207,30 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/debriefing.php';
 		<title><?php echo htmlspecialchars($config['page_title']); ?></title>
 		<link rel="stylesheet" href="<?php echo htmlspecialchars($cssHref); ?>" />
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<script type="text/javascript">
+		function showDetails(zoneAffiche, rowElement){
+			var detailRow = document.getElementById(zoneAffiche);
+			if(!detailRow){
+				return false;
+			}
+			var pilotRow = rowElement || (typeof event !== "undefined" ? event.currentTarget : null);
+			if(!pilotRow){
+				return false;
+			}
+			var isHidden = window.getComputedStyle(detailRow).display === "none";
+			document.querySelectorAll("tr.hiddenRow").forEach(function(row){ row.style.display="none"; });
+			document.querySelectorAll("tr.statisticsTable").forEach(function(row){ row.classList.remove("active-pilot"); });
+			if(isHidden){
+				detailRow.style.display="table-row";
+				pilotRow.classList.add("active-pilot");
+			}else{
+				detailRow.style.display="none";
+				pilotRow.classList.remove("active-pilot");
+			}
+			return false;
+		}
+
+		</script>
 	</head>
 	<body>
 		<div class="header-container">
@@ -204,41 +246,31 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/debriefing.php';
 
 			// Resolve the glob relative to the project root so local static serving works.
 			$debriefingsGlob = __DIR__ . '/../' . ltrim($config['debriefings_path'], '/');
-
 			$xmlFiles = glob($debriefingsGlob) ?: [];
 
-			$showStatusOverlay = ($config['show_status_overlay'] ?? false) || (isset($_GET['debug']) && $_GET['debug'] === '1');
-			$debugMessages = [];
-			$criticalMessages = [];
-
-			if ($showStatusOverlay) {
-				$debugMessages[] = '<p>Looking for XML files in debriefings folder...</p>';
-				$debugMessages[] = '<p>Found ' . count($xmlFiles) . ' XML files.</p>';
-			}
+			$statusMessages = "<div style='margin-top: 40px; padding: 20px; border-top: 1px solid #333;'>";
+			$statusMessages .= "<p>Looking for XML files in debriefings folder...</p>";
+			$statusMessages .= "<p>Found " . count($xmlFiles) . " XML files.</p>";
 
 			if ($xmlFiles === []) {
-				$criticalMessages[] = '<p>No Tacview XML debriefings found in <code>' . htmlspecialchars($debriefingsBase) . '</code>.</p>';
-				$allFiles = glob($debriefingsBase . '*') ?: [];
-				if ($allFiles !== []) {
-					$listItems = '';
-					foreach ($allFiles as $file) {
-						$listItems .= '<li>' . htmlspecialchars(basename($file)) . '</li>';
-					}
-					$criticalMessages[] = '<p>Files present:</p><ul>' . $listItems . '</ul>';
+				$statusMessages .= "<p>No XML files found. Looking for other files...</p>";
+				$allFiles = glob(__DIR__ . '/../debriefings/*') ?: [];
+				$statusMessages .= "<ul>";
+				foreach ($allFiles as $file) {
+					$statusMessages .= "<li>" . htmlspecialchars(basename($file)) . "</li>";
 				}
-				$criticalMessages[] = '<p><strong>Note:</strong> Upload converted Tacview XML files. Raw .acmi recordings need to be exported to XML before analysis.</p>';
+				$statusMessages .= "</ul>";
+				$statusMessages .= "<p><strong>Note:</strong> This application currently processes XML files only. You have an .acmi file which needs to be converted to XML format.</p>";
 			} else {
 				$aggregatorOptions = $config['aggregator'] ?? [];
 				$aggregator = new EventGraphAggregator($config['default_language'], $aggregatorOptions);
 
 				foreach ($xmlFiles as $filexml) {
-					if ($showStatusOverlay) {
-						$debugMessages[] = '<p>Aggregating ' . htmlspecialchars(basename($filexml)) . '...</p>';
-					}
+					$statusMessages .= "<p>Aggregating " . htmlspecialchars(basename($filexml)) . "...</p>";
 					try {
 						$aggregator->ingestFile($filexml);
 					} catch (\Throwable $exception) {
-						$criticalMessages[] = "<p style='color: #ff6b6b;'>Failed to ingest " . htmlspecialchars(basename($filexml)) . ': ' . htmlspecialchars($exception->getMessage()) . '</p>';
+						$statusMessages .= "<p style='color: #ff6b6b;'>Failed to ingest " . htmlspecialchars(basename($filexml)) . ': ' . htmlspecialchars($exception->getMessage()) . "</p>";
 					}
 				}
 
@@ -251,48 +283,42 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/debriefing.php';
 				);
 				echo $tv->getOutput();
 
-				if ($showStatusOverlay) {
-					$metrics = $aggregator->getMetrics();
-					$debugMessages[] = '<h2>Aggregation Summary</h2>';
-					$debugMessages[] = '<ul>'
-						. '<li>Total raw events: ' . (int)($metrics['raw_event_count'] ?? 0) . '</li>'
-						. '<li>Merged events: ' . (int)($metrics['merged_events'] ?? 0) . '</li>'
-						. '<li>Duplicates suppressed: ' . (int)($metrics['duplicates_suppressed'] ?? 0) . '</li>'
-						. '<li>Inferred links: ' . (int)($metrics['inferred_links'] ?? 0) . '</li>'
-						. '</ul>';
+				$metrics = $aggregator->getMetrics();
+				$statusMessages .= "<h2>Aggregation Summary</h2>";
+				$statusMessages .= "<ul>";
+				$statusMessages .= "<li>Total raw events: " . (int)($metrics['raw_event_count'] ?? 0) . "</li>";
+				$statusMessages .= "<li>Merged events: " . (int)($metrics['merged_events'] ?? 0) . "</li>";
+				$statusMessages .= "<li>Duplicates suppressed: " . (int)($metrics['duplicates_suppressed'] ?? 0) . "</li>";
+				$statusMessages .= "<li>Inferred links: " . (int)($metrics['inferred_links'] ?? 0) . "</li>";
+				$statusMessages .= "</ul>";
 
-					$sources = $mission->getSources();
-					if ($sources !== []) {
-						$sourceItems = '';
-						foreach ($sources as $source) {
-							$label = htmlspecialchars($source['filename'] ?? $source['id'] ?? 'unknown');
-							$eventsCount = (int)($source['events'] ?? 0);
-							$offsetSeconds = isset($source['offset']) && is_numeric($source['offset']) ? (float)$source['offset'] : 0.0;
-							$offsetLabel = sprintf('%+.2fs', $offsetSeconds);
-							$offsetHtml = htmlspecialchars($offsetLabel, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-							$strategy = $source['offsetStrategy'] ?? null;
-							$strategyLabel = '';
-							if ($strategy === 'anchor') {
-								$strategyLabel = ' via anchor match';
-							} elseif ($strategy === 'fallback-applied') {
-								$strategyLabel = ' via fallback';
-							} elseif ($strategy === 'fallback-skipped') {
-								$strategyLabel = ' (fallback skipped)';
-							}
-							$baselineMarker = !empty($source['baseline']) ? ' <strong>(baseline)</strong>' : '';
-							$sourceItems .= "<li>{$label}{$baselineMarker} ({$eventsCount} events, offset {$offsetHtml}{$strategyLabel})</li>";
+				$sources = $mission->getSources();
+				if ($sources !== []) {
+					$statusMessages .= "<h3>Source Recordings</h3><ul>";
+					foreach ($sources as $source) {
+						$label = htmlspecialchars($source['filename'] ?? $source['id'] ?? 'unknown');
+						$eventsCount = (int)($source['events'] ?? 0);
+						$offsetSeconds = isset($source['offset']) && is_numeric($source['offset']) ? (float)$source['offset'] : 0.0;
+						$offsetLabel = sprintf('%+.2fs', $offsetSeconds);
+						$offsetHtml = htmlspecialchars($offsetLabel, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+						$strategy = $source['offsetStrategy'] ?? null;
+						$strategyLabel = '';
+						if ($strategy === 'anchor') {
+							$strategyLabel = ' via anchor match';
+						} elseif ($strategy === 'fallback-applied') {
+							$strategyLabel = ' via fallback';
+						} elseif ($strategy === 'fallback-skipped') {
+							$strategyLabel = ' (fallback skipped)';
 						}
-						$debugMessages[] = '<h3>Source Recordings</h3><ul>' . $sourceItems . '</ul>';
+						$baselineMarker = !empty($source['baseline']) ? ' <strong>(baseline)</strong>' : '';
+						$statusMessages .= "<li>{$label}{$baselineMarker} ({$eventsCount} events, offset {$offsetHtml}{$strategyLabel})</li>";
 					}
+					$statusMessages .= "</ul>";
 				}
 			}
 
-			if ($showStatusOverlay || $criticalMessages !== []) {
-				$statusHtml = implode('', array_merge($criticalMessages, $showStatusOverlay ? $debugMessages : []));
-				if ($statusHtml !== '') {
-					echo "<div class=\"status-overlay\" style=\"margin-top: 40px; padding: 20px; border-top: 1px solid #333;\">" . $statusHtml . '</div>';
-				}
-			}
+			$statusMessages .= "</div>";
+			echo $statusMessages;
 
 		?>
 	</body>

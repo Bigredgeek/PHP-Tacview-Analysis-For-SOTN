@@ -1,0 +1,156 @@
+{
+  "mission": {
+    "title": "Unit Test Strike",
+    "category": "Regression",
+    "mission_time": "1986-05-30T05:58:47Z",
+    "duration": 7200,
+    "source": "DCS 2.9.21",
+    "recorder": "UnitTest Recorder"
+  },
+  "recordings": [
+    {
+      "author": "Recorder Alpha",
+      "recording_time": "2025-11-22T18:00:00Z",
+      "events": [
+        {
+          "time": 100.0,
+          "action": "HasBeenDestroyed",
+          "location": {
+            "Longitude": 12.5001,
+            "Latitude": 53.1001,
+            "Altitude": 40.0
+          },
+          "primary": {
+            "ID": "GROUND-OLY-ALPHA",
+            "Type": "Car",
+            "Name": "Olympus Truck Alpha",
+            "Pilot": "Olympus Convoy | Truck 1",
+            "Coalition": "Enemies",
+            "Country": "ru",
+            "Group": "Olympus Convoy"
+          },
+          "secondary": {
+            "ID": "WPN-MAV-ALPHA",
+            "Type": "Missile",
+            "Name": "AGM-65D Maverick",
+            "Coalition": "Allies"
+          },
+          "parent": {
+            "ID": "SKUNK-12",
+            "Type": "Aircraft",
+            "Name": "A-10A Thunderbolt II",
+            "Pilot": "Skunk 1-2 | Zach",
+            "Coalition": "Allies",
+            "Country": "us",
+            "Group": "Skunk"
+          }
+        },
+        {
+          "time": 101.0,
+          "action": "HasBeenDestroyed",
+          "location": {
+            "Longitude": 12.5015,
+            "Latitude": 53.1012,
+            "Altitude": 38.0
+          },
+          "primary": {
+            "ID": "GROUND-OLY-BRAVO",
+            "Type": "Car",
+            "Name": "Olympus Truck Bravo",
+            "Pilot": "Olympus Convoy | Truck 2",
+            "Coalition": "Enemies",
+            "Country": "ru",
+            "Group": "Olympus Convoy"
+          },
+          "secondary": {
+            "ID": "WPN-MAV-BRAVO-ALT",
+            "Type": "Missile",
+            "Name": "AGM-65D Maverick",
+            "Coalition": "Allies"
+          },
+          "parent": {
+            "ID": "SKUNK-12",
+            "Type": "Aircraft",
+            "Name": "A-10A Thunderbolt II",
+            "Pilot": "Skunk 1-2 | Zach",
+            "Coalition": "Allies",
+            "Country": "us",
+            "Group": "Skunk"
+          }
+        }
+      ]
+    },
+    {
+      "author": "Recorder Bravo",
+      "recording_time": "2025-11-22T18:00:05Z",
+      "events": [
+        {
+          "time": 103.0,
+          "action": "HasBeenDestroyed",
+          "location": {
+            "Longitude": 12.5003,
+            "Latitude": 53.1003,
+            "Altitude": 40.0
+          },
+          "primary": {
+            "ID": "GROUND-OLY-ALPHA",
+            "Type": "Car",
+            "Name": "Olympus Truck Alpha",
+            "Pilot": "Olympus Convoy | Truck 1",
+            "Coalition": "Enemies",
+            "Country": "ru",
+            "Group": "Olympus Convoy"
+          },
+          "secondary": {
+            "ID": "WPN-MAV-ALPHA",
+            "Type": "Missile",
+            "Name": "AGM-65D Maverick",
+            "Coalition": "Allies"
+          },
+          "parent": {
+            "ID": "SKUNK-12",
+            "Type": "Aircraft",
+            "Name": "A-10A Thunderbolt II",
+            "Pilot": "Skunk 1-2 | Zach",
+            "Coalition": "Allies",
+            "Country": "us",
+            "Group": "Skunk"
+          }
+        },
+        {
+          "time": 106.0,
+          "action": "HasBeenDestroyed",
+          "location": {
+            "Longitude": 12.5020,
+            "Latitude": 53.1014,
+            "Altitude": 38.0
+          },
+          "primary": {
+            "ID": "GROUND-OLY-BRAVO",
+            "Type": "Car",
+            "Name": "Olympus Truck Bravo",
+            "Pilot": "Olympus Convoy | Truck 2",
+            "Coalition": "Enemies",
+            "Country": "ru",
+            "Group": "Olympus Convoy"
+          },
+          "secondary": {
+            "ID": "WPN-MAV-BRAVO",
+            "Type": "Missile",
+            "Name": "AGM-65D Maverick",
+            "Coalition": "Allies"
+          },
+          "parent": {
+            "ID": "SKUNK-12",
+            "Type": "Aircraft",
+            "Name": "A-10A Thunderbolt II",
+            "Pilot": "Skunk 1-2 | Zach",
+            "Coalition": "Allies",
+            "Country": "us",
+            "Group": "Skunk"
+          }
+        }
+      ]
+    }
+  ]
+}

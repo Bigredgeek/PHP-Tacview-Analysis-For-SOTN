@@ -8,7 +8,8 @@
     "prebuild": "echo 'Starting build process...'",
     "postbuild": "echo 'Build completed successfully'",
     "start": "php -S 0.0.0.0:8000",
-    "dev": "php -S localhost:8000"
+    "dev": "php -S localhost:8000",
+    "test": "vendor/bin/phpunit"
   },
   "repository": {
     "type": "git",

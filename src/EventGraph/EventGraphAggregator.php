@@ -10,8 +10,12 @@ use function abs;
 use function array_key_exists;
 use function array_key_first;
 use function array_keys;
+use function array_shift;
 use function array_slice;
+use function atan2;
 use function count;
+use function cos;
+use function deg2rad;
 use function floor;
 use function implode;
 use function in_array;
@@ -23,7 +27,10 @@ use function method_exists;
 use function min;
 use function preg_match;
 use function round;
+use function sin;
 use function sort;
+use function sqrt;
+use function spl_object_id;
 use function str_contains;
 use function str_replace;
 use function str_starts_with;
@@ -58,6 +65,65 @@ final class EventGraphAggregator
         'hasbeenshotdown',
         'hascrashed',
     ];
+    private const WEAPON_INSTANCE_TYPES = [
+        'hasbeenhitby',
+        'hasbeendestroyed',
+        'hasbeenshotdown',
+    ];
+    private const IDENTITY_HINT_TIME_WINDOW = 5.0;
+    private const IDENTITY_HINT_DISTANCE_METERS = 2000.0;
+    private const DUPLICATE_DEFAULT_WINDOW = 1.0;
+    private const DUPLICATE_TIME_WINDOWS = [
+        'hasfired' => 0.6,
+        'hasbeenhitby' => 2.5,
+        'hasbeendestroyed' => 1.2,
+        'hasbeenshotdown' => 1.2,
+        'hasbeenkilled' => 1.2,
+        'hascrashed' => 2.0,
+        'hastakenoff' => 15.0,
+        'haslanded' => 20.0,
+        'hasenteredthearea' => 45.0,
+        'hasleftthearea' => 45.0,
+        'hasenteredparkingarea' => 30.0,
+        'hasleftparkingarea' => 30.0,
+        'hasenteredthezone' => 45.0,
+        'hasleftthezone' => 45.0,
+        'hasbeenlockedby' => 2.0,
+        'hasbeenlaunchedat' => 2.0,
+        'hasbeenfiredat' => 2.0,
+        'hasstopped' => 5.0,
+        'hasstarted' => 5.0,
+        'hasrepaired' => 10.0,
+    ];
+    private const TERMINAL_EVENT_WINDOW = 30.0;
+    private const POST_RECONCILIATION_WINDOW = 5.0;
+    private const TERMINAL_EVENT_TYPES = [
+        'hasbeendestroyed' => true,
+        'hasbeenshotdown' => true,
+        'hasbeenkilled' => true,
+        'hascrashed' => true,
+    ];
+    private const TERMINAL_CATEGORY_ACTIONS = [
+        'missile' => ['hasenteredthearea', 'hasbeenhitby', 'hasbeendestroyed'],
+        'bomb' => ['hasenteredthearea', 'hasbeenhitby', 'hasbeendestroyed'],
+        'parachutist' => ['hasenteredthearea', 'hasbeendestroyed'],
+        'ground' => ['hasbeenhitby', 'hasbeendestroyed'],
+    ];
+    private const OBJECT_CATEGORY_KEYWORDS = [
+        'parachutist' => ['parachut'],
+        'bomb' => ['bomb', 'mk-', 'gbu', 'rockeye', 'fab-', 'betab', 'cbu-', 'cluster'],
+        'missile' => ['missile', 'aim-', 'agm-', 'r-', 'phoenix', 'sparrow', 'sidewinder', 'maverick', 'harm', 'super 530', 'rsam', 'lsam'],
+        'ground' => ['tank', 'btr', 'bmp', 'sam', 'aaa', 'vehicle', 'truck', 'ural', 'gepard', 'shilka', 'sa-', 'moto', 'car', 'zsu', 'zu-', 'tor', 'buk', 'strela', 'patriot', 'howitzer'],
+    ];
+    private const HAS_FIRED_SUPPRESSION_WINDOW = 90.0;
+    private const HAS_FIRED_BUCKET_SIZE = 1.0;
+    private const COMPOSITE_SIGNATURE_BUCKET_SIZE = 5.0;
+    private const COMPOSITE_SIGNATURE_TYPES = [
+        'hasbeenhitby',
+        'hasbeendestroyed',
+        'hasbeenshotdown',
+        'hasbeenkilled',
+    ];
 
     private readonly string $language;
     private readonly float $timeTolerance;
@@ -76,6 +142,9 @@ final class EventGraphAggregator
 
     /** @var array<string, list<NormalizedEvent>> */
     private array $eventIndex = [];
+
+    /** @var array<string, NormalizedEvent> */
+    private array $compositeSignatureIndex = [];
 
     /** @var array<string, list<NormalizedEvent>> */
     private array $pendingEvents = [];
@@ -99,6 +168,8 @@ final class EventGraphAggregator
     private bool $built = false;
     /** @var list<float> */
     private array $startTimeSamples = [];
+    /** @var array<string, list<array{primary:?array, identity:ObjectIdentity, position:array|null, time:float}>> */
+    private array $identityHints = [];
 
     /** @var array<string, mixed> */
     private array $metrics = [
@@ -114,6 +185,13 @@ final class EventGraphAggregator
         'mixed_coalition_evidence' => 0,
         'disconnect_destructions_pruned' => 0,
         'disconnect_midair_flagged' => 0,
+        'ambiguous_events_quarantined' => 0,
+        'identity_salvaged' => 0,
+        'composite_signatures_emitted' => 0,
+        'composite_signature_merges' => 0,
+        'composite_signature_missing_target' => 0,
+        'composite_signature_missing_weapon' => 0,
+        'post_inference_merges' => 0,
     ];
 
     /**
@@ -189,6 +267,7 @@ final class EventGraphAggregator
 
         $this->rebuildEventIndex();
         $this->runInference();
+        $this->reconcileDestructionEvents();
         $this->applyPostMergeFilters();
         $this->pruneDisconnectDestructions();
         $this->annotateEvents();
@@ -376,11 +455,323 @@ final class EventGraphAggregator
 
         $this->pendingEvents = [];
         $this->applyStartTimeConsensus();
+        $this->coalesceDuplicateEvents();
+        $this->coalesceTerminalEvents();
         $this->metrics['merged_events'] = count($this->events);
+    }
+
+    private function coalesceDuplicateEvents(): void
+    {
+        if ($this->events === []) {
+            return;
+        }
+
+        $groups = [];
+        $deduped = [];
+        $hasFiredBuckets = [];
+
+        foreach ($this->events as $event) {
+            $typeKey = strtolower($event->getType());
+            if ($typeKey === 'hasfired') {
+                $primaryKey = $this->buildLooseObjectKey($event->getPrimary())
+                    ?? $this->buildObjectKey($event->getPrimary());
+                $weaponKey = $this->buildLooseObjectKey($event->getSecondary());
+                if ($primaryKey !== null && $weaponKey !== null) {
+                    $timeBucket = $this->getHasFiredTimeBucket($event->getMissionTime());
+                    $bucketKey = $primaryKey . '|' . $weaponKey . '|tb:' . $timeBucket;
+                    $bucket = $hasFiredBuckets[$bucketKey] ?? [];
+
+                    $merged = false;
+                    foreach ($bucket as $existing) {
+                        if (abs($existing->getMissionTime() - $event->getMissionTime()) <= self::HAS_FIRED_SUPPRESSION_WINDOW) {
+                            $existing->mergeWith($event);
+                            $this->metrics['duplicates_suppressed']++;
+                            $merged = true;
+                            break;
+                        }
+                    }
+
+                    if ($merged) {
+                        continue;
+                    }
+
+                    $hasFiredBuckets[$bucketKey][] = $event;
+                }
+            }
+
+            $window = self::DUPLICATE_TIME_WINDOWS[$typeKey] ?? self::DUPLICATE_DEFAULT_WINDOW;
+            if ($window <= 0.0) {
+                $deduped[] = $event;
+                continue;
+            }
+
+            if ($typeKey === 'hasfired') {
+                $primaryKey = $this->buildLooseObjectKey($event->getPrimary())
+                    ?? $this->buildObjectKey($event->getPrimary());
+            } else {
+                $primaryKey = $this->buildObjectKey($event->getPrimary());
+            }
+            if ($primaryKey === null) {
+                $deduped[] = $event;
+                continue;
+            }
+
+            if ($typeKey === 'hasfired') {
+                $secondaryKey = $this->buildLooseObjectKey($event->getSecondary())
+                    ?? $this->buildObjectKey($event->getSecondary(), true);
+            } else {
+                $secondaryKey = $this->buildObjectKey($event->getSecondary(), true);
+            }
+            if ($secondaryKey === null && !$this->allowsMissingSecondary($event->getType())) {
+                $deduped[] = $event;
+                continue;
+            }
+
+            $parentKey = $this->buildObjectKey($event->getParent());
+            $indexKey = $typeKey . '|' . $primaryKey . '|' . ($secondaryKey ?? 'none') . '|' . ($parentKey ?? 'noparent');
+
+            if (!isset($groups[$indexKey])) {
+                $groups[$indexKey] = [];
+            }
+
+            $merged = false;
+            foreach ($groups[$indexKey] as $existing) {
+                if (abs($existing->getMissionTime() - $event->getMissionTime()) <= $window) {
+                    $existing->mergeWith($event);
+                    $this->metrics['duplicates_suppressed']++;
+                    $merged = true;
+                    break;
+                }
+            }
+
+            if (!$merged) {
+                $groups[$indexKey][] = $event;
+                $deduped[] = $event;
+            }
+        }
+
+        if (count($deduped) === count($this->events)) {
+            $this->rebuildEventIndex();
+            return;
+        }
+
+        $this->events = $deduped;
+        $this->rebuildEventIndex();
+    }
+
+    private function coalesceTerminalEvents(): void
+    {
+        if ($this->events === []) {
+            return;
+        }
+
+        $buckets = [];
+        foreach ($this->events as $event) {
+            $typeKey = strtolower($event->getType());
+            $category = $this->classifyObjectCategory($event->getPrimary());
+            $isTerminal = isset(self::TERMINAL_EVENT_TYPES[$typeKey]);
+            if (!$isTerminal && $category !== null) {
+                $categoryActions = self::TERMINAL_CATEGORY_ACTIONS[$category] ?? [];
+                if (in_array($typeKey, $categoryActions, true)) {
+                    $isTerminal = true;
+                }
+            }
+
+            if (!$isTerminal) {
+                continue;
+            }
+
+            $primaryKey = $this->buildAugmentedObjectKey($event->getPrimary());
+            if ($primaryKey === null) {
+                continue;
+            }
+
+            $bucketKey = $typeKey . '|' . $primaryKey;
+            $buckets[$bucketKey][] = $event;
+        }
+
+        if ($buckets === []) {
+            return;
+        }
+
+        $remove = [];
+
+        foreach ($buckets as $events) {
+            if (count($events) <= 1) {
+                continue;
+            }
+
+            usort($events, static fn (NormalizedEvent $left, NormalizedEvent $right): int => $left->getMissionTime() <=> $right->getMissionTime());
+
+            $clusterAnchor = array_shift($events);
+            if ($clusterAnchor === null) {
+                continue;
+            }
+
+            foreach ($events as $candidate) {
+                $delta = abs($candidate->getMissionTime() - $clusterAnchor->getMissionTime());
+                if ($delta <= self::TERMINAL_EVENT_WINDOW) {
+                    $clusterAnchor->mergeWith($candidate);
+                    $remove[spl_object_id($candidate)] = true;
+                    $this->metrics['duplicates_suppressed']++;
+                } else {
+                    $clusterAnchor = $candidate;
+                }
+            }
+        }
+
+        if ($remove === []) {
+            return;
+        }
+
+        $filtered = [];
+        foreach ($this->events as $event) {
+            if (isset($remove[spl_object_id($event)])) {
+                continue;
+            }
+            $filtered[] = $event;
+        }
+
+        $this->events = $filtered;
+        $this->rebuildEventIndex();
+    }
+
+    private function buildObjectKey(?array $object, bool $relaxed = false): ?string
+    {
+        if ($object === null) {
+            return null;
+        }
+
+        $identity = ObjectIdentity::forObject($object);
+        if ($identity !== null) {
+            if ($relaxed && $identity->getTier() === ObjectIdentity::TIER_ID) {
+                $fallback = ObjectIdentity::buildFallbackSignature($object);
+                if ($fallback !== null) {
+                    return $fallback;
+                }
+            }
+
+            return $identity->getKey();
+        }
+
+        return ObjectIdentity::buildFallbackSignature($object);
+    }
+
+    private function buildAugmentedObjectKey(?array $object): ?string
+    {
+        $key = $this->buildObjectKey($object);
+        if ($key !== null) {
+            return $key;
+        }
+
+        return $this->buildLooseObjectKey($object);
+    }
+
+    private function buildLooseObjectKey(?array $object): ?string
+    {
+        if ($object === null) {
+            return null;
+        }
+
+        $fields = ['Pilot', 'Name', 'Group', 'Type', 'Coalition', 'Country'];
+        $parts = [];
+        foreach ($fields as $field) {
+            if (!isset($object[$field])) {
+                continue;
+            }
+
+            $value = strtolower(trim((string)$object[$field]));
+            if ($value !== '') {
+                $parts[] = $value;
+            }
+        }
+
+        if ($parts !== []) {
+            return implode('|', $parts);
+        }
+
+        if (isset($object['ID'])) {
+            $id = strtolower(trim((string)$object['ID']));
+            if ($id !== '') {
+                return 'id:' . $id;
+            }
+        }
+
+        return null;
+    }
+
+    private function classifyObjectCategory(?array $object): ?string
+    {
+        if ($object === null) {
+            return null;
+        }
+
+        $segments = [];
+        foreach (['Type', 'Name', 'Group', 'Pilot'] as $field) {
+            if (!isset($object[$field])) {
+                continue;
+            }
+
+            $value = strtolower(trim((string)$object[$field]));
+            if ($value !== '') {
+                $segments[] = $value;
+            }
+        }
+
+        if ($segments === []) {
+            return null;
+        }
+
+        $haystack = trim(implode(' ', $segments));
+        if ($haystack === '') {
+            return null;
+        }
+
+        foreach (['parachutist', 'bomb', 'missile', 'ground'] as $category) {
+            $keywords = self::OBJECT_CATEGORY_KEYWORDS[$category] ?? null;
+            if ($keywords === null) {
+                continue;
+            }
+
+            if ($this->stringContainsAny($haystack, $keywords)) {
+                return $category;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param list<string> $needles
+     */
+    private function stringContainsAny(string $haystack, array $needles): bool
+    {
+        foreach ($needles as $needle) {
+            if ($needle === '') {
+                continue;
+            }
+
+            if (str_contains($haystack, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function addOrMerge(NormalizedEvent $candidate): void
     {
+        $this->enrichEventIdentity($candidate);
+
+        if ($this->mergeByCompositeSignature($candidate)) {
+            return;
+        }
+
+        if ($this->shouldQuarantineEvent($candidate)) {
+            $this->metrics['ambiguous_events_quarantined']++;
+            return;
+        }
+
         $bucketKey = $candidate->getType();
         $bucket = $this->eventIndex[$bucketKey] ?? [];
 
@@ -398,6 +789,10 @@ final class EventGraphAggregator
 
     private function areEventsEquivalent(NormalizedEvent $left, NormalizedEvent $right): bool
     {
+        if ($this->isSameWeaponInstance($left, $right)) {
+            return true;
+        }
+
         $tolerance = max(
             $this->timeToleranceForEvent($left),
             $this->timeToleranceForEvent($right)
@@ -418,6 +813,33 @@ final class EventGraphAggregator
         return true;
     }
 
+    private function isSameWeaponInstance(NormalizedEvent $left, NormalizedEvent $right): bool
+    {
+        $type = strtolower($left->getType());
+        if (!in_array($type, self::WEAPON_INSTANCE_TYPES, true)) {
+            return false;
+        }
+
+        $leftKey = $this->weaponInstanceKey($left->getSecondary());
+        if ($leftKey === null) {
+            return false;
+        }
+
+        $rightKey = $this->weaponInstanceKey($right->getSecondary());
+        if ($rightKey === null || $leftKey !== $rightKey) {
+            return false;
+        }
+
+        if (!$this->objectsComparable($left->getParent(), $right->getParent())) {
+            return false;
+        }
+
+        $delta = abs($left->getMissionTime() - $right->getMissionTime());
+        $window = max(6.0, min(180.0, $this->resolveWeaponWindow($left->getSecondary())));
+
+        return $delta <= $window;
+    }
+
     private function objectsComparable(?array $a, ?array $b): bool
     {
         if ($a === null && $b === null) {
@@ -428,44 +850,218 @@ final class EventGraphAggregator
             return false;
         }
 
-        $keyA = $this->objectKey($a);
-        $keyB = $this->objectKey($b);
+        $identityA = ObjectIdentity::forObject($a);
+        $identityB = ObjectIdentity::forObject($b);
 
-        return $keyA !== null && $keyA === $keyB;
+        if ($identityA === null || $identityB === null) {
+            return false;
+        }
+
+        return $identityA->getKey() === $identityB->getKey();
     }
 
-    private function objectKey(?array $object): ?string
+    private function enrichEventIdentity(NormalizedEvent $event): void
     {
-        if ($object === null) {
+        $primary = $event->getPrimary();
+        if ($primary === null) {
+            return;
+        }
+
+        $identity = ObjectIdentity::forObject($primary);
+        if ($identity !== null && $identity->isHardSignal()) {
+            $this->rememberIdentityHint($event, $identity);
+            return;
+        }
+
+        if ($this->applyIdentityHint($event)) {
+            $updatedIdentity = ObjectIdentity::forObject($event->getPrimary());
+            if ($updatedIdentity !== null && $updatedIdentity->isHardSignal()) {
+                $this->rememberIdentityHint($event, $updatedIdentity);
+            }
+        }
+    }
+
+    private function rememberIdentityHint(NormalizedEvent $event, ObjectIdentity $identity): void
+    {
+        if (!$identity->isHardSignal()) {
+            return;
+        }
+
+        $signature = ObjectIdentity::buildFallbackSignature($event->getPrimary());
+        if ($signature === null) {
+            return;
+        }
+
+        $this->identityHints[$signature][] = [
+            'identity' => $identity,
+            'primary' => $event->getPrimary(),
+            'position' => $event->getPosition(),
+            'time' => $event->getMissionTime(),
+        ];
+
+        if (count($this->identityHints[$signature]) > 12) {
+            array_shift($this->identityHints[$signature]);
+        }
+    }
+
+    private function applyIdentityHint(NormalizedEvent $event): bool
+    {
+        $match = $this->matchIdentityHint($event);
+        if ($match !== null) {
+            $event->overwritePrimary($match['primary'], $match['reason']);
+            $this->metrics['identity_salvaged']++;
+            return true;
+        }
+
+        $existing = $this->matchExistingEventsForIdentity($event);
+        if ($existing !== null) {
+            $event->overwritePrimary($existing, 'identity-salvaged-existing');
+            $this->metrics['identity_salvaged']++;
+            return true;
+        }
+
+        return false;
+    }
+
+    private function matchIdentityHint(NormalizedEvent $event): ?array
+    {
+        $signature = ObjectIdentity::buildFallbackSignature($event->getPrimary());
+        if ($signature === null || !isset($this->identityHints[$signature])) {
             return null;
         }
 
-        $fields = ['Pilot', 'Name', 'Group', 'Type', 'Coalition', 'Country'];
-        $parts = [];
+        $time = $event->getMissionTime();
+        $position = $event->getPosition();
 
-        foreach ($fields as $field) {
-            if (!isset($object[$field])) {
+        for ($i = count($this->identityHints[$signature]) - 1; $i >= 0; $i--) {
+            $hint = $this->identityHints[$signature][$i];
+            if (!$this->withinIdentityContext($time, $position, $hint['time'], $hint['position'])) {
                 continue;
             }
 
-            $value = strtolower(trim((string)$object[$field]));
-            if ($value !== '') {
-                $parts[] = $value;
+            if (!is_array($hint['primary'])) {
+                continue;
             }
-        }
 
-        if ($parts !== []) {
-            return implode('|', $parts);
-        }
-
-        if (isset($object['ID'])) {
-            $id = strtolower(trim((string)$object['ID']));
-            if ($id !== '') {
-                return $id;
-            }
+            return [
+                'primary' => $hint['primary'],
+                'reason' => 'identity-hint-context',
+            ];
         }
 
         return null;
+    }
+
+    private function matchExistingEventsForIdentity(NormalizedEvent $event): ?array
+    {
+        $signature = ObjectIdentity::buildFallbackSignature($event->getPrimary());
+        if ($signature === null) {
+            return null;
+        }
+
+        $time = $event->getMissionTime();
+        $position = $event->getPosition();
+
+        for ($i = count($this->events) - 1; $i >= 0; $i--) {
+            $existing = $this->events[$i];
+            $existingPrimary = $existing->getPrimary();
+            if ($existingPrimary === null) {
+                continue;
+            }
+
+            $identity = ObjectIdentity::forObject($existingPrimary);
+            if ($identity === null || !$identity->isHardSignal()) {
+                continue;
+            }
+
+            $existingSignature = ObjectIdentity::buildFallbackSignature($existingPrimary);
+            if ($existingSignature !== $signature) {
+                continue;
+            }
+
+            if (!$this->withinIdentityContext($time, $position, $existing->getMissionTime(), $existing->getPosition())) {
+                continue;
+            }
+
+            return $existingPrimary;
+        }
+
+        return null;
+    }
+
+    private function withinIdentityContext(float $time, ?array $position, float $referenceTime, ?array $referencePosition): bool
+    {
+        if (abs($time - $referenceTime) > self::IDENTITY_HINT_TIME_WINDOW) {
+            return false;
+        }
+
+        if ($position === null || $referencePosition === null) {
+            return true;
+        }
+
+        $distance = $this->calculateDistanceMeters($position, $referencePosition);
+        if ($distance === null) {
+            return true;
+        }
+
+        return $distance <= self::IDENTITY_HINT_DISTANCE_METERS;
+    }
+
+    private function calculateDistanceMeters(?array $a, ?array $b): ?float
+    {
+        if ($a === null || $b === null) {
+            return null;
+        }
+
+        if (!isset($a['latitude'], $a['longitude'], $b['latitude'], $b['longitude'])) {
+            return null;
+        }
+
+        $lat1 = deg2rad((float)$a['latitude']);
+        $lat2 = deg2rad((float)$b['latitude']);
+        $deltaLat = $lat2 - $lat1;
+        $deltaLon = deg2rad((float)$b['longitude'] - (float)$a['longitude']);
+
+        $sinLat = sin($deltaLat / 2);
+        $sinLon = sin($deltaLon / 2);
+
+        $aTerm = $sinLat * $sinLat + cos($lat1) * cos($lat2) * $sinLon * $sinLon;
+        if ($aTerm > 1.0) {
+            $aTerm = 1.0;
+        } elseif ($aTerm < 0.0) {
+            $aTerm = 0.0;
+        }
+
+        $c = 2 * atan2(sqrt($aTerm), sqrt(1 - $aTerm));
+
+        $distance = 6371000.0 * $c;
+
+        return $distance;
+    }
+
+    private function shouldQuarantineEvent(NormalizedEvent $event): bool
+    {
+        $primary = $event->getPrimary();
+        if ($primary === null) {
+            return false;
+        }
+
+        $primaryIdentity = ObjectIdentity::forObject($primary);
+        if ($primaryIdentity !== null && $primaryIdentity->isHardSignal()) {
+            return false;
+        }
+
+        $parentIdentity = ObjectIdentity::forObject($event->getParent());
+        if ($parentIdentity !== null && $parentIdentity->isHardSignal()) {
+            return false;
+        }
+
+        $weaponKey = $this->weaponInstanceKey($event->getSecondary());
+        if ($weaponKey !== null) {
+            return false;
+        }
+
+        return true;
     }
 
     private function secondaryComparable(NormalizedEvent $left, NormalizedEvent $right): bool
@@ -649,18 +1245,18 @@ final class EventGraphAggregator
      */
     private function anchorKeysForEvent(NormalizedEvent $event): array
     {
-        $primaryKey = $this->objectKey($event->getPrimary());
-        if ($primaryKey === null) {
+        $primaryIdentity = ObjectIdentity::forObject($event->getPrimary());
+        if ($primaryIdentity === null) {
             return [];
         }
 
         $keys = [];
-        $secondaryKey = $this->objectKey($event->getSecondary());
-        if ($secondaryKey !== null) {
-            $keys[] = $event->getType() . '|' . $primaryKey . '|' . $secondaryKey;
+        $secondaryIdentity = ObjectIdentity::forObject($event->getSecondary());
+        if ($secondaryIdentity !== null) {
+            $keys[] = $event->getType() . '|' . $primaryIdentity->getKey() . '|' . $secondaryIdentity->getKey();
         }
 
-        $keys[] = $event->getType() . '|' . $primaryKey;
+        $keys[] = $event->getType() . '|' . $primaryIdentity->getKey();
 
         return $keys;
     }
@@ -1369,23 +1965,59 @@ final class EventGraphAggregator
             return null;
         }
 
-        $name = strtolower(trim((string)($weapon['Name'] ?? '')));
-        $type = strtolower(trim((string)($weapon['Type'] ?? '')));
         $id = strtolower(trim((string)($weapon['ID'] ?? '')));
+        if ($id !== '') {
+            return 'id:' . $id;
+        }
 
+        $parent = strtolower(trim((string)($weapon['Parent'] ?? '')));
+        if ($parent !== '') {
+            return 'parent:' . $parent;
+        }
+
+        $serial = strtolower(trim((string)($weapon['Serial'] ?? $weapon['SerialNumber'] ?? '')));
+        $name = strtolower(trim((string)($weapon['Name'] ?? '')));
         if ($name !== '') {
-            return $name;
+            if ($serial !== '') {
+                return $name . '#' . $serial;
+            }
+            return 'name:' . $name;
         }
 
+        $type = strtolower(trim((string)($weapon['Type'] ?? '')));
         if ($type !== '') {
-            return $type;
+            return 'type:' . $type;
         }
 
+        return null;
+    }
+
+    private function weaponInstanceKey(?array $weapon): ?string
+    {
+        if ($weapon === null) {
+            return null;
+        }
+
+        $id = strtolower(trim((string)($weapon['ID'] ?? '')));
         if ($id !== '') {
             return $id;
         }
 
+        $parent = strtolower(trim((string)($weapon['Parent'] ?? '')));
+        if ($parent !== '') {
+            return 'parent:' . $parent;
+        }
+
         return null;
+    }
+
+    private function getHasFiredTimeBucket(float $missionTime): int
+    {
+        if (self::HAS_FIRED_BUCKET_SIZE <= 0.0) {
+            return (int)round($missionTime);
+        }
+
+        return (int)floor($missionTime / self::HAS_FIRED_BUCKET_SIZE);
     }
 
     private function resolveWeaponWindow(?array $weapon): float
@@ -1441,6 +2073,149 @@ final class EventGraphAggregator
         $this->metrics['mixed_coalition_evidence'] = $mixedCoalitions;
     }
 
+    private function reconcileDestructionEvents(): void
+    {
+        if ($this->events === []) {
+            return;
+        }
+
+        $window = self::POST_RECONCILIATION_WINDOW;
+        if ($window <= 0.0) {
+            return;
+        }
+
+        $remove = [];
+        /** @var array<string, list<int>> $recentByTarget */
+        $recentByTarget = [];
+
+        foreach ($this->events as $index => $event) {
+            if ($event->getType() !== 'HasBeenDestroyed') {
+                continue;
+            }
+
+            $targetKey = $this->canonicalObjectKey($event->getPrimary());
+            if ($targetKey === null) {
+                continue;
+            }
+
+            $recent = $recentByTarget[$targetKey] ?? [];
+            $updatedRecent = [];
+            $merged = false;
+
+            foreach ($recent as $recentIndex) {
+                $existing = $this->events[$recentIndex] ?? null;
+                if ($existing === null) {
+                    continue;
+                }
+
+                $delta = abs($event->getMissionTime() - $existing->getMissionTime());
+                if ($delta <= $window) {
+                    $existing->mergeWith($event);
+                    $this->metrics['post_inference_merges']++;
+                    $remove[$index] = true;
+                    $merged = true;
+                    break;
+                }
+
+                if (($event->getMissionTime() - $existing->getMissionTime()) <= $window) {
+                    $updatedRecent[] = $recentIndex;
+                }
+            }
+
+            if ($merged) {
+                $recentByTarget[$targetKey] = $updatedRecent;
+                continue;
+            }
+
+            $updatedRecent[] = $index;
+            $recentByTarget[$targetKey] = $updatedRecent;
+        }
+
+        if ($remove === []) {
+            return;
+        }
+
+        $filtered = [];
+        foreach ($this->events as $idx => $event) {
+            if (isset($remove[$idx])) {
+                continue;
+            }
+            $filtered[] = $event;
+        }
+
+        $this->events = $filtered;
+        $this->rebuildEventIndex();
+    }
+
+    private function mergeByCompositeSignature(NormalizedEvent $candidate): bool
+    {
+        $type = strtolower($candidate->getType());
+        if (!in_array($type, self::COMPOSITE_SIGNATURE_TYPES, true)) {
+            return false;
+        }
+
+        $signature = $this->buildCompositeSignature($candidate);
+        if ($signature === null) {
+            return false;
+        }
+
+        $this->metrics['composite_signatures_emitted']++;
+
+        if (isset($this->compositeSignatureIndex[$signature])) {
+            $this->compositeSignatureIndex[$signature]->mergeWith($candidate);
+            $this->metrics['composite_signature_merges']++;
+            return true;
+        }
+
+        $this->compositeSignatureIndex[$signature] = $candidate;
+        return false;
+    }
+
+    private function buildCompositeSignature(NormalizedEvent $event): ?string
+    {
+        $targetKey = $this->canonicalObjectKey($event->getPrimary());
+        if ($targetKey === null) {
+            $this->metrics['composite_signature_missing_target']++;
+            return null;
+        }
+
+        $weaponKey = $this->weaponInstanceKey($event->getSecondary());
+        if ($weaponKey === null) {
+            $parentKey = $this->canonicalObjectKey($event->getParent());
+            if ($parentKey !== null) {
+                $weaponKey = 'parent:' . $parentKey;
+            }
+        }
+
+        if ($weaponKey === null) {
+            $this->metrics['composite_signature_missing_weapon']++;
+            $weaponKey = 'unknown';
+        }
+
+        $bucket = $this->getCompositeTimeBucket($event->getMissionTime());
+
+        return strtolower($event->getType()) . '|' . $targetKey . '|' . $weaponKey . '|tb:' . $bucket;
+    }
+
+    private function canonicalObjectKey(?array $object): ?string
+    {
+        if ($object === null) {
+            return null;
+        }
+
+        $identity = ObjectIdentity::forObject($object);
+        return $identity?->getKey();
+    }
+
+    private function getCompositeTimeBucket(float $missionTime): int
+    {
+        if (self::COMPOSITE_SIGNATURE_BUCKET_SIZE <= 0.0) {
+            return (int)round($missionTime);
+        }
+
+        return (int)floor($missionTime / self::COMPOSITE_SIGNATURE_BUCKET_SIZE);
+    }
+
     private function findRecentHit(NormalizedEvent $event): ?NormalizedEvent
     {
         $primary = $event->getPrimary();
@@ -1448,8 +2223,8 @@ final class EventGraphAggregator
             return null;
         }
 
-        $targetKey = $this->objectKey($primary);
-        if ($targetKey === null) {
+        $targetIdentity = ObjectIdentity::forObject($primary);
+        if ($targetIdentity === null) {
             return null;
         }
 
@@ -1460,8 +2235,8 @@ final class EventGraphAggregator
                 continue;
             }
 
-            $candidateKey = $this->objectKey($candidate->getPrimary());
-            if ($candidateKey !== $targetKey) {
+            $candidateIdentity = ObjectIdentity::forObject($candidate->getPrimary());
+            if ($candidateIdentity === null || $candidateIdentity->getKey() !== $targetIdentity->getKey()) {
                 continue;
             }
 

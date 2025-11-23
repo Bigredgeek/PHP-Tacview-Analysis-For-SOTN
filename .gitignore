@@ -42,3 +42,5 @@ tacview.css
 # Build-time generated files (regenerated during build)
 public/debriefings/aggregated.html
 public/debriefings/aggregated.json
+vendor/
+.phpunit.result.cache

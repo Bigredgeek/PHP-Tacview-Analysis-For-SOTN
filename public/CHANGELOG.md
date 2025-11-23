@@ -1,6 +1,11 @@
 # SOTN Public Bundle Changelog
 
 ## [Unreleased]
+- Canonicalized object identities so pilot/package/slot parsing, Tacview IDs, and type/coalition fallbacks stay consistent across recordings while ambiguous, pilotless events without a weapon or parent reference are quarantined before they reach the public mission view.
+- Added mission-context identity salvage so once a pilot is confirmed, nearby weapon impacts and destruction rows inherit that hard identity (tracked via new metrics) instead of being dropped as anonymous duplicates, dramatically reducing Menton-style double kills in the public UI.
+- Coalesced duplicate `HasFired`/`HasBeenHitBy`/`HasBeenDestroyed` rows across Tacview sources by clustering on mission time and canonical identities, so ProdingGhost's sortie now shows single launch/hit entries with multi-source evidence instead of six-per-weapon spam.
+- Applied the same consolidation sweep to every other action type (takeoff/landing logs, SAM launches, ground kills, etc.) with tuned time windows, eliminating the Skunk 1-2 | Zach duplicate Maverick spam and keeping the pilot view to six launches and eight Ural kills total.
+- Align `public/api/debriefing.php` with the root API so config defaults cascade from the repo-level file, local overrides apply cleanly, and the aggregator status panel only appears when `show_status_overlay` is enabled or `?debug=1` is passed.
 - Hide the aggregator status overlay by default, surfacing the metrics pane only when `show_status_overlay` is enabled or `?debug=1` is appended while keeping ingest failures visible to end users.
 - Remove duplicate short sorties by discarding takeoff/landing pairs under two minutes at the same airfield when no other events occur, aligning the public render with Franz 1-2’s deduped timeline.
 - Hardened public PHP entrypoints to auto-locate the shared Tacview core (including sibling `php-tacview-core` directories) so Vercel uploads without `/core` no longer throw fatal errors during bootstrap.

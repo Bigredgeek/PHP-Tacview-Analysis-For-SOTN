@@ -7,7 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - 2025-11-22
+- Authored `docs/eventgraph-dedupe-plan.md`, outlining the agent-ready to-do list for composite signature clustering, post-inference reconciliation, regression fixtures, the audit CLI, and mission-set regression runs.
+- Added a Composer/PHPUnit harness with the `menton_dupe` Tacview fixture plus `tests/EventGraph/EventGraphAggregatorTest.php`, wiring `vendor/bin/phpunit` into `package.json` so composite signatures and the reconciliation window stay regression-tested.
+
+### Fixed - 2025-11-22
+- Extended `EventGraphAggregator` terminal coalescing with category-aware fallbacks for missiles, bombs, parachutists, and ground units, using augmented object keys so multi-source kills collapse even when Tacview omits stable IDs.
+- Added per-launcher suppression for `HasFired` events by bucketing on the firing unit plus weapon descriptor for ninety-second windows, preventing Zach/Menton style duplicate launch rows from different recordings.
+- Replayed `php tmp/find_duplicates.php` against the sanitized GT6 set to confirm the new heuristics merge across all seven source files and to capture the remaining clusters for future tuning.
+
 ### Fixed - 2025-11-08
+- Introduced the canonical `ObjectIdentity` helper so EventGraph normalizes pilot/package/slot metadata, falls back to Tacview object IDs, and ignores per-recording group noise for airborne units, eliminating duplicate kill rows like the Menton/Olympus stack.
+- Added contextual identity salvage to `EventGraphAggregator`: hard-identified events now emit location/time scoped hints, ambiguous follow-on events adopt those primaries when weapon/parent context aligns, and the new metrics (`identity_salvaged`, `ambiguous_events_quarantined`) track when the guardrails step in.
+- Added an ambiguity guard in `EventGraphAggregator` that quarantines events lacking a hard identity unless they can be tied to a weapon instance or an inferred parent, preventing cross-coalition duplicates from entering the merged mission feed.
+- Collapsed per-recording weapon streams by coalescing events on mission-time/identity buckets, eliminating the Super 530D/Magic spam for Menton 2-2 (and similar sorties) so each launch/hit/destruction now surfaces once with combined source evidence.
+- Extended the consolidation pass to every Tacview action (takeoffs, landings, SAM launches, ground kills, etc.) with sensible time windows so Skunk 1-2 | Zach now shows six Maverick launches and eight truck kills instead of 20+ duplicate log rows copied from each recording.
+- Restored `public/api/debriefing.php` to merge root defaults with public overrides and enforce the `show_status_overlay`/`?debug=1` gate so the bundled endpoint mirrors the primary API behavior.
 - Fixed Vercel caching issue where API endpoints (`/api/*`) were serving stale debriefing data: changed `Cache-Control` header from `public, max-age=3600` (1 hour) to `no-cache, must-revalidate`. This ensures that when new debriefing files are added to `/debriefings/`, the aggregator picks them up on the next request instead of serving cached data from 1 hour ago. The old 1-hour cache was causing API to serve only old mission data even after new XML files were uploaded.
 - Fixed logo spacing in header by adding `margin-top: 40px` to `.header-container`, providing proper visual breathing room matching Brownwater's layout and preventing logo from running out of viewport.
 - Fixed cross-device filesystem rename failure in `scripts/fetch-core.php` that blocked Vercel deployments; the script now falls back to recursive copy when the temp directory is on a different volume than the project workspace.

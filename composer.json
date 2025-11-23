@@ -1,0 +1,24 @@
+{
+    "name": "bigredgeek/php-tacview-analysis-sotn",
+    "description": "Tacview debriefing aggregator and renderer for the Song of the Nibelungs community.",
+    "type": "project",
+    "require": {
+        "php": "^8.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "EventGraph\\": "src/EventGraph/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    }
+}

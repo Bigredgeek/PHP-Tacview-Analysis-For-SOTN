@@ -1,5 +1,35 @@
 ================================================================================
 PHP-Tacview-Analysis-For-SOTN
+EventGraph Regression Guard - PHPUnit Suite
+Date: 2025-11-22
+================================================================================
+
+TEST 1: Composer Autoloader
+Status: ✓ PASS
+Details:
+  - `composer install` resolved `phpunit/phpunit` plus PSR-4 mappings for `EventGraph\` and `Tests\`
+  - `vendor/autoload.php` now bootstraps Tacview fixtures inside PHPUnit
+
+TEST 2: EventGraph Aggregator Regression
+Status: ✓ PASS
+Details:
+  - Command: `vendor/bin/phpunit --testsuite event-graph`
+  - Fixture: `tests/EventGraph/fixtures/menton_dupe.json` (Olympus convoy duplicates)
+  - Assertions:
+    * `HasBeenDestroyed` events collapse from 4 source rows to 2 merged targets
+    * `metrics['composite_signature_merges'] === 1` and `metrics['post_inference_merges'] === 1`
+    * Evidence arrays retain both recordings, preventing silent data loss
+
+TEST 3: npm Wrapper
+Status: ✓ PASS
+Details:
+  - `npm run test` proxies to `vendor/bin/phpunit` for CI friendliness
+  - Matches Composer script output without additional tooling
+
+================================================================================
+Historical Reference Below (2025-10-25 Modernization Run)
+================================================================================
+PHP-Tacview-Analysis-For-SOTN
 PHP 8.2 Modernization - Test Results
 Date: 2025-10-25
 ================================================================================

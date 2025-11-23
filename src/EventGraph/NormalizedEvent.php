@@ -202,6 +202,16 @@ final class NormalizedEvent
         }
     }
 
+    public function overwritePrimary(array $replacement, string $reason = ''): void
+    {
+        $before = $this->primary;
+        $this->primary = $this->mergeObject($this->primary, $replacement);
+
+        if ($reason !== '' && $before !== $this->primary) {
+            $this->addGraphLink('primaryOverride', $reason);
+        }
+    }
+
     private function mergeObject(?array $current, ?array $candidate): ?array
     {
         if ($current === null) {
@@ -373,8 +383,8 @@ final class NormalizedEvent
         $bWeight = $tierWeights['B'];
         $cWeight = $tierWeights['C'];
 
-    $twoSourceThreshold = 1.4;
-    $singleSourceThreshold = 0.7;
+        $twoSourceThreshold = 1.4;
+        $singleSourceThreshold = 0.7;
 
         $confidence = self::BASE_CONFIDENCE;
 
@@ -409,7 +419,7 @@ final class NormalizedEvent
             $confidence += min(0.1, $this->confidenceAdjustments);
         }
 
-    $confidence = max(0.55, min(1.0, $confidence));
+        $confidence = max(0.55, min(1.0, $confidence));
         $this->confidence = $confidence;
 
         $this->confidenceBreakdown = [
