@@ -261,11 +261,13 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/debriefing.php';
 				$cache = json_decode(file_get_contents($cacheFile), true);
 				
 				if ($cache && isset($cache['mission'])) {
+					$sources = $cache['mission']['sources'] ?? [];
 					$tv->proceedAggregatedStats(
 						$cache['mission']['name'],
 						$cache['mission']['startTime'],
 						$cache['mission']['duration'],
-						$cache['mission']['events']
+						$cache['mission']['events'],
+						count($sources)
 					);
 					echo $tv->getOutput();
 					
@@ -340,11 +342,13 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/debriefing.php';
 				}
 
 				$mission = $aggregator->toAggregatedMission();
+				$sources = $mission->getSources();
 				$tv->proceedAggregatedStats(
 					$mission->getMissionName(),
 					$mission->getStartTime(),
 					$mission->getDuration(),
-					$mission->getEvents()
+					$mission->getEvents(),
+					count($sources)
 				);
 				echo $tv->getOutput();
 
@@ -357,7 +361,6 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/debriefing.php';
 				$statusMessages .= "<li>Inferred links: " . (int)($metrics['inferred_links'] ?? 0) . "</li>";
 				$statusMessages .= "</ul>";
 
-				$sources = $mission->getSources();
 				if ($sources !== []) {
 					$statusMessages .= "<h3>Source Recordings</h3><ul>";
 					foreach ($sources as $source) {

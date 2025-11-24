@@ -89,11 +89,13 @@ $tv->image_path = '/'; // Use root-relative paths for icons
 
 // Process aggregated statistics
 echo "  Generating HTML output...\n";
+$sources = $mission->getSources();
 $tv->proceedAggregatedStats(
     $mission->getMissionName(),
     $mission->getStartTime(),
     $mission->getDuration(),
-    $mission->getEvents()
+    $mission->getEvents(),
+    count($sources)
 );
 
 // Get the rendered output
@@ -101,7 +103,6 @@ $htmlBody = $tv->getOutput();
 
 // Generate metadata
 $metrics = $aggregator->getMetrics();
-$sources = $mission->getSources();
 
 $metadata = [
     'generated_at' => date('c'),

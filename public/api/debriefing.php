@@ -310,11 +310,13 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/api/debriefing.php';
 		    }
 
 		    $mission = $aggregator->toAggregatedMission();
+		    $sources = $mission->getSources();
 		    $tv->proceedAggregatedStats(
 		        $mission->getMissionName(),
 		        $mission->getStartTime(),
 		        $mission->getDuration(),
-		        $mission->getEvents()
+		        $mission->getEvents(),
+		        count($sources)
 		    );
 		    echo $tv->getOutput();
 
@@ -328,7 +330,6 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/api/debriefing.php';
 		    		. '<li>Inferred links: ' . (int)($metrics['inferred_links'] ?? 0) . '</li>'
 		    		. '</ul>';
 
-		    	$sources = $mission->getSources();
 		    	if ($sources !== []) {
 		    		$debugMessages[] = '<h3>Source Recordings</h3><ul>';
 		    		$sourceItems = '';

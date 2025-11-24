@@ -105,11 +105,13 @@ try {
 // Test 8: Render aggregated output
 echo "✓ Test 8: Render Output\n";
 try {
+    $sources = $mission->getSources();
     $tv->proceedAggregatedStats(
         $mission->getMissionName(),
         $mission->getStartTime(),
         $mission->getDuration(),
-        $mission->getEvents()
+        $mission->getEvents(),
+        count($sources)
     );
     $output = $tv->getOutput();
     $length = strlen($output);

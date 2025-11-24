@@ -75,11 +75,13 @@ use EventGraph\EventGraphAggregator;
 			}
 
 			$mission = $aggregator->toAggregatedMission();
+			$sources = $mission->getSources();
 			$tv->proceedAggregatedStats(
 				$mission->getMissionName(),
 				$mission->getStartTime(),
 				$mission->getDuration(),
-				$mission->getEvents()
+				$mission->getEvents(),
+				count($sources)
 			);
 			echo $tv->getOutput();
 
@@ -93,7 +95,6 @@ use EventGraph\EventGraphAggregator;
 					. '<li>Inferred links: ' . (int)($metrics['inferred_links'] ?? 0) . '</li>'
 					. '</ul>';
 
-				$sources = $mission->getSources();
 				if ($sources !== []) {
 					$sourceItems = '';
 					foreach ($sources as $source) {

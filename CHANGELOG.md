@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - 2025-11-23
+- Added an explicit source-count row to the Mission Information panel by extending `core/tacview.php` and every call to `proceedAggregatedStats()` with a `count($mission->getSources())` argument, ensuring combined debriefings report how many Tacview recordings were merged.
+- Restored the neon green marquee styling for the hero headings in `public/tacview.css` so “PHP Tacview Debriefing”, “Mission Information”, and “Aircrew Performance Summary” once again match the rest of the HUD palette instead of the temporary cyan variant.
+
 ### Added - 2025-11-24
 - Extended `scripts/eventgraph-dedupe-audit.php` with `--mode events|sources`, parent filtering, and mission-time windows so investigators can dump raw events or inspect per-recording offsets without reaching for bespoke helpers; documented the workflow in `README.md` and the new `docs/diagnostics-toolbox.md` cheat sheet.
 
