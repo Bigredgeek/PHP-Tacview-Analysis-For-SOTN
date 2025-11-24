@@ -66,6 +66,32 @@
 	}
 }
 
+@keyframes headerGlowCyan {
+	0%, 100% {
+		text-shadow:
+			0 0 5px rgba(0, 255, 255, 0.55),
+			0 0 10px rgba(0, 255, 255, 0.35);
+	}
+	50% {
+		text-shadow:
+			0 0 8px rgba(0, 255, 255, 0.5),
+			0 0 14px rgba(0, 255, 255, 0.4);
+	}
+}
+
+@keyframes headerGlowGreen {
+	0%, 100% {
+		text-shadow:
+			0 0 4px rgba(57, 255, 20, 0.6),
+			0 0 9px rgba(57, 255, 20, 0.35);
+	}
+	50% {
+		text-shadow:
+			0 0 7px rgba(57, 255, 20, 0.5),
+			0 0 12px rgba(57, 255, 20, 0.4);
+	}
+}
+
 /* CRT Flicker */
 @keyframes crtFlicker {
 	0%, 100% {
@@ -140,14 +166,15 @@ body::after {
 	height: 100%;
 	background: repeating-linear-gradient(
 		0deg,
-		rgba(0, 0, 0, 0.12) 0px,
-		rgba(0, 0, 0, 0.12) 2px,
-		transparent 2px,
-		transparent 6px
+		rgba(0, 0, 0, 0.05) 0px,
+		rgba(0, 0, 0, 0.05) 1px,
+		transparent 1px,
+		transparent 15px
 	);
 	pointer-events: none;
 	z-index: 9998;
-	animation: scanline 18s linear infinite;
+	opacity: 0.45;
+	animation: scanline 36s linear infinite;
 }
 
 /* VHS Noise Texture */
@@ -309,15 +336,13 @@ h1
 	text-align: center;
 	text-transform: uppercase;
 	letter-spacing: 6px;
-	text-shadow: 
-		0 0 10px rgba(0, 255, 255, 0.8),
-		0 0 20px rgba(0, 255, 255, 0.6),
-		0 0 30px rgba(0, 255, 255, 0.4),
-		0 0 40px rgba(0, 170, 170, 0.3),
-		2px 2px 4px rgba(0, 0, 0, 0.8);
-	animation: phosphorPulse 3s ease-in-out infinite;
+	text-shadow:
+		0 0 6px rgba(0, 255, 255, 0.6),
+		0 0 14px rgba(0, 255, 255, 0.35),
+		2px 2px 4px rgba(0, 0, 0, 0.7);
+	animation: headerGlowCyan 4s ease-in-out infinite;
 	position: relative;
-	filter: contrast(1.2) brightness(1.1);
+	filter: contrast(1.08) brightness(1.05);
 }
 
 h2
@@ -331,12 +356,12 @@ h2
 	text-align: center;
 	text-transform: uppercase;
 	letter-spacing: 4px;
-	text-shadow: 
-		0 0 10px rgba(57, 255, 20, 0.8),
-		0 0 20px rgba(57, 255, 20, 0.5),
-		0 0 30px rgba(57, 255, 20, 0.3),
-		2px 2px 4px rgba(0, 0, 0, 0.8);
-	filter: contrast(1.2);
+	text-shadow:
+		0 0 5px rgba(57, 255, 20, 0.6),
+		0 0 11px rgba(57, 255, 20, 0.35),
+		2px 2px 4px rgba(0, 0, 0, 0.75);
+	animation: headerGlowGreen 4.5s ease-in-out infinite;
+	filter: contrast(1.08);
 }
 
 body > p

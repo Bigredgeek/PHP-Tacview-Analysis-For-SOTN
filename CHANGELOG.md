@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed - 2025-11-24
 - Enabled Apache's `headers` module in the Docker image so the `.htaccess` security headers no longer trigger 500 errors when testing the stack under `docker run -p 8080:80 tacview-analysis`.
-- Tuned the CRT visual effects in `public/tacview.css`: widened scanline spacing, slowed the grid/scan animations, and softened the flicker opacity so the retro treatment remains comfortable on desktop monitors and Pixel-class phones.
+- Tuned the CRT visual effects in `public/tacview.css`: widened scanline spacing, slowed the grid/scan animations, and softened the flicker opacity so the retro treatment remains comfortable on desktop monitors and Pixel-class phones. Further reduced the fine scanline overlay density/opacity and introduced gentler glow animations for the hero headers so the marquee titles stay readable without overpowering the UI.
 
 ### Added - 2025-11-23
 - Introduced `scripts/eventgraph-dedupe-audit.php`, a diagnostics CLI that bootstraps the EventGraph stack, surfaces composite-signature clusters (type, canonical target key, weapon key, bucket window, and evidence counts), and accepts filters such as `--pilot`, `--type`, `--target`, `--weapon`, `--window`, `--limit`, and `--json` for automation.
