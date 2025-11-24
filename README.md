@@ -49,6 +49,39 @@ PHP Tacview transforms your XML flight log into a visually understandable, inter
 
 The PHPUnit suite hydrates lightweight Tacview fixtures that mirror the Menton/Olympus duplicate-destruction scenario, ensuring the EventGraph composite signatures and reconciliation windows stay locked down before shipping changes.
 
+## Diagnostics
+
+Use the EventGraph dedupe audit CLI whenever you need to inspect how duplicate destructions collapse across multiple Tacview exports:
+
+```bash
+php scripts/eventgraph-dedupe-audit.php --mode events --type HasBeenDestroyed --pilot "Skunk"
+```
+
+Headline options:
+
+- `--mode clusters|events|sources` switches between composite-signature summaries (default), raw event dumps, or per-recording offset diagnostics.
+- `--type` (repeatable), `--pilot`, `--target`, `--weapon`, and `--parent` provide fine-grained filters regardless of mode.
+- `--time <seconds>` plus `--time-window` (events mode) focuses on a specific mission-time window.
+- `--path`, `--window`, `--duplicates-only`, `--limit`, and `--json` mirror the previous workflow for bulk duplicate reviews.
+
+See `docs/diagnostics-toolbox.md` for a full cheat sheet, including the two specialized helpers that now live under `scripts/diagnostics/`.
+
+The CLI mirrors the composite signature keys used inside `EventGraphAggregator`, so the evidence counts, canonical target keys, and weapon identifiers line up with the runtime renderer and the PHPUnit fixtures.
+
+## Regression Harness
+
+Run the multi-set regression harness whenever you need to sanity-check dedupe behaviour across the canonical Tacview bundles:
+
+```bash
+php scripts/run-regressions.php --skip-tests
+```
+
+Key behavior:
+
+- Boots the EventGraph stack, optionally executes `php vendor/bin/phpunit --testsuite event-graph` (omit `--skip-tests` when mbstring is available), then ingests each dataset glob defined in `regressionSets()`.
+- Prints per-set summaries (file counts, mission durations, raw→merged counts, duplicate suppression, composite/post-inference merges, and an at-a-glance duplicate-cluster check) and writes JSON artifacts to `tmp/regressions/<timestamp>/`.
+- Extend coverage by editing `regressionSets()` inside `scripts/run-regressions.php` with new glob patterns or metadata; the harness will automatically include them on the next run.
+
 ## File Structure
 
 - `debriefing.php` - Main web interface

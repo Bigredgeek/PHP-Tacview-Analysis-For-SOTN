@@ -1,0 +1,78 @@
+{
+    "timestamp": "20251124-044805",
+    "phpunit": {
+        "command": "php vendor/bin/phpunit --testsuite event-graph",
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "PHPUnit requires the \"dom\", \"json\", \"libxml\", \"mbstring\", \"tokenizer\", \"xml\", \"xmlwriter\" extensions, but the \"mbstring\" extension is not available.\r\n"
+    },
+    "sets": [
+        {
+            "missionName": "SOTN_GT6_rc4",
+            "fileCount": 7,
+            "missionDuration": 9243.379999999997,
+            "missionStart": 20867,
+            "rawEvents": 5901,
+            "mergedEvents": 1624,
+            "duplicatesSuppressed": 3470,
+            "compositeMerges": 781,
+            "postInferenceMerges": 0,
+            "duplicateClusters": 0,
+            "heaviestCluster": null,
+            "name": "gt6_rc4",
+            "label": "SOTN GT6 rc4 sanitized bundle",
+            "files": [
+                "SOTN GT6 - Saageli - Tacview-20251122-204908-DCS-Client-SOTN_GT6_rc4.xml",
+                "Tacview-20251122-115907-DCS-Client-SOTN_GT6_rc4.xml",
+                "Tacview-20251122-140010-DCS-Client-SOTN_GT6_rc4.xml",
+                "Tacview-20251122-144910-DCS-Client-SOTN_GT6_rc4.xml",
+                "Tacview-20251122-190503-DCS-Client-SOTN_GT6_rc4.xml",
+                "Tacview-20251122-204948-DCS-Client-SOTN_GT6_rc4.xml",
+                "Tacview-20251122-215029-DCS-Client-SOTN_GT6_rc4.xml"
+            ],
+            "glob": "debriefings/*SOTN_GT6_rc4.xml",
+            "status": "ok"
+        },
+        {
+            "missionName": "Tacview-20251108-172052-DCS-Client FRANZ1-1 STRIKE3002",
+            "fileCount": 1,
+            "missionDuration": 3989.8499999999985,
+            "missionStart": 60826,
+            "rawEvents": 1415,
+            "mergedEvents": 1360,
+            "duplicatesSuppressed": 54,
+            "compositeMerges": 0,
+            "postInferenceMerges": 0,
+            "duplicateClusters": 0,
+            "heaviestCluster": null,
+            "name": "franz_strike",
+            "label": "Franz STRIKE3002 archived Tacview",
+            "files": [
+                "Tacview-20251108-172052-DCS-Client FRANZ1-1 STRIKE3002.xml"
+            ],
+            "glob": "debriefings/Archived logs/*FRANZ*.xml",
+            "status": "ok"
+        },
+        {
+            "missionName": "Tacview-20251108-210436-DCS-Client",
+            "fileCount": 2,
+            "missionDuration": 12581.050000000003,
+            "missionStart": 51978,
+            "rawEvents": 3187,
+            "mergedEvents": 1828,
+            "duplicatesSuppressed": 873,
+            "compositeMerges": 398,
+            "postInferenceMerges": 0,
+            "duplicateClusters": 0,
+            "heaviestCluster": null,
+            "name": "nov8_evening",
+            "label": "Tacview 2025-11-08 evening stack",
+            "files": [
+                "Tacview-20251108-210436-DCS-Client.xml",
+                "Tacview-20251108-212543-DCS-Client.xml"
+            ],
+            "glob": "debriefings/Archived logs/Tacview-20251108-21*.xml",
+            "status": "ok"
+        }
+    ]
+}

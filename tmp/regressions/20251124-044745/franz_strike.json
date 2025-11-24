@@ -1,0 +1,20 @@
+{
+    "missionName": "Tacview-20251108-172052-DCS-Client FRANZ1-1 STRIKE3002",
+    "fileCount": 1,
+    "missionDuration": 3989.8499999999985,
+    "missionStart": 60826,
+    "rawEvents": 1415,
+    "mergedEvents": 1360,
+    "duplicatesSuppressed": 54,
+    "compositeMerges": 0,
+    "postInferenceMerges": 0,
+    "duplicateClusters": 0,
+    "heaviestCluster": null,
+    "name": "franz_strike",
+    "label": "Franz STRIKE3002 archived Tacview",
+    "files": [
+        "Tacview-20251108-172052-DCS-Client FRANZ1-1 STRIKE3002.xml"
+    ],
+    "glob": "debriefings/Archived logs/*FRANZ*.xml",
+    "status": "ok"
+}

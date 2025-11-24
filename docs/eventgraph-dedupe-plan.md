@@ -10,8 +10,8 @@ This document translates the recent investigation notes into a to-do style plan 
   3. Maintain a `signatureIndex` map when calling `addOrMerge()` so duplicate signatures always merge before inference regardless of evidence order.
   4. Track metrics (`composite_signatures_emitted`, `composite_signature_merges`) to confirm hits during regression runs.
 - **Verification:**
-  - Re-run `php tmp/inspect_zach.php` and confirm six unique HasFired rows remain.
-  - Run `php tmp/find_duplicates.php | Select-String "Olympus"` and ensure Olympus truck destructions now emit once per kill.
+  - Re-run `php scripts/eventgraph-dedupe-audit.php --mode events --type HasFired --pilot "Skunk"` and confirm six unique HasFired rows remain.
+  - Run `php scripts/eventgraph-dedupe-audit.php --duplicates-only --type HasBeenDestroyed | Select-String "Olympus"` and ensure Olympus truck destructions now emit once per kill.
 
 ## 2. Post-Build Reconciliation Pass
 - **Status:** Missing. After `runInference()` the pipeline only calls `applyPostMergeFilters()` and `pruneDisconnectDestructions()` (both prune, not merge).
@@ -33,28 +33,24 @@ This document translates the recent investigation notes into a to-do style plan 
   - `vendor/bin/phpunit --testsuite event-graph` ensures duplicate destructions collapse to two targets and enforces the expected metrics counters.
 
 ## 4. EventGraph Dedupe Audit CLI
-- **Status:** Not present. `scripts/` only hosts deployment utilities; investigators rely on ad-hoc `tmp/*.php` scripts.
-- **Implementation Plan:**
-  1. Add `scripts/eventgraph-dedupe-audit.php` that bootstraps the app (require `config.php`), instantiates `EventGraphAggregator`, and iterates merged events printing `canonicalTargetKey`, `weaponKey`, mission time, and evidence counts.
-  2. Support filters via CLI options (e.g., `--pilot "Skunk 1-2"`, `--type HasBeenDestroyed`, `--window 10`).
-  3. Document usage in `README.md` under a new “Diagnostics” section.
+- **Status:** ✅ `scripts/eventgraph-dedupe-audit.php` now ships with the repo and replaces the ad-hoc `tmp/*.php` probes.
+- **Implementation Notes:**
+  1. The CLI bootstraps the normal aggregator stack (shared config + EventGraph autoloader), ingests the selected Tacview glob, and emits composite-signature clusters with `targetKey`, `weaponKey`, bucket range, and evidence counts.
+  2. Filters include `--pilot`, `--type` (repeatable), `--target`, `--weapon`, `--window <seconds>` for bucket sizing, `--duplicates-only` to focus on contested signatures, `--limit`, and `--json` to hand results to tooling.
+  3. Usage is documented in the README “Diagnostics” section so investigators can grep duplicates without writing new scripts.
 - **Verification:**
-  - Run `php scripts/eventgraph-dedupe-audit.php --pilot "Skunk 1-2" --type HasBeenDestroyed` and confirm output matches inspector scripts.
-  - Replace ad-hoc one-off scripts with this CLI inside `tmp/README.md` (if any) to reduce drift.
+  - `php scripts/eventgraph-dedupe-audit.php --mode events --type HasBeenDestroyed --pilot "Skunk" --limit 3` highlights the Skunk truck destructions with the same canonical keys as the retired inspectors.
+  - Running with `--json` mirrors the evidence counts and metrics reported by the inspector scripts, demonstrating parity and enabling CI hooks.
 
 ## 5. Multi-Set Regression Runs
-- **Status:** Only the sanitized GT6 set is mentioned in `CHANGELOG.md` (Unreleased → Fixed 2025-11-22). No evidence of reruns against the Franz strike or other missions.
-- **Implementation Plan:**
-  1. Prepare a regression checklist referencing key Tacview bundles (GT6 sanitized set, Franz strike, Olympus Menton, Brownwater baseline).
-  2. For each set, run:
-     - `php tmp/find_duplicates.php --path ./debriefings/[SET]`
-     - `php tmp/inspect_zach.php` or analogous inspector per squadron
-     - `php public/api/debriefing.php?debriefing=[SET]` via curl to verify API output
-  3. Capture summaries in `TEST_RESULTS.txt` and append bullet points to `CHANGELOG.md` under the corresponding date.
-  4. Automate via a PowerShell or PHP harness (`scripts/run-regressions.ps1`) so future agents can re-run with one command.
+- **Status:** ✅ `scripts/run-regressions.php` now exercises the canonical Tacview bundles (GT6 rc4 set, Franz STRIKE3002 archive, and the Nov 8 evening stack), records aggregator metrics + duplicate-cluster counts, and stores machine-readable logs under `tmp/regressions/<timestamp>/`.
+- **Implementation Notes:**
+  1. The harness boots the EventGraph stack, optionally shells out to `php vendor/bin/phpunit --testsuite event-graph`, then iterates each dataset glob defined in `regressionSets()`.
+  2. For every dataset it ingests the files, captures mission duration, raw→merged counts, composite/post-inference merges, and a quick duplicate-cluster scan (target/weapon bucket signature) to highlight any regressions.
+  3. Results are persisted as JSON per set plus a top-level `summary.json`, making it easy to diff runs or feed the numbers into dashboards; logs are timestamped for traceability.
 - **Verification:**
-  - Archive the command logs under `tmp/regressions/DATE/` for traceability.
-  - Share findings with the team (Slack/README) if new clusters appear.
+  - `php scripts/run-regressions.php --skip-tests` (run on 2025-11-23) generated `tmp/regressions/20251124-044821/` with clean summaries for GT6 rc4, Franz STRIKE3002, and the Nov 8 evening Tacviews—no duplicate clusters detected in any set.
+  - README and `TEST_RESULTS.txt` now outline the workflow so future engineers can rerun the bundle (or add new ones) before shipping dedupe changes.
 
 ## Execution Order for an Agentic Model
 1. Implement the composite signature pipeline (Section 1) and ensure unit metrics pass.

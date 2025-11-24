@@ -1,0 +1,21 @@
+{
+    "missionName": "Tacview-20251108-210436-DCS-Client",
+    "fileCount": 2,
+    "missionDuration": 12581.050000000003,
+    "missionStart": 51978,
+    "rawEvents": 3187,
+    "mergedEvents": 1828,
+    "duplicatesSuppressed": 873,
+    "compositeMerges": 398,
+    "postInferenceMerges": 0,
+    "duplicateClusters": 0,
+    "heaviestCluster": null,
+    "name": "nov8_evening",
+    "label": "Tacview 2025-11-08 evening stack",
+    "files": [
+        "Tacview-20251108-210436-DCS-Client.xml",
+        "Tacview-20251108-212543-DCS-Client.xml"
+    ],
+    "glob": "debriefings/Archived logs/Tacview-20251108-21*.xml",
+    "status": "ok"
+}

@@ -1,8 +1,8 @@
 # Use official PHP image with Apache
 FROM php:8.2-apache
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+# Enable required Apache modules
+RUN a2enmod rewrite headers
 
 # Install any additional PHP extensions if needed
 RUN docker-php-ext-install pdo pdo_mysql

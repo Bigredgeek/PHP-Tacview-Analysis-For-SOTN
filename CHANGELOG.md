@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - 2025-11-24
+- Extended `scripts/eventgraph-dedupe-audit.php` with `--mode events|sources`, parent filtering, and mission-time windows so investigators can dump raw events or inspect per-recording offsets without reaching for bespoke helpers; documented the workflow in `README.md` and the new `docs/diagnostics-toolbox.md` cheat sheet.
+
+### Removed - 2025-11-24
+- Deleted the legacy `tmp/*.php` inspectors (Zach/Menton probes, duplicate scanners, offset calculators, etc.) now that the audit CLI and regression harness cover those workflows; the only survivors were relocated to `scripts/diagnostics/analyze-coalition-mismatch.php` and `scripts/diagnostics/source-event-dump.php`, leaving `tmp/` reserved for generated artifacts like regression logs.
+
+### Fixed - 2025-11-24
+- Enabled Apache's `headers` module in the Docker image so the `.htaccess` security headers no longer trigger 500 errors when testing the stack under `docker run -p 8080:80 tacview-analysis`.
+- Tuned the CRT visual effects in `public/tacview.css`: widened scanline spacing, slowed the grid/scan animations, and softened the flicker opacity so the retro treatment remains comfortable on desktop monitors and Pixel-class phones.
+
+### Added - 2025-11-23
+- Introduced `scripts/eventgraph-dedupe-audit.php`, a diagnostics CLI that bootstraps the EventGraph stack, surfaces composite-signature clusters (type, canonical target key, weapon key, bucket window, and evidence counts), and accepts filters such as `--pilot`, `--type`, `--target`, `--weapon`, `--window`, `--limit`, and `--json` for automation.
+- Documented the new workflow in the README "Diagnostics" section so investigators can replace the ad-hoc `tmp/*.php` scripts when reviewing Zach/Menton-style duplicates.
+- Added `scripts/run-regressions.php`, which iterates the canonical Tacview bundles (GT6 rc4, Franz STRIKE3002, Nov 8 evening stack), optionally runs `php vendor/bin/phpunit --testsuite event-graph`, and writes JSON summaries with raw→merged counts, duplicate suppression, and cluster health to `tmp/regressions/<timestamp>/`; the inaugural run (2025-11-23) is recorded in `TEST_RESULTS.txt`.
+
 ### Added - 2025-11-22
 - Authored `docs/eventgraph-dedupe-plan.md`, outlining the agent-ready to-do list for composite signature clustering, post-inference reconciliation, regression fixtures, the audit CLI, and mission-set regression runs.
 - Added a Composer/PHPUnit harness with the `menton_dupe` Tacview fixture plus `tests/EventGraph/EventGraphAggregatorTest.php`, wiring `vendor/bin/phpunit` into `package.json` so composite signatures and the reconciliation window stay regression-tested.

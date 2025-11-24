@@ -1,0 +1,26 @@
+{
+    "missionName": "SOTN_GT6_rc4",
+    "fileCount": 7,
+    "missionDuration": 9243.379999999997,
+    "missionStart": 20867,
+    "rawEvents": 5901,
+    "mergedEvents": 1624,
+    "duplicatesSuppressed": 3470,
+    "compositeMerges": 781,
+    "postInferenceMerges": 0,
+    "duplicateClusters": 0,
+    "heaviestCluster": null,
+    "name": "gt6_rc4",
+    "label": "SOTN GT6 rc4 sanitized bundle",
+    "files": [
+        "SOTN GT6 - Saageli - Tacview-20251122-204908-DCS-Client-SOTN_GT6_rc4.xml",
+        "Tacview-20251122-115907-DCS-Client-SOTN_GT6_rc4.xml",
+        "Tacview-20251122-140010-DCS-Client-SOTN_GT6_rc4.xml",
+        "Tacview-20251122-144910-DCS-Client-SOTN_GT6_rc4.xml",
+        "Tacview-20251122-190503-DCS-Client-SOTN_GT6_rc4.xml",
+        "Tacview-20251122-204948-DCS-Client-SOTN_GT6_rc4.xml",
+        "Tacview-20251122-215029-DCS-Client-SOTN_GT6_rc4.xml"
+    ],
+    "glob": "debriefings/*SOTN_GT6_rc4.xml",
+    "status": "ok"
+}
