@@ -562,15 +562,25 @@ function renderSources(EventGraphAggregator $aggregator, array $sources): void
         $duration = isset($source['duration']) ? (float)$source['duration'] : 0.0;
         $events = (int)($source['events'] ?? 0);
         $baseline = !empty($source['baseline']);
+        $alignedStart = isset($source['alignedStartTime']) && is_numeric($source['alignedStartTime'])
+            ? (float)$source['alignedStartTime']
+            : null;
+        $alignedDuration = isset($source['alignedDuration']) && is_numeric($source['alignedDuration'])
+            ? (float)$source['alignedDuration']
+            : null;
+        $alignedStartLabel = $alignedStart !== null ? sprintf('%8.2f', $alignedStart) : '   n/a ';
+        $alignedDurationLabel = $alignedDuration !== null ? sprintf('%8.2f', $alignedDuration) : '   n/a ';
 
         printf(
-            "  - %s | offset=%+.3f | strategy=%s | baseline=%s | start=%8.2f | duration=%8.2f | events=%d\n",
+            "  - %s | offset=%+.3f | strategy=%s | baseline=%s | start=%8.2f | duration=%8.2f | alignedStart=%s | alignedDuration=%s | events=%d\n",
             $id,
             $offset,
             $strategy,
             $baseline ? 'yes' : 'no',
             $start,
             $duration,
+            $alignedStartLabel,
+            $alignedDurationLabel,
             $events
         );
     }

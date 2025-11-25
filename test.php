@@ -111,7 +111,8 @@ try {
         $mission->getStartTime(),
         $mission->getDuration(),
         $mission->getEvents(),
-        count($sources)
+        count($sources),
+        $sources
     );
     $output = $tv->getOutput();
     $length = strlen($output);

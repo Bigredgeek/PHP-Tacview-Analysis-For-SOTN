@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed - 2025-11-28
+- Condensed the mission timeline component to reduce vertical space: row heights reduced from 38px to 22px, bar heights from 26px to 16px, row margins from 14px to 6px, fonts reduced ~2pt across all elements; label width narrowed; coreline and panel padding trimmed—preserving all information and readability while cutting total panel height by approximately 40%.
+
+### Fixed - 2025-11-27
+- Corrected the `EventGraphAggregator` offset calculation logic to account for absolute time shifts (e.g. timezone errors) when using the `anchor` strategy. The aggregator now correctly combines the relative event offset with the start time difference, ensuring that recordings with significant clock drift (like the 2-hour shift in "Longshot") are aligned to the correct absolute time on the mission timeline.
+- Fixed a bug in `EventGraphAggregator::findConsensusStart` where an undefined variable `$start` was used instead of `$left`, which could cause issues with start time consensus.
+
+### Added - 2025-11-27
+- Added a central mission-time axis with five-minute tick marks and mission-start labels inside `core/tacview.php`, giving the mission coverage timeline a precise visual ruler plus hover tooltips so analysts can gauge offsets without opening the tooltips on each bar.
+
+### Changed - 2025-11-27
+- Taught the Tacview renderer (`core/tacview.php`) to seed its master timeline from the EventGraph-aligned source windows, caching the derived `timelineStart`/`timelineDuration` and using them for both the axis ticks and bar layout so the UI now reflects the aggregator’s adjusted offsets instead of the unreliable raw `<MissionTime>` headers.
+- Re-skinned the mission coverage timeline with the SOTN neon command-center palette (dark gridglass, lime recording bars, amber baseline, holographic tooltips) and synced the tick/legend styles across `core/tacview.css` and `public/tacview.css` while introducing a shared label-width offset so the top axis, core line, and source bars align perfectly.
+- Locked the mission timeline tick generator (`core/tacview.php`) to absolute quarter-hour anchors so the rail now shows clean 06:00/06:15/06:30 marks (with intermediate five-minute minors) instead of inheriting each recording’s odd start seconds.
+- Updated the mission timeline colors to reuse the site-wide neon #39FF14 palette (axis ticks, tooltips, aligned bars) while keeping the baseline source in a contrasting amber so the component matches the rest of the UI.
+- Swapped the mission timeline border rails and aligned-source bars over to the same blue gradient used by the statistics column headers, refreshed the legend swatches/text color for readability, and mirrored the styling across `core/tacview.css` and `public/tacview.css` so the component matches the latest palette direction.
+- Centered the aligned-source duration labels inside each mission timeline bar via flexbox so the coverage length no longer hugs the lower edge of the track.
+- Replaced the mission timeline row labels with Tacview author names, wiring the `<Author>` tags through EventGraph so analysts immediately see which pilot recorded each source instead of the generic mission filename.
+- Corrected the mission timeline coverage math so each bar uses the EventGraph-aligned coverage window (Tacview header start/end shifted by the solved offsets, with evidence-derived fallbacks), fixing the short “Crown/Skunk/Yellow” bars and ensuring the visualization now mirrors the actual aggregation time base.
+- Expanded the mission bounds aggregator logic to factor in aligned coverage windows and reuse the computed per-source window metadata, so the timeline now stretches from the earliest aligned start to the latest aligned end without clipping long recordings while still preserving the absolute mission clock for every consumer (renderer, CLI, preprocessors).
+
+### Added - 2025-11-26
+- Inserted an interactive mission coverage timeline between Mission Information and the Aircrew Performance Summary: `core/tacview.php` now normalizes per-source coverage windows, renders hover tooltips, and exposes new language strings while every entry point (root/API/public, optimized fallback, preprocessing CLI, and `test.php`) forwards `EventGraphAggregator::getSources()` data into `proceedAggregatedStats()` so the component shows up in cached builds too; mirrored the neon styling in both `core/tacview.css` and `public/tacview.css` to keep the new bars on-brand.
+
 ### Fixed - 2025-11-23
 - Added an explicit source-count row to the Mission Information panel by extending `core/tacview.php` and every call to `proceedAggregatedStats()` with a `count($mission->getSources())` argument, ensuring combined debriefings report how many Tacview recordings were merged.
 - Restored the neon green marquee styling for the hero headings in `public/tacview.css` so “PHP Tacview Debriefing”, “Mission Information”, and “Aircrew Performance Summary” once again match the rest of the HUD palette instead of the temporary cyan variant.

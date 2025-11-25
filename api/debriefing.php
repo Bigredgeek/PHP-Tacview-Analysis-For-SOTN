@@ -81,7 +81,8 @@ use EventGraph\EventGraphAggregator;
 				$mission->getStartTime(),
 				$mission->getDuration(),
 				$mission->getEvents(),
-				count($sources)
+				count($sources),
+				$sources
 			);
 			echo $tv->getOutput();
 

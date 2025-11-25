@@ -281,7 +281,8 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/debriefing.php';
 					$mission->getStartTime(),
 					$mission->getDuration(),
 					$mission->getEvents(),
-					count($sources)
+					count($sources),
+					$sources
 				);
 				echo $tv->getOutput();
 

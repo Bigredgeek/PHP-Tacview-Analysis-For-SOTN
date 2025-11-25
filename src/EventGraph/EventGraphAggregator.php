@@ -207,8 +207,8 @@ final class EventGraphAggregator
         $minimumMatches = isset($options['anchor_min_matches']) ? (int)$options['anchor_min_matches'] : 3;
         $this->anchorMinimumMatches = $minimumMatches > 0 ? $minimumMatches : 1;
 
-        $this->maxFallbackOffset = isset($options['max_fallback_offset']) ? (float)$options['max_fallback_offset'] : 600.0;
-        $defaultAnchorOffset = max($this->maxFallbackOffset, 7200.0);
+        $this->maxFallbackOffset = isset($options['max_fallback_offset']) ? (float)$options['max_fallback_offset'] : 7200.0;
+        $defaultAnchorOffset = max($this->maxFallbackOffset, 28800.0);
         $this->maxAnchorOffset = isset($options['max_anchor_offset']) ? (float)$options['max_anchor_offset'] : $defaultAnchorOffset;
         $this->missionTimeCongruenceTolerance = isset($options['mission_time_congruence_tolerance'])
             ? max(0.0, (float)$options['mission_time_congruence_tolerance'])
@@ -279,6 +279,12 @@ final class EventGraphAggregator
     public function toAggregatedMission(): AggregatedMission
     {
         $this->build();
+        $coverageWindows = $this->buildRecordingCoverageWindows();
+        $alignedWindows = [];
+        foreach ($this->recordings as $recording) {
+            $alignedWindows[$recording->id] = $this->computeAlignedWindow($recording, $coverageWindows);
+        }
+        $this->expandMissionBoundsWithAlignedWindows($alignedWindows);
 
         $mission = new AggregatedMission(
             $this->missionName ?? self::DEFAULT_MISSION_NAME,
@@ -292,14 +298,21 @@ final class EventGraphAggregator
         }
 
         foreach ($this->recordings as $recording) {
+            $offset = $this->recordingOffsets[$recording->id] ?? 0.0;
+            $window = $alignedWindows[$recording->id] ?? ['start' => null, 'end' => null, 'duration' => null];
+
             $mission->addSource([
                 'id' => $recording->id,
                 'filename' => $recording->filename,
                 'missionName' => $recording->missionName,
+                'author' => $recording->author,
                 'startTime' => $recording->startTime,
                 'duration' => $recording->duration,
+                'alignedStartTime' => $window['start'],
+                'alignedEndTime' => $window['end'],
+                'alignedDuration' => $window['duration'],
                 'events' => count($recording->events),
-                'offset' => $this->recordingOffsets[$recording->id] ?? 0.0,
+                'offset' => $offset,
                 'baseline' => $recording->id === $this->baselineRecordingId,
                 'offsetStrategy' => $this->offsetStrategies[$recording->id] ?? null,
                 'reliability' => $this->recordingReliability[$recording->id] ?? 1.0,
@@ -1406,7 +1419,14 @@ final class EventGraphAggregator
         $baselineIndex = $this->buildAnchorIndex($baselineEvents);
         $anchorOffset = $this->findAnchorOffset($baselineIndex, $targetEvents);
         if ($anchorOffset !== null) {
-            return ['offset' => $anchorOffset['offset'], 'strategy' => 'anchor', 'matches' => $anchorOffset['matches']];
+            $baseline = $this->findRecording($baselineId);
+            $target = $this->findRecording($targetId);
+            $startTimeDiff = 0.0;
+            if ($baseline !== null && $target !== null && $baseline->startTime !== null && $target->startTime !== null) {
+                $startTimeDiff = $target->startTime - $baseline->startTime;
+            }
+
+            return ['offset' => $anchorOffset['offset'] + $startTimeDiff, 'strategy' => 'anchor', 'matches' => $anchorOffset['matches']];
         }
 
         $fallback = $this->fallbackOffset($baselineId, $targetId);
@@ -2203,6 +2223,8 @@ final class EventGraphAggregator
             return null;
         }
 
+       
+
         $identity = ObjectIdentity::forObject($object);
         return $identity?->getKey();
     }
@@ -2542,6 +2564,106 @@ final class EventGraphAggregator
         foreach ($this->events as $event) {
             $event->shiftMissionTime($delta);
         }
+    }
+
+    /**
+     * @return array<string, array{start: float, end: float}>
+     */
+    private function buildRecordingCoverageWindows(): array
+    {
+        if ($this->events === []) {
+            return [];
+        }
+
+        $windows = [];
+
+        foreach ($this->events as $event) {
+            $evidenceSamples = $event->getEvidence();
+            if ($evidenceSamples === []) {
+                continue;
+            }
+
+            foreach ($evidenceSamples as $evidence) {
+                $sourceId = $evidence->sourceId;
+                $time = $evidence->missionTime;
+
+                if (!isset($windows[$sourceId])) {
+                    $windows[$sourceId] = [
+                        'start' => $time,
+                        'end' => $time,
+                    ];
+                    continue;
+                }
+
+                if ($time < $windows[$sourceId]['start']) {
+                    $windows[$sourceId]['start'] = $time;
+                }
+                if ($time > $windows[$sourceId]['end']) {
+                    $windows[$sourceId]['end'] = $time;
+                }
+            }
+        }
+
+        return $windows;
+    }
+
+    private function expandMissionBoundsWithAlignedWindows(array $alignedWindows): void
+    {
+        $minStart = $this->startTime;
+        $maxEnd = $this->endTime;
+
+        foreach ($alignedWindows as $window) {
+            if (isset($window['start'])) {
+                $minStart = $minStart === null ? $window['start'] : min($minStart, $window['start']);
+            }
+            if (isset($window['end'])) {
+                $maxEnd = $maxEnd === null ? $window['end'] : max($maxEnd, $window['end']);
+            }
+        }
+
+        $this->startTime = $minStart;
+        $this->endTime = $maxEnd;
+    }
+
+    /**
+     * @return array{start: ?float, end: ?float, duration: ?float}
+     */
+    private function computeAlignedWindow(SourceRecording $recording, array $coverageWindows): array
+    {
+        $rawStart = $recording->startTime;
+        $rawEnd = $recording->endTime;
+        $rawDuration = $recording->duration;
+        $offset = $this->recordingOffsets[$recording->id] ?? 0.0;
+
+        $alignedStart = $rawStart !== null ? $rawStart - $offset : null;
+        $alignedEnd = $rawEnd !== null ? $rawEnd - $offset : null;
+
+        $coverage = $coverageWindows[$recording->id] ?? null;
+        if ($alignedStart === null && isset($coverage['start'])) {
+            $alignedStart = $coverage['start'];
+        }
+        if ($alignedEnd === null && isset($coverage['end'])) {
+            $alignedEnd = $coverage['end'];
+        }
+
+        $alignedDuration = null;
+        if ($alignedStart !== null && $alignedEnd !== null) {
+            $alignedDuration = max(0.0, $alignedEnd - $alignedStart);
+        } elseif ($rawDuration !== null) {
+            $alignedDuration = max(0.0, $rawDuration);
+        } elseif (isset($coverage['start'], $coverage['end'])) {
+            $alignedDuration = max(0.0, $coverage['end'] - $coverage['start']);
+        }
+
+        if ($alignedStart !== null && $alignedDuration !== null && $alignedEnd === null) {
+            $alignedEnd = $alignedStart + $alignedDuration;
+        }
+
+        return [
+            'start' => $alignedStart,
+            'end' => $alignedEnd,
+            'duration' => $alignedDuration,
+        ];
     }
 
     private function resolveMissionName(?string $current, string $candidate): string

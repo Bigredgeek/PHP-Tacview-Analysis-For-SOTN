@@ -95,7 +95,8 @@ $tv->proceedAggregatedStats(
     $mission->getStartTime(),
     $mission->getDuration(),
     $mission->getEvents(),
-    count($sources)
+    count($sources),
+    $sources
 );
 
 // Get the rendered output

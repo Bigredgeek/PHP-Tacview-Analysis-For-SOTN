@@ -21,6 +21,7 @@ final class SourceRecording
     public readonly string $id;
     public readonly string $filename;
     public readonly string $missionName;
+    public readonly ?string $author;
     public readonly ?float $startTime;
     public readonly ?float $duration;
     public readonly ?float $endTime;
@@ -52,6 +53,9 @@ final class SourceRecording
 
         $missionName = trim((string)($parser->missionName ?? ''));
         $this->missionName = $missionName !== '' ? $missionName : $this->id;
+
+        $author = trim((string)($parser->author ?? ''));
+        $this->author = $author !== '' ? $author : null;
         $this->startTime = is_numeric($parser->startTime) ? (float)$parser->startTime : null;
         $this->duration = is_numeric($parser->duration) ? (float)$parser->duration : null;
         $this->endTime = ($this->startTime !== null && $this->duration !== null)

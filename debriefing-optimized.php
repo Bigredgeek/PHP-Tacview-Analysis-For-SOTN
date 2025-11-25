@@ -295,7 +295,8 @@ $showStatusOverlay = ($config['show_status_overlay'] ?? false) || (isset($_GET['
 					$mission->getStartTime(),
 					$mission->getDuration(),
 					$mission->getEvents(),
-					count($sources)
+					count($sources),
+					$sources
 				);
 				echo $tv->getOutput();
 

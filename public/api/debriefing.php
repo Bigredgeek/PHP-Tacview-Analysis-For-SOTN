@@ -316,7 +316,8 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/api/debriefing.php';
 		        $mission->getStartTime(),
 		        $mission->getDuration(),
 		        $mission->getEvents(),
-		        count($sources)
+		        count($sources),
+		        $sources
 		    );
 		    echo $tv->getOutput();
 
