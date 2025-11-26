@@ -5,6 +5,14 @@ declare(strict_types=1);
 // Load configuration from parent directory
 $config = require_once __DIR__ . "/../config.php";
 
+// Enable gzip compression if supported and configured (helps with Vercel payload limits)
+if (($config['enable_compression'] ?? true) && !headers_sent()) {
+    if (extension_loaded('zlib') && isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
+        ini_set('zlib.output_compression', '1');
+        ini_set('zlib.output_compression_level', '6');
+    }
+}
+
 require_once __DIR__ . '/../src/core_path.php';
 $corePath = tacview_resolve_core_path($config['core_path'] ?? 'core', dirname(__DIR__));
 

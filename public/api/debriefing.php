@@ -32,6 +32,14 @@ if ($config === []) {
 	throw new \RuntimeException('Failed to load configuration for public/api/debriefing.php');
 }
 
+// Enable gzip compression if supported and configured (helps with Vercel payload limits)
+if (($config['enable_compression'] ?? true) && !headers_sent()) {
+	if (extension_loaded('zlib') && isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
+		ini_set('zlib.output_compression', '1');
+		ini_set('zlib.output_compression_level', '6');
+	}
+}
+
 // Load the shared Tacview engine from the core submodule
 require_once __DIR__ . '/../../' . $config['core_path'] . '/tacview.php';
 

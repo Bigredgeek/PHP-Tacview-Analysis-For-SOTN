@@ -21,6 +21,10 @@ return [
     // Paths (relative to project root)
     'debriefings_path' => 'debriefings/*.xml',
     'core_path' => 'core',  // Path to the bundled core assets
+    
+    // Output compression (helps with serverless environments like Vercel)
+    'enable_compression' => true,  // Enable gzip output compression
+    
     // EventGraph aggregator tuning
     'aggregator' => [
         'time_tolerance' => 1.5,
