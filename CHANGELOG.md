@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - 2025-11-26 (SOTN Command Center Label)
+- Updated the descriptive header in `public/tacview.css` to explicitly name the Song of the Nibelungs command-center palette so downstream deployments reference the right visual theme when verifying assets.
+
 ### Fixed - 2025-11-26 (Vercel Payload Optimization)
 - **Implemented aggressive output compression and HTML minification for Vercel deployment**
   - Enabled gzip compression with level 9 (maximum) using forced `zlib.output_compression`
