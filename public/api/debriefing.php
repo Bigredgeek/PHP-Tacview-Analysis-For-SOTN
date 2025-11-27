@@ -32,11 +32,14 @@ if ($config === []) {
 	throw new \RuntimeException('Failed to load configuration for public/api/debriefing.php');
 }
 
-// Enable gzip compression if supported and configured (helps with Vercel payload limits)
+// Enable aggressive output compression for Vercel payload limits
 if (($config['enable_compression'] ?? true) && !headers_sent()) {
 	if (extension_loaded('zlib') && isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
+		// Use output buffering with gzip for better compression
+		ob_start('ob_gzhandler');
+		// Set aggressive compression level
 		ini_set('zlib.output_compression', '1');
-		ini_set('zlib.output_compression_level', '6');
+		ini_set('zlib.output_compression_level', '9');
 	}
 }
 
@@ -374,3 +377,21 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/api/debriefing.php';
 		?>
 	</body>
 </html>
+<?php
+// Minify HTML output to reduce payload size for Vercel
+if (($config['minify_html'] ?? false) && ob_get_level() > 0) {
+	$html = ob_get_clean();
+	
+	// Aggressive HTML minification
+	$html = preg_replace('/\s+/', ' ', $html); // Collapse whitespace
+	$html = preg_replace('/>\s+</', '><', $html); // Remove space between tags
+	$html = preg_replace('/\s+([\/>])/', '$1', $html); // Remove trailing spaces in tags
+	
+	echo $html;
+}
+
+// Ensure gzip buffer is flushed
+if (ob_get_level() > 0) {
+	ob_end_flush();
+}
+?>

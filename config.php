@@ -23,7 +23,8 @@ return [
     'core_path' => 'core',  // Path to the bundled core assets
     
     // Output compression (helps with serverless environments like Vercel)
-    'enable_compression' => false,  // Enable gzip output compression
+    'enable_compression' => true,  // Enable gzip output compression
+    'minify_html' => true,  // Minify HTML to reduce payload size
     
     // EventGraph aggregator tuning
     'aggregator' => [

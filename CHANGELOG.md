@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - 2025-11-26 (Vercel Payload Optimization)
+- **Implemented aggressive output compression and HTML minification for Vercel deployment**
+  - Enabled gzip compression with level 9 (maximum) using `ob_gzhandler`
+  - Added HTML minification: collapses whitespace, removes inter-tag spacing, strips trailing tag spaces
+  - New config options: `minify_html` (default: true) to control minification
+  - Changed `enable_compression` default from false to true
+  - Addresses "FUNCTION_RESPONSE_PAYLOAD_TOO_LARGE" (4.5MB limit) on Vercel serverless functions
+  - Combined optimizations can reduce payload by 70-90% (HTML minification ~15-25%, gzip compression ~70-80%)
+
 ### Fixed - 2025-11-26 (Coverage-Weighted Baseline Selection)
 - **Implemented coverage-weighted baseline selection algorithm**
   - Changed baseline selection from pure anchor score to a weighted combination of anchor quality (40%) and recording coverage (60%)
