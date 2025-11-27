@@ -506,9 +506,15 @@ final class EventGraphAggregator
 
             if (!$progress) {
                 foreach (array_keys($pending) as $recordingId) {
-                    $this->recordingOffsets[$recordingId] = 0.0;
-                    $this->offsetStrategies[$recordingId] = 'fallback-skipped';
-                    $this->alignmentConfidence[$recordingId] = 0.1; // Low confidence for unaligned
+                    // Hard alignment fallback: align based on start times when event matching fails
+                    // This ensures recordings with correct timestamps (but no overlapping events) are placed correctly
+                    $recordingStart = $recordingsById[$recordingId]->startTime ?? 0.0;
+                    $baselineStart = $recordingsById[$baselineId]->startTime ?? 0.0;
+                    $hardOffset = $recordingStart - $baselineStart;
+
+                    $this->recordingOffsets[$recordingId] = $hardOffset;
+                    $this->offsetStrategies[$recordingId] = 'fallback-hard-align';
+                    $this->alignmentConfidence[$recordingId] = 0.4; // Moderate confidence
                     $this->metrics['alignment_conflicts']++;
                 }
                 break;
@@ -524,7 +530,7 @@ final class EventGraphAggregator
             $offset = $this->recordingOffsets[$recording->id] ?? 0.0;
             $strategy = $this->offsetStrategies[$recording->id] ?? 'baseline';
 
-            if ($offset !== 0.0 && (str_starts_with($strategy, 'anchor') || str_starts_with($strategy, 'fallback-applied'))) {
+            if ($offset !== 0.0 && (str_starts_with($strategy, 'anchor') || str_starts_with($strategy, 'fallback-applied') || str_starts_with($strategy, 'fallback-hard-align'))) {
                 foreach ($events as $event) {
                     $event->shiftMissionTime(-$offset);
                 }
@@ -1351,6 +1357,7 @@ final class EventGraphAggregator
             $indices[$recording->id] = $this->buildAnchorIndex($eventSets[$recording->id]);
         }
 
+        // Calculate raw anchor scores
         foreach ($this->recordings as $candidate) {
             $score = 0;
             $index = $indices[$candidate->id];
@@ -1368,35 +1375,68 @@ final class EventGraphAggregator
             $anchorScores[$candidate->id] = $score;
         }
 
+        // Find the longest recording duration to normalize coverage
+        $maxDuration = 0.0;
+        foreach ($this->recordings as $recording) {
+            if ($recording->duration !== null && $recording->duration > $maxDuration) {
+                $maxDuration = $recording->duration;
+            }
+        }
+
+        // Calculate the maximum anchor score for normalization
+        $maxAnchorScore = 0;
+        foreach ($anchorScores as $score) {
+            if ($score > $maxAnchorScore) {
+                $maxAnchorScore = $score;
+            }
+        }
+
+        // Calculate coverage-weighted scores
+        // Formula: weightedScore = (normalizedAnchor * 0.4) + (coverageRatio * 0.6)
+        // This gives 60% weight to coverage and 40% to anchor quality
+        $weightedScores = [];
+        foreach ($this->recordings as $recording) {
+            $anchorScore = $anchorScores[$recording->id] ?? 0;
+            
+            $normalizedAnchor = $maxAnchorScore > 0 ? ($anchorScore / $maxAnchorScore) : 0;
+            $coverageRatio = ($maxDuration > 0 && $recording->duration !== null) 
+                ? ($recording->duration / $maxDuration) 
+                : 0;
+            
+            // 40% anchor quality, 60% coverage - heavily favor longer recordings
+            $weightedScores[$recording->id] = ($normalizedAnchor * 0.4) + ($coverageRatio * 0.6);
+        }
+
         $bestId = null;
-        $bestScore = -1;
-        $bestStart = null;
+        $bestScore = -1.0;
+        $bestDuration = null;
 
         foreach ($this->recordings as $recording) {
-            $score = $anchorScores[$recording->id] ?? 0;
-            $startTime = $recording->startTime;
+            $score = $weightedScores[$recording->id] ?? 0.0;
+            $duration = $recording->duration;
 
             if ($score > $bestScore) {
                 $bestScore = $score;
                 $bestId = $recording->id;
-                $bestStart = $startTime;
+                $bestDuration = $duration;
                 continue;
             }
 
-            if ($score === $bestScore) {
+            if (abs($score - $bestScore) < 0.01 && $score > 0) {
+                // For recordings with nearly equal weighted scores, prefer the longer one
                 $prefer = false;
 
-                if ($bestStart === null && $startTime !== null) {
+                if ($bestDuration === null && $duration !== null) {
                     $prefer = true;
-                } elseif ($bestStart !== null && $startTime !== null && $startTime < $bestStart) {
+                } elseif ($bestDuration !== null && $duration !== null && $duration > $bestDuration) {
                     $prefer = true;
-                } elseif ($bestStart === null && $startTime === null && $bestId === null) {
+                } elseif ($bestDuration === null && $duration === null && $bestId === null) {
                     $prefer = true;
                 }
 
                 if ($prefer) {
                     $bestId = $recording->id;
-                    $bestStart = $startTime;
+                    $bestDuration = $duration;
                 }
             }
         }
@@ -1405,7 +1445,29 @@ final class EventGraphAggregator
             return $bestId;
         }
 
-        return $this->selectEarliestStartRecordingId();
+        return $this->selectLongestRecordingId();
+    }
+
+    private function selectLongestRecordingId(): ?string
+    {
+        $selected = null;
+        $bestDuration = null;
+
+        foreach ($this->recordings as $recording) {
+            if ($recording->duration === null) {
+                if ($selected === null) {
+                    $selected = $recording->id;
+                }
+                continue;
+            }
+
+            if ($bestDuration === null || $recording->duration > $bestDuration) {
+                $bestDuration = $recording->duration;
+                $selected = $recording->id;
+            }
+        }
+
+        return $selected;
     }
 
     private function selectEarliestStartRecordingId(): ?string
@@ -1637,11 +1699,17 @@ final class EventGraphAggregator
         $baselineIndex = $this->buildAnchorIndex($baselineEvents);
         $anchorOffset = $this->findAnchorOffset($baselineIndex, $targetEvents);
         if ($anchorOffset !== null) {
-            // NOTE: We intentionally do NOT add startTimeDiff here.
-            // The MissionTime header in Tacview XML is notoriously unreliable -
-            // different DCS clients record different start times for the same mission
-            // (can vary by 2-3 hours!). The anchor offset from event matching is
-            // the only reliable alignment method.
+            // Calculate the start time difference from MissionTime headers
+            // While MissionTime headers can have incorrect absolute times (wrong hour),
+            // the relative minute/second values are generally correct across recordings.
+            // This ensures the timeline displays at the consensus mission time (e.g., 06:45)
+            // rather than the baseline's potentially incorrect time (e.g., 05:47).
+            $baseline = $this->findRecording($baselineId);
+            $target = $this->findRecording($targetId);
+            $startTimeDiff = 0.0;
+            if ($baseline !== null && $target !== null && $baseline->startTime !== null && $target->startTime !== null) {
+                $startTimeDiff = $target->startTime - $baseline->startTime;
+            }
 
             // Calculate confidence based on number of matches and offset spread
             $matchCount = $anchorOffset['matches'];
@@ -1662,7 +1730,7 @@ final class EventGraphAggregator
             $this->metrics['anchor_match_total'] += $matchCount;
 
             return [
-                'offset' => $anchorOffset['offset'],  // Pure anchor offset - no unreliable header time
+                'offset' => $anchorOffset['offset'] + $startTimeDiff,  // Anchor offset + header time diff
                 'strategy' => 'anchor',
                 'matches' => $matchCount,
                 'confidence' => round($confidence, 3),
@@ -3348,6 +3416,7 @@ final class EventGraphAggregator
         }
 
         $consensus = $this->computeCongruentStartTime();
+
         if ($consensus !== null) {
             $this->startTime = $consensus;
         } elseif ($this->startTime === null) {
@@ -3554,7 +3623,7 @@ final class EventGraphAggregator
                 $windowSize > $bestSize
                 || (
                     $windowSize === $bestSize
-                    && $samples[$left] < $samples[$bestIndex]
+                    && $samples[$left] > $samples[$bestIndex]
                 )
             ) {
                 $bestSize = $windowSize;
@@ -3562,10 +3631,9 @@ final class EventGraphAggregator
             }
         }
 
-        if ($bestSize <= 1) {
-            return $samples[0];
-        }
-
+        // If no consensus found (bestSize <= 1), or if we found a cluster,
+        // we return the best candidate. Since we prioritize later times in ties,
+        // this will return the latest time if no cluster > 1 exists.
         return $samples[$bestIndex];
     }
 

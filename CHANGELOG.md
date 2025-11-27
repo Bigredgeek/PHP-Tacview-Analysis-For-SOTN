@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - 2025-11-26 (Coverage-Weighted Baseline Selection)
+- **Implemented coverage-weighted baseline selection algorithm**
+  - Changed baseline selection from pure anchor score to a weighted combination of anchor quality (40%) and recording coverage (60%)
+  - Normalizes both anchor scores and duration/coverage to 0-1 scale before combining
+  - Formula: `weightedScore = (normalizedAnchor * 0.4) + (coverageRatio * 0.6)`
+  - This ensures longer recordings with good (but not necessarily perfect) event alignment are preferred over short recordings with many event matches
+  - Example: Feeniks (92% coverage, 61% normalized anchor) now correctly selected over Tungsten (45% coverage, 100% anchor) and Saageli (100% coverage, 42% anchor)
+  - Added normalization of anchor scores by maximum anchor score to prevent short recordings with high event density from always winning
+  - Preserves anchor score as a quality metric while prioritizing comprehensive mission coverage
+
 ### Fixed - 2025-11-30 (Alignment & Deduplication)
 - **Fixed Recording Alignment Logic**: Adjusted `EventGraphAggregator` to accept "fallback" (large) time offsets when they have significantly more matches (>2x) than "primary" (small) offsets. This fixes cases where recordings are offset by several minutes (e.g., 6 minutes) but were being forced to a 0-offset due to a few coincidental matches, causing massive duplication of events.
 - Enhanced `EventGraphAggregator` to support "soft comparison" for secondary objects (like weapons) where IDs differ across recordings but Type/Name match. This resolves duplicate `HasFired` events where each recording assigned a different ID to the same missile.
