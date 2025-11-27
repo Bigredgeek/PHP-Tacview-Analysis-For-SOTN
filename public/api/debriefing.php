@@ -34,12 +34,16 @@ if ($config === []) {
 
 // Enable aggressive output compression for Vercel payload limits
 if (($config['enable_compression'] ?? true) && !headers_sent()) {
-	if (extension_loaded('zlib') && isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
-		// Use output buffering with gzip for better compression
-		ob_start('ob_gzhandler');
-		// Set aggressive compression level
-		ini_set('zlib.output_compression', '1');
+	if (extension_loaded('zlib')) {
+		// Force gzip compression
+		ini_set('zlib.output_compression', 'On');
 		ini_set('zlib.output_compression_level', '9');
+		
+		// Set headers to ensure compression is used
+		if (isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
+			header('Content-Encoding: gzip');
+			ob_start('ob_gzhandler');
+		}
 	}
 }
 
@@ -237,6 +241,11 @@ if (!function_exists('tacview_resolve_asset_paths')) {
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/api/debriefing.php';
 [$assetBaseUrl, $cssHref] = tacview_resolve_asset_paths(__DIR__, $scriptName, $config['core_path']);
 
+// Start output buffering BEFORE any HTML output for minification
+if ($config['minify_html'] ?? false) {
+	ob_start();
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -383,15 +392,10 @@ if (($config['minify_html'] ?? false) && ob_get_level() > 0) {
 	$html = ob_get_clean();
 	
 	// Aggressive HTML minification
-	$html = preg_replace('/\s+/', ' ', $html); // Collapse whitespace
-	$html = preg_replace('/>\s+</', '><', $html); // Remove space between tags
-	$html = preg_replace('/\s+([\/>])/', '$1', $html); // Remove trailing spaces in tags
+	$html = preg_replace('/\s+/', ' ', $html); // Collapse all whitespace to single space
+	$html = preg_replace('/>\s+</', '><', $html); // Remove spaces between tags
+	$html = preg_replace('/\s*=\s*/', '=', $html); // Remove spaces around = in attributes
 	
 	echo $html;
-}
-
-// Ensure gzip buffer is flushed
-if (ob_get_level() > 0) {
-	ob_end_flush();
 }
 ?>
