@@ -1,0 +1,102 @@
+{
+  "mission": {
+    "title": "Movement Dedup Test",
+    "category": "Regression",
+    "mission_time": "2025-11-26T05:00:00Z",
+    "duration": 3600,
+    "source": "DCS 2.9.21",
+    "recorder": "UnitTest Recorder"
+  },
+  "recordings": [
+    {
+      "author": "Recorder Alpha",
+      "recording_time": "2025-11-26T05:00:05Z",
+      "events": [
+        {
+          "time": 100.0,
+          "action": "HasEnteredTheArea",
+          "primary": {
+            "ID": "SAAGELI-DEFECT-601",
+            "Type": "Aircraft",
+            "Name": "F-14B Tomcat",
+            "Pilot": "Defekt 601 | Saageli",
+            "Coalition": "Enemies",
+            "Country": "ru",
+            "Group": "Defekt 6"
+          }
+        },
+        {
+          "time": 120.0,
+          "action": "HasTakenOff",
+          "primary": {
+            "ID": "SAAGELI-DEFECT-601",
+            "Type": "Aircraft",
+            "Name": "F-14B Tomcat",
+            "Pilot": "Defekt 601 | Saageli",
+            "Coalition": "Enemies",
+            "Country": "ru",
+            "Group": "Defekt 6"
+          }
+        },
+        {
+          "time": 400.0,
+          "action": "HasLanded",
+          "primary": {
+            "ID": "SAAGELI-DEFECT-601",
+            "Type": "Aircraft",
+            "Name": "F-14B Tomcat",
+            "Pilot": "Defekt 601 | Saageli",
+            "Coalition": "Enemies",
+            "Country": "ru",
+            "Group": "Defekt 6"
+          }
+        }
+      ]
+    },
+    {
+      "author": "Recorder Bravo",
+      "recording_time": "2025-11-26T05:00:10Z",
+      "events": [
+        {
+          "time": 103.0,
+          "action": "HasEnteredTheArea",
+          "primary": {
+            "ID": "SAAGELI-DEFECT-601",
+            "Type": "Aircraft",
+            "Name": "F-14B Tomcat",
+            "Pilot": "Defekt 601 | Saageli",
+            "Coalition": "Enemies",
+            "Country": "ru",
+            "Group": "Defekt 6"
+          }
+        },
+        {
+          "time": 123.0,
+          "action": "HasTakenOff",
+          "primary": {
+            "ID": "SAAGELI-DEFECT-601",
+            "Type": "Aircraft",
+            "Name": "F-14B Tomcat",
+            "Pilot": "Defekt 601 | Saageli",
+            "Coalition": "Enemies",
+            "Country": "ru",
+            "Group": "Defekt 6"
+          }
+        },
+        {
+          "time": 403.0,
+          "action": "HasLanded",
+          "primary": {
+            "ID": "SAAGELI-DEFECT-601",
+            "Type": "Aircraft",
+            "Name": "F-14B Tomcat",
+            "Pilot": "Defekt 601 | Saageli",
+            "Coalition": "Enemies",
+            "Country": "ru",
+            "Group": "Defekt 6"
+          }
+        }
+      ]
+    }
+  ]
+}

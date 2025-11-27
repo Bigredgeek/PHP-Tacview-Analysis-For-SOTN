@@ -7,6 +7,99 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - 2025-11-30 (Alignment & Deduplication)
+- **Fixed Recording Alignment Logic**: Adjusted `EventGraphAggregator` to accept "fallback" (large) time offsets when they have significantly more matches (>2x) than "primary" (small) offsets. This fixes cases where recordings are offset by several minutes (e.g., 6 minutes) but were being forced to a 0-offset due to a few coincidental matches, causing massive duplication of events.
+- Enhanced `EventGraphAggregator` to support "soft comparison" for secondary objects (like weapons) where IDs differ across recordings but Type/Name match. This resolves duplicate `HasFired` events where each recording assigned a different ID to the same missile.
+- Fixed a logic error in `secondaryComparable` that prevented merging events when *both* secondary objects were missing (e.g., `HasTakenOff` where airport is omitted in both sources).
+- Allowed `EventGraphAggregator` to treat logistics-style actions (`HasEnteredTheArea`, `HasTakenOff`, `HasLanded`, parking/zone transitions, etc.) as valid merges even when Tacview omits a secondary object.
+- Added the `movement_dupes` regression fixture plus `EventGraphAggregatorTest::testMovementEventsDeduplicateWithoutSecondaryObjects()` to lock in the behavior.
+- Updated `shouldMergeHumanDuplicate` to aggressively merge `HasBeenDestroyed` events if they share the same attacker (Parent), even if evidence counts are similar. This resolves duplicate self-kill entries (e.g., Essah hit by own Rockeyes) where slight metadata differences previously prevented merging.
+- Extended duplicate suppression to `HasEnteredTheArea` and `HasLeftTheArea` events for weapons (missiles, bombs, etc.). These events now use "loose" key matching (Type/Name instead of ID) with a tight 2-second window, ensuring that simultaneous weapon spawns across recordings are merged into a single event instead of appearing as duplicates.
+- These changes ensure that high-frequency events like weapon fires and logistics events are correctly collapsed into single canonical events, significantly reducing noise in the debriefing log.
+
+### Fixed - 2025-11-26 (Defekt 601 Kill Attribution)
+- Ensured `core/tacview.php` still attributes `HasBeenDestroyed` events to the attacking pilot even when Tacview marks the victim as a midair disconnect, so legitimate kills are no longer skipped once a killer is known.
+- Verified Defekt 601 | Saageli now shows the expected 3 Air-to-Air kills (2× Mirage F1 EE, 1× AJS 37 Viggen) across the pilot stats grid and detail pane after regenerating `tmp/debriefing-after.html`.
+
+### Fixed - 2025-11-26 (AI Target Duplicate Resolution)
+- **Fixed false kill attributions for AI aircraft deaths**
+  - AI units (like "Olympus-20-2") can only die once, but different Tacview recordings could incorrectly attribute the same death to different pilots
+  - Added `collapseAITargetDuplicates()` method that:
+    - Groups all destruction events by AI target (not attacker)
+    - Identifies AI pilots via naming pattern `/^[A-Za-z]+-\d+-\d+$/` (e.g., "Olympus-20-2")
+    - Keeps only the highest-evidence attribution, removes low-evidence false positives
+    - Prefers human attacker attributions when evidence count is equal
+  - Added `selectPreferredAITargetKill()` method for multi-criteria kill selection
+  - Added `hasHumanAttacker()` helper method
+  - Improved `looksLikeHumanPilot()` to recognize AI flight group naming patterns
+  - New metric `ai_target_duplicate_removals` tracks how many false attributions were removed
+- **Example fix**: Pygmalion was falsely credited with 2 MiG-23 Olympus kills (1 evidence each) when Vapor was the actual killer (4 evidence). These are now correctly attributed.
+- **Human kill attribution repairs**
+  - Added `collapseHumanTargetDuplicates()` to merge low-confidence duplicate kills for the same pilot even when recordings disagree on package/slot naming
+  - Added `enrichHumanDestructionsFromHits()` which backfills missing killer data by replaying `HasBeenHitBy` evidence into otherwise orphaned destruction events using the new `NormalizedEvent::setSecondary()` helper
+  - Metrics `human_target_duplicate_merges` and `human_hit_inferences` expose when each rescue path fired
+  - Result: Pygmalion now shows the expected three kills (Rich, Baron, Switchblade06 friendly) even though only a single Tacview recording carried his name for Baron’s splash
+
+### Fixed - 2025-11-29
+- Eliminated the Saageli-style kill overcount by teaching `EventGraphAggregator` to collapse `HasBeenDestroyed` events that share the same canonical target + attacker signature even when misaligned recordings push them hours apart. The new pass merges all evidence into a single kill, preserves the preferred mission time, and tracks the suppression through the `target_signature_merges` metric so analysts can see when global dedupe fired.
+
+### Fixed - 2025-11-26 (Critical Alignment Bug)
+- **CRITICAL: Fixed massive duplicate events caused by unreliable MissionTime headers**
+  - DCS Tacview records `<MissionTime>` inconsistently across clients - timestamps can vary by 2-3 hours for the same mission
+  - The aggregator was adding this unreliable `startTimeDiff` to anchor-based offsets, causing 7200-second (2-hour) false alignments
+  - Now uses **pure anchor-based alignment only** - the event matching offset is the sole source of truth
+  - Disabled `fallbackOffset()` entirely since it relied on the unreliable header timestamps
+  - This reduces false duplicates dramatically (e.g., 7998→6475 events, 1450 duplicates now correctly suppressed)
+- **Improved anchor offset selection logic**
+  - Strongly prefer small (primary) offsets over large (fallback) offsets
+  - Large offsets with many matches are likely false positives from pilots doing similar actions at different times
+  - If primary matches meet minimum threshold, always prefer them regardless of fallback match count
+- **Reduced offset tolerances in config**
+  - `max_anchor_offset`: 14400→600 seconds (4 hours→10 minutes)
+  - `max_fallback_offset`: 900→300 seconds (15 minutes→5 minutes)
+  - `anchor_min_matches`: 3→5 (require more matches to prevent false positives)
+- **Mission-time pruning is now a true last resort**
+  - EventGraph checks for anchor/fallback-aligned sources and rescues any recording that shares evidence with a trusted source before pruning
+  - Start-time comparisons now use aligned headers (original start minus solved offset) so timezone-skewed but aligned sources stay in the mission
+  - Added metrics (`incongruent_prune_candidates`, `incongruent_rescued`) plus detailed strategy labels to surface when/why a source was excluded
+
+### Added - 2025-11-26 (Phase 1: Alignment & Coverage Improvements)
+- **Confidence Scoring for Alignment**: Extended `EventGraphAggregator::estimateRecordingOffset()` to return alignment confidence metrics based on anchor match quality and coalition alignment. Confidence is calculated from match count (scaled 0-1 based on 10+ matches being optimal) and offset magnitude relative to max anchor offset.
+- **Coalition-Aware Alignment**: Added `checkCoalitionAlignment()` method to detect when recordings from different coalitions are being aligned, with metrics tracking (`coalition_alignment_matches`, `coalition_alignment_mismatches`).
+- **Improved Duplicate Handling**: Enhanced `coalesceDuplicateEvents()` with:
+  - Weapon GUID-based matching via new `buildWeaponGuidKey()` method for precise duplicate identification
+  - Coalition-aware merging via `areEventsCoalitionCompatible()` to prevent cross-coalition event merging
+  - Coalition included in index keys for combat events (`isCombatEvent()`)
+- **Coverage Statistics**: Added `computeCoverageStatistics()` method that calculates:
+  - Total coverage time across all sources
+  - Gap percentage (mission time not covered by any source)
+  - Overlap percentage (mission time covered by multiple sources)
+  - Per-source coverage percentages
+- **New Config Options**: Added to `config.php` aggregator block:
+  - `anchor_decay` (0.0-1.0): Decay factor for older anchor matches
+  - `drift_sample_window` (seconds): Time window for drift detection sampling
+  - `coalition_alignment_weight` (0.0-1.0): How much coalition alignment affects confidence
+- **Enhanced Debug Overlay**: Added Coverage & Alignment section to debug overlay showing:
+  - Average alignment confidence percentage
+  - Alignment conflict count
+  - Coalition alignment match/mismatch counts
+  - Coverage gap and overlap percentages
+  - Per-source confidence and coverage in source list
+- **Enhanced Timeline Visualization**: Extended source timeline tooltips with:
+  - Alignment Confidence percentage
+  - Coverage percentage per source
+
+### Changed - 2025-11-26 (Phase 1)
+- **Reliability Scoring**: Updated `computeRecordingMetadata()` to factor in alignment confidence. New weight distribution: events 40%, duration 25%, coverage 15%, alignment confidence 20% (previously events 50%, duration 30%, coverage 20%).
+- **Source Data**: Added `alignmentConfidence` and `coveragePercent` fields to source data returned by `toAggregatedMission()`.
+- **Metrics**: Added alignment and coverage metrics to $metrics array:
+  - `alignment_confidence_avg`: Average confidence across all recordings
+  - `alignment_conflicts`: Count of recordings that couldn't be aligned
+  - `coalition_alignment_matches`/`mismatches`: Coalition alignment tracking
+  - `anchor_match_total`: Total anchor matches found
+  - `coverage_gap_percent`/`coverage_overlap_percent`: Coverage statistics
+  - `coverage_stats`: Full coverage statistics object
+
 ### Changed - 2025-11-28
 - Condensed the mission timeline component to reduce vertical space: row heights reduced from 38px to 22px, bar heights from 26px to 16px, row margins from 14px to 6px, fonts reduced ~2pt across all elements; label width narrowed; coreline and panel padding trimmed—preserving all information and readability while cutting total panel height by approximately 40%.
 

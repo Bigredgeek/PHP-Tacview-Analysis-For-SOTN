@@ -16,6 +16,7 @@ use function atan2;
 use function count;
 use function cos;
 use function deg2rad;
+use function explode;
 use function floor;
 use function implode;
 use function in_array;
@@ -57,6 +58,16 @@ final class EventGraphAggregator
         'hasbeenshotdown',
         'hasbeenkilled',
         'hascrashed',
+        'hastakenoff',
+        'haslanded',
+        'hasenteredthearea',
+        'hasleftthearea',
+        'hasenteredparkingarea',
+        'hasleftparkingarea',
+        'hasenteredthezone',
+        'hasleftthezone',
+        'hasstarted',
+        'hasstopped',
     ];
     private const COALITION_MISMATCH_EXEMPT_TYPES = [
         'hasbeenhitby',
@@ -133,6 +144,9 @@ final class EventGraphAggregator
     private readonly float $maxFallbackOffset;
     private readonly float $maxAnchorOffset;
     private readonly float $missionTimeCongruenceTolerance;
+    private readonly float $anchorDecay;
+    private readonly float $driftSampleWindow;
+    private readonly float $coalitionAlignmentWeight;
 
     /** @var list<SourceRecording> */
     private array $recordings = [];
@@ -158,8 +172,13 @@ final class EventGraphAggregator
     /** @var array<string, float> */
     private array $recordingReliability = [];
 
+    /** @var array<string, float> */
+    private array $alignmentConfidence = [];
+
     /** @var array<string, string|null> */
     private array $recordingCoalitions = [];
+    /** @var array<string, bool> */
+    private array $excludedRecordings = [];
 
     private ?string $baselineRecordingId = null;
     private ?string $missionName = null;
@@ -192,6 +211,20 @@ final class EventGraphAggregator
         'composite_signature_missing_target' => 0,
         'composite_signature_missing_weapon' => 0,
         'post_inference_merges' => 0,
+        'target_signature_merges' => 0,
+        // Alignment diagnostics
+        'alignment_confidence_avg' => 0.0,
+        'alignment_conflicts' => 0,
+        'coalition_alignment_matches' => 0,
+        'coalition_alignment_mismatches' => 0,
+        'anchor_match_total' => 0,
+        // Coverage statistics
+        'coverage_gap_percent' => 0.0,
+        'coverage_overlap_percent' => 0.0,
+        'incongruent_recordings' => 0,
+        'incongruent_events_pruned' => 0,
+        'incongruent_prune_candidates' => 0,
+        'incongruent_rescued' => 0,
     ];
 
     /**
@@ -213,6 +246,17 @@ final class EventGraphAggregator
         $this->missionTimeCongruenceTolerance = isset($options['mission_time_congruence_tolerance'])
             ? max(0.0, (float)$options['mission_time_congruence_tolerance'])
             : 1800.0;
+
+        // Phase 1 alignment tuning options
+        $this->anchorDecay = isset($options['anchor_decay'])
+            ? max(0.0, min(1.0, (float)$options['anchor_decay']))
+            : 0.95;
+        $this->driftSampleWindow = isset($options['drift_sample_window'])
+            ? max(1.0, (float)$options['drift_sample_window'])
+            : 60.0;
+        $this->coalitionAlignmentWeight = isset($options['coalition_alignment_weight'])
+            ? max(0.0, min(1.0, (float)$options['coalition_alignment_weight']))
+            : 0.15;
     }
 
     public function ingestFile(string $path): void
@@ -268,6 +312,10 @@ final class EventGraphAggregator
         $this->rebuildEventIndex();
         $this->runInference();
         $this->reconcileDestructionEvents();
+        $this->collapseTargetSignatureDuplicates();
+        $this->collapseAITargetDuplicates();
+        $this->collapseHumanTargetDuplicates();
+        $this->enrichHumanDestructionsFromHits();
         $this->applyPostMergeFilters();
         $this->pruneDisconnectDestructions();
         $this->annotateEvents();
@@ -286,6 +334,9 @@ final class EventGraphAggregator
         }
         $this->expandMissionBoundsWithAlignedWindows($alignedWindows);
 
+        // Compute coverage statistics after windows are finalized
+        $coverageStats = $this->computeCoverageStatistics($alignedWindows);
+
         $mission = new AggregatedMission(
             $this->missionName ?? self::DEFAULT_MISSION_NAME,
             $this->startTime ?? 0.0,
@@ -300,6 +351,7 @@ final class EventGraphAggregator
         foreach ($this->recordings as $recording) {
             $offset = $this->recordingOffsets[$recording->id] ?? 0.0;
             $window = $alignedWindows[$recording->id] ?? ['start' => null, 'end' => null, 'duration' => null];
+            $sourceCoverage = $coverageStats['perSource'][$recording->id] ?? null;
 
             $mission->addSource([
                 'id' => $recording->id,
@@ -316,9 +368,19 @@ final class EventGraphAggregator
                 'baseline' => $recording->id === $this->baselineRecordingId,
                 'offsetStrategy' => $this->offsetStrategies[$recording->id] ?? null,
                 'reliability' => $this->recordingReliability[$recording->id] ?? 1.0,
+                'alignmentConfidence' => $this->alignmentConfidence[$recording->id] ?? 0.5,
                 'dominantCoalition' => $this->recordingCoalitions[$recording->id] ?? null,
+                'coveragePercent' => $sourceCoverage['coveragePercent'] ?? null,
             ]);
         }
+
+        // Add coverage statistics to metrics
+        $this->metrics['coverage_stats'] = [
+            'totalCoverage' => $coverageStats['totalCoverage'],
+            'gapPercent' => $coverageStats['gapPercentage'],
+            'overlapPercent' => $coverageStats['overlapPercentage'],
+            'sourceCount' => $coverageStats['sourceCount'],
+        ];
 
         $mission->setMetrics($this->metrics);
 
@@ -352,6 +414,7 @@ final class EventGraphAggregator
         $this->eventIndex = [];
         $this->recordingOffsets = [];
         $this->offsetStrategies = [];
+        $this->alignmentConfidence = [];
 
         $recordingsById = [];
         foreach ($this->recordings as $recording) {
@@ -367,6 +430,7 @@ final class EventGraphAggregator
         if ($baselineId !== null) {
             $this->recordingOffsets[$baselineId] = 0.0;
             $this->offsetStrategies[$baselineId] = 'baseline';
+            $this->alignmentConfidence[$baselineId] = 1.0; // Baseline has full confidence
         }
 
         $alignedIds = [];
@@ -413,12 +477,15 @@ final class EventGraphAggregator
                     $globalOffset = $best['offset'] + $referenceOffset;
 
                     $this->recordingOffsets[$recordingId] = $globalOffset;
+                    $this->alignmentConfidence[$recordingId] = $best['confidence'] ?? 0.5;
+
                     if ($best['strategy'] === 'anchor') {
                         $label = 'anchor';
                         if ($best['reference'] !== $baselineId) {
                             $label .= ' vs ' . $best['reference'];
                         }
-                        $label .= ' (delta=' . round($best['offset'], 3) . ', matches=' . $best['matches'] . ')';
+                        $label .= ' (delta=' . round($best['offset'], 3) . ', matches=' . $best['matches'];
+                        $label .= ', conf=' . round($best['confidence'] ?? 0.5, 2) . ')';
                         $this->offsetStrategies[$recordingId] = $label;
                     } elseif ($best['strategy'] === 'fallback-applied') {
                         $label = 'fallback-applied';
@@ -441,6 +508,8 @@ final class EventGraphAggregator
                 foreach (array_keys($pending) as $recordingId) {
                     $this->recordingOffsets[$recordingId] = 0.0;
                     $this->offsetStrategies[$recordingId] = 'fallback-skipped';
+                    $this->alignmentConfidence[$recordingId] = 0.1; // Low confidence for unaligned
+                    $this->metrics['alignment_conflicts']++;
                 }
                 break;
             }
@@ -471,6 +540,7 @@ final class EventGraphAggregator
         $this->coalesceDuplicateEvents();
         $this->coalesceTerminalEvents();
         $this->metrics['merged_events'] = count($this->events);
+        $this->pruneIncongruentSources();
     }
 
     private function coalesceDuplicateEvents(): void
@@ -488,7 +558,8 @@ final class EventGraphAggregator
             if ($typeKey === 'hasfired') {
                 $primaryKey = $this->buildLooseObjectKey($event->getPrimary())
                     ?? $this->buildObjectKey($event->getPrimary());
-                $weaponKey = $this->buildLooseObjectKey($event->getSecondary());
+                $weaponKey = $this->buildWeaponGuidKey($event->getSecondary())
+                    ?? $this->buildLooseObjectKey($event->getSecondary());
                 if ($primaryKey !== null && $weaponKey !== null) {
                     $timeBucket = $this->getHasFiredTimeBucket($event->getMissionTime());
                     $bucketKey = $primaryKey . '|' . $weaponKey . '|tb:' . $timeBucket;
@@ -497,10 +568,13 @@ final class EventGraphAggregator
                     $merged = false;
                     foreach ($bucket as $existing) {
                         if (abs($existing->getMissionTime() - $event->getMissionTime()) <= self::HAS_FIRED_SUPPRESSION_WINDOW) {
-                            $existing->mergeWith($event);
-                            $this->metrics['duplicates_suppressed']++;
-                            $merged = true;
-                            break;
+                            // Check coalition compatibility before merging
+                            if ($this->areEventsCoalitionCompatible($existing, $event)) {
+                                $existing->mergeWith($event);
+                                $this->metrics['duplicates_suppressed']++;
+                                $merged = true;
+                                break;
+                            }
                         }
                     }
 
@@ -518,9 +592,19 @@ final class EventGraphAggregator
                 continue;
             }
 
+            // Special handling for weapon logistics events (enter/leave area)
+            // Weapons often have different IDs across recordings, so we use loose keys
+            // but enforce a tight time window to avoid merging distinct shots
+            $isWeaponLogistics = ($typeKey === 'hasenteredthearea' || $typeKey === 'hasleftthearea')
+                && $this->isWeaponObject($event->getPrimary());
+
             if ($typeKey === 'hasfired') {
                 $primaryKey = $this->buildLooseObjectKey($event->getPrimary())
                     ?? $this->buildObjectKey($event->getPrimary());
+            } elseif ($isWeaponLogistics) {
+                $primaryKey = $this->buildLooseObjectKey($event->getPrimary())
+                    ?? $this->buildObjectKey($event->getPrimary());
+                $window = 2.0; // Tight window for weapon spawns/despawns
             } else {
                 $primaryKey = $this->buildObjectKey($event->getPrimary());
             }
@@ -529,7 +613,12 @@ final class EventGraphAggregator
                 continue;
             }
 
-            if ($typeKey === 'hasfired') {
+            // For weapon-related events, try to use weapon GUID for better matching
+            if ($typeKey === 'hasfired' || in_array($typeKey, self::WEAPON_INSTANCE_TYPES, true)) {
+                $secondaryKey = $this->buildWeaponGuidKey($event->getSecondary())
+                    ?? $this->buildLooseObjectKey($event->getSecondary())
+                    ?? $this->buildObjectKey($event->getSecondary(), true);
+            } elseif ($typeKey === 'hasfired') {
                 $secondaryKey = $this->buildLooseObjectKey($event->getSecondary())
                     ?? $this->buildObjectKey($event->getSecondary(), true);
             } else {
@@ -541,7 +630,17 @@ final class EventGraphAggregator
             }
 
             $parentKey = $this->buildObjectKey($event->getParent());
+            
+            // Include coalition in index key for combat events to prevent cross-coalition merging
+            $coalitionKey = '';
+            if ($this->isCombatEvent($typeKey)) {
+                $coalitionKey = $this->extractEventCoalition($event) ?? 'unknown';
+            }
+            
             $indexKey = $typeKey . '|' . $primaryKey . '|' . ($secondaryKey ?? 'none') . '|' . ($parentKey ?? 'noparent');
+            if ($coalitionKey !== '') {
+                $indexKey .= '|' . $coalitionKey;
+            }
 
             if (!isset($groups[$indexKey])) {
                 $groups[$indexKey] = [];
@@ -550,10 +649,13 @@ final class EventGraphAggregator
             $merged = false;
             foreach ($groups[$indexKey] as $existing) {
                 if (abs($existing->getMissionTime() - $event->getMissionTime()) <= $window) {
-                    $existing->mergeWith($event);
-                    $this->metrics['duplicates_suppressed']++;
-                    $merged = true;
-                    break;
+                    // Additional coalition compatibility check for combat events
+                    if (!$this->isCombatEvent($typeKey) || $this->areEventsCoalitionCompatible($existing, $event)) {
+                        $existing->mergeWith($event);
+                        $this->metrics['duplicates_suppressed']++;
+                        $merged = true;
+                        break;
+                    }
                 }
             }
 
@@ -570,6 +672,72 @@ final class EventGraphAggregator
 
         $this->events = $deduped;
         $this->rebuildEventIndex();
+    }
+
+    /**
+     * Build a key from weapon GUID (ID field) for precise duplicate matching.
+     */
+    private function buildWeaponGuidKey(?array $object): ?string
+    {
+        if ($object === null) {
+            return null;
+        }
+
+        // Weapons typically have ID fields as GUIDs
+        if (isset($object['ID'])) {
+            $id = strtolower(trim((string)$object['ID']));
+            if ($id !== '') {
+                return 'guid:' . $id;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if two events have compatible coalitions for merging.
+     * Returns true if coalitions match, are both unknown, or one is unknown.
+     */
+    private function areEventsCoalitionCompatible(NormalizedEvent $eventA, NormalizedEvent $eventB): bool
+    {
+        $coalitionA = $this->extractEventCoalition($eventA);
+        $coalitionB = $this->extractEventCoalition($eventB);
+
+        // If either is unknown, allow merge (benefit of doubt)
+        if ($coalitionA === null || $coalitionB === null) {
+            return true;
+        }
+
+        return strtolower($coalitionA) === strtolower($coalitionB);
+    }
+
+    /**
+     * Extract coalition from event's primary object.
+     */
+    private function extractEventCoalition(NormalizedEvent $event): ?string
+    {
+        $primary = $event->getPrimary();
+        if ($primary === null || !isset($primary['Coalition'])) {
+            return null;
+        }
+
+        $coalition = trim((string)$primary['Coalition']);
+        return $coalition !== '' ? $coalition : null;
+    }
+
+    /**
+     * Check if an event type is a combat event that should consider coalition.
+     */
+    private function isCombatEvent(string $typeKey): bool
+    {
+        return in_array($typeKey, [
+            'hasfired',
+            'hasbeenhitby',
+            'hasbeendestroyed',
+            'hasbeenshotdown',
+            'hasbeenkilled',
+            'hascrashed',
+        ], true);
     }
 
     private function coalesceTerminalEvents(): void
@@ -1086,12 +1254,20 @@ final class EventGraphAggregator
             return true;
         }
 
+        if ($this->objectsSoftComparable($secondaryLeft, $secondaryRight)) {
+            return true;
+        }
+
         if (!$this->allowsMissingSecondary($left->getType())) {
             return false;
         }
 
         $leftMissing = $this->isObjectEffectivelyMissing($secondaryLeft);
         $rightMissing = $this->isObjectEffectivelyMissing($secondaryRight);
+
+        if ($leftMissing && $rightMissing) {
+            return true;
+        }
 
         if ($leftMissing && !$rightMissing) {
             return true;
@@ -1102,6 +1278,29 @@ final class EventGraphAggregator
         }
 
         return false;
+    }
+
+    private function objectsSoftComparable(?array $a, ?array $b): bool
+    {
+        if ($a === null || $b === null) {
+            return false;
+        }
+
+        $typeA = $a['Type'] ?? null;
+        $typeB = $b['Type'] ?? null;
+
+        if ($typeA === null || $typeB === null) {
+            return false;
+        }
+
+        if ($typeA !== $typeB) {
+            return false;
+        }
+
+        $nameA = $a['Name'] ?? null;
+        $nameB = $b['Name'] ?? null;
+
+        return $nameA === $nameB;
     }
 
     private function allowsMissingSecondary(string $eventType): bool
@@ -1344,19 +1543,26 @@ final class EventGraphAggregator
             }
         }
 
+        // STRONGLY prefer primary (small) offsets over fallback (large) offsets
+        // Large offsets with many matches are likely false positives from repeated actions
         if ($bestPrimaryMedian !== null && $bestFallbackMedian !== null) {
-            if ($bestFallbackCount > $bestPrimaryCount) {
-                return ['offset' => $bestFallbackMedian, 'matches' => $bestFallbackCount];
-            }
-
-            if ($bestPrimaryCount > $bestFallbackCount) {
+            // If primary has enough matches, prefer it UNLESS fallback is overwhelming
+            if ($bestPrimaryCount >= $this->anchorMinimumMatches) {
+                // If fallback has significantly more matches (e.g. > 2x), it's likely the true offset
+                // and the primary matches are just coincidental
+                if ($bestFallbackCount > $bestPrimaryCount * 2) {
+                    return ['offset' => $bestFallbackMedian, 'matches' => $bestFallbackCount];
+                }
                 return ['offset' => $bestPrimaryMedian, 'matches' => $bestPrimaryCount];
             }
-
-            if (abs($bestFallbackMedian) < abs($bestPrimaryMedian)) {
+            
+            // Only use fallback if primary doesn't meet minimum matches
+            // and fallback has significantly more matches (2x)
+            if ($bestFallbackCount >= $bestPrimaryCount * 2) {
                 return ['offset' => $bestFallbackMedian, 'matches' => $bestFallbackCount];
             }
 
+            // Default to primary (smaller offset) when in doubt
             return ['offset' => $bestPrimaryMedian, 'matches' => $bestPrimaryCount];
         }
 
@@ -1410,46 +1616,118 @@ final class EventGraphAggregator
         if ($baselineEvents === [] || $targetEvents === []) {
             $fallback = $this->fallbackOffset($baselineId, $targetId);
             if ($fallback !== null) {
-                return ['offset' => $fallback, 'strategy' => 'fallback-applied', 'matches' => 0];
+                return [
+                    'offset' => $fallback,
+                    'strategy' => 'fallback-applied',
+                    'matches' => 0,
+                    'confidence' => 0.3,
+                    'coalitionAligned' => null,
+                ];
             }
 
-            return ['offset' => 0.0, 'strategy' => 'fallback-skipped', 'matches' => 0];
+            return [
+                'offset' => 0.0,
+                'strategy' => 'fallback-skipped',
+                'matches' => 0,
+                'confidence' => 0.1,
+                'coalitionAligned' => null,
+            ];
         }
 
         $baselineIndex = $this->buildAnchorIndex($baselineEvents);
         $anchorOffset = $this->findAnchorOffset($baselineIndex, $targetEvents);
         if ($anchorOffset !== null) {
-            $baseline = $this->findRecording($baselineId);
-            $target = $this->findRecording($targetId);
-            $startTimeDiff = 0.0;
-            if ($baseline !== null && $target !== null && $baseline->startTime !== null && $target->startTime !== null) {
-                $startTimeDiff = $target->startTime - $baseline->startTime;
+            // NOTE: We intentionally do NOT add startTimeDiff here.
+            // The MissionTime header in Tacview XML is notoriously unreliable -
+            // different DCS clients record different start times for the same mission
+            // (can vary by 2-3 hours!). The anchor offset from event matching is
+            // the only reliable alignment method.
+
+            // Calculate confidence based on number of matches and offset spread
+            $matchCount = $anchorOffset['matches'];
+            $matchConfidence = min(1.0, $matchCount / 10.0); // More matches = higher confidence
+            $offsetMagnitude = abs($anchorOffset['offset']);
+            $offsetConfidence = max(0.2, 1.0 - ($offsetMagnitude / $this->maxAnchorOffset));
+            $confidence = (0.7 * $matchConfidence) + (0.3 * $offsetConfidence);
+
+            // Check coalition alignment between recordings
+            $coalitionAligned = $this->checkCoalitionAlignment($baselineId, $targetId);
+            if ($coalitionAligned === true) {
+                $this->metrics['coalition_alignment_matches']++;
+            } elseif ($coalitionAligned === false) {
+                $this->metrics['coalition_alignment_mismatches']++;
+                $confidence *= 0.85; // Reduce confidence for misaligned coalitions
             }
 
-            return ['offset' => $anchorOffset['offset'] + $startTimeDiff, 'strategy' => 'anchor', 'matches' => $anchorOffset['matches']];
+            $this->metrics['anchor_match_total'] += $matchCount;
+
+            return [
+                'offset' => $anchorOffset['offset'],  // Pure anchor offset - no unreliable header time
+                'strategy' => 'anchor',
+                'matches' => $matchCount,
+                'confidence' => round($confidence, 3),
+                'coalitionAligned' => $coalitionAligned,
+            ];
         }
 
         $fallback = $this->fallbackOffset($baselineId, $targetId);
         if ($fallback !== null) {
-            return ['offset' => $fallback, 'strategy' => 'fallback-applied', 'matches' => 0];
+            $coalitionAligned = $this->checkCoalitionAlignment($baselineId, $targetId);
+            return [
+                'offset' => $fallback,
+                'strategy' => 'fallback-applied',
+                'matches' => 0,
+                'confidence' => 0.4,
+                'coalitionAligned' => $coalitionAligned,
+            ];
         }
 
-        return ['offset' => 0.0, 'strategy' => 'fallback-skipped', 'matches' => 0];
+        return [
+            'offset' => 0.0,
+            'strategy' => 'fallback-skipped',
+            'matches' => 0,
+            'confidence' => 0.1,
+            'coalitionAligned' => null,
+        ];
+    }
+
+    /**
+     * Check if two recordings have aligned (matching) dominant coalitions.
+     * Returns true if same coalition, false if different, null if one or both unknown.
+     */
+    private function checkCoalitionAlignment(string $recordingIdA, string $recordingIdB): ?bool
+    {
+        $coalitionA = $this->recordingCoalitions[$recordingIdA] ?? null;
+        $coalitionB = $this->recordingCoalitions[$recordingIdB] ?? null;
+
+        if ($coalitionA === null || $coalitionB === null) {
+            return null;
+        }
+
+        return strtolower($coalitionA) === strtolower($coalitionB);
     }
 
     private function fallbackOffset(string $baselineId, string $targetId): ?float
     {
-        $baseline = $this->findRecording($baselineId);
-        $target = $this->findRecording($targetId);
-
-        if ($baseline !== null && $target !== null && $baseline->startTime !== null && $target->startTime !== null) {
-            $difference = $target->startTime - $baseline->startTime;
-            if (abs($difference) <= $this->maxFallbackOffset) {
-                return $difference;
-            }
-        }
-
+        // DISABLED: The MissionTime header in Tacview XML files is unreliable.
+        // Different DCS clients record different start times for the same mission,
+        // sometimes varying by 2-3 hours. Using header-based fallback creates
+        // incorrect offsets that cause duplicate events.
+        // 
+        // Without reliable anchor matches, we use 0 offset and let duplicate
+        // detection handle any timing discrepancies.
         return null;
+
+        // Original code kept for reference:
+        // $baseline = $this->findRecording($baselineId);
+        // $target = $this->findRecording($targetId);
+        // if ($baseline !== null && $target !== null && $baseline->startTime !== null && $target->startTime !== null) {
+        //     $difference = $target->startTime - $baseline->startTime;
+        //     if (abs($difference) <= $this->maxFallbackOffset) {
+        //         return $difference;
+        //     }
+        // }
+        // return null;
     }
 
     private function findRecording(string $id): ?SourceRecording
@@ -2167,6 +2445,589 @@ final class EventGraphAggregator
         $this->rebuildEventIndex();
     }
 
+    private function collapseTargetSignatureDuplicates(): void
+    {
+        if ($this->events === []) {
+            return;
+        }
+
+        $groups = [];
+        foreach ($this->events as $index => $event) {
+            if ($event->getType() !== 'HasBeenDestroyed') {
+                continue;
+            }
+
+            $signature = $this->buildTargetSignature($event);
+            if ($signature === null) {
+                continue;
+            }
+
+            $groups[$signature][] = $index;
+        }
+
+        if ($groups === []) {
+            return;
+        }
+
+        $remove = [];
+        $mergeCount = 0;
+
+        foreach ($groups as $indices) {
+            if (count($indices) < 2) {
+                continue;
+            }
+
+            $preferredIndex = $this->selectPreferredDestructionEvent($indices);
+            $preferred = $this->events[$preferredIndex];
+            $preservedTime = $preferred->getMissionTime();
+
+            foreach ($indices as $candidateIndex) {
+                if ($candidateIndex === $preferredIndex) {
+                    continue;
+                }
+
+                $preferred->mergeWith($this->events[$candidateIndex]);
+                $remove[$candidateIndex] = true;
+                $mergeCount++;
+            }
+
+            $preferred->shiftMissionTime($preservedTime - $preferred->getMissionTime());
+        }
+
+        if ($mergeCount === 0) {
+            return;
+        }
+
+        $this->metrics['target_signature_merges'] += $mergeCount;
+
+        $filtered = [];
+        foreach ($this->events as $index => $event) {
+            if (isset($remove[$index])) {
+                continue;
+            }
+            $filtered[] = $event;
+        }
+
+        $this->events = $filtered;
+        $this->rebuildEventIndex();
+    }
+
+    /**
+     * Collapse duplicate AI target destructions.
+     * 
+     * AI units (like "Olympus-20-2") can only die once. When we see multiple
+     * destruction events for the same AI target with different attackers, this
+     * is a data quality issue where different Tacview recordings have conflicting
+     * information about who killed the target.
+     * 
+     * Resolution strategy:
+     * 1. Group destructions by target only (ignoring attacker)
+     * 2. Identify AI targets (non-human pilot names)
+     * 3. When duplicates exist, prefer the event with most evidence
+     * 4. If evidence is equal, prefer the one with a human attacker
+     */
+    private function collapseAITargetDuplicates(): void
+    {
+        if ($this->events === []) {
+            return;
+        }
+
+        // Group destruction events by target only
+        /** @var array<string, list<int>> $groups */
+        $groups = [];
+        foreach ($this->events as $index => $event) {
+            if ($event->getType() !== 'HasBeenDestroyed') {
+                continue;
+            }
+
+            $primary = $event->getPrimary();
+            if ($primary === null) {
+                continue;
+            }
+
+            $pilot = $primary['Pilot'] ?? '';
+            // Only process AI targets (non-human pilots)
+            if ($this->looksLikeHumanPilot($pilot, $primary['Type'] ?? '')) {
+                continue;
+            }
+
+            $targetKey = $this->buildHumanTargetGroupKey($primary);
+            if ($targetKey === null) {
+                continue;
+            }
+
+            $groups[$targetKey][] = $index;
+        }
+
+        $remove = [];
+        $mergeCount = 0;
+
+        foreach ($groups as $targetKey => $indices) {
+            if (count($indices) < 2) {
+                continue;
+            }
+
+            // Find the preferred event (highest evidence, human attacker preference)
+            $preferredIndex = $this->selectPreferredAITargetKill($indices);
+            $preferred = $this->events[$preferredIndex];
+
+            // Remove all other events for this target
+            foreach ($indices as $candidateIndex) {
+                if ($candidateIndex === $preferredIndex) {
+                    continue;
+                }
+
+                // Don't merge - just remove the lower-evidence duplicate
+                // This prevents wrong attacker info from polluting the correct event
+                $remove[$candidateIndex] = true;
+                $mergeCount++;
+            }
+        }
+
+        if ($mergeCount === 0) {
+            return;
+        }
+
+        $this->metrics['ai_target_duplicate_removals'] = ($this->metrics['ai_target_duplicate_removals'] ?? 0) + $mergeCount;
+
+        $filtered = [];
+        foreach ($this->events as $index => $event) {
+            if (isset($remove[$index])) {
+                continue;
+            }
+            $filtered[] = $event;
+        }
+
+        $this->events = $filtered;
+        $this->rebuildEventIndex();
+    }
+
+    private function collapseHumanTargetDuplicates(): void
+    {
+        if ($this->events === []) {
+            return;
+        }
+
+        /** @var array<string, list<int>> $groups */
+        $groups = [];
+        foreach ($this->events as $index => $event) {
+            if ($event->getType() !== 'HasBeenDestroyed') {
+                continue;
+            }
+
+            $primary = $event->getPrimary();
+            if ($primary === null) {
+                continue;
+            }
+
+            $pilot = $primary['Pilot'] ?? '';
+            if (!$this->looksLikeHumanPilot($pilot, $primary['Type'] ?? '')) {
+                continue;
+            }
+
+            $targetKey = $this->canonicalObjectKey($primary);
+            if ($targetKey === null) {
+                continue;
+            }
+
+            $groups[$targetKey][] = $index;
+        }
+
+        $remove = [];
+        $mergeCount = 0;
+
+        foreach ($groups as $indices) {
+            if (count($indices) < 2) {
+                continue;
+            }
+
+            $preferredIndex = $this->selectPreferredDestructionEvent($indices);
+            $preferred = $this->events[$preferredIndex];
+
+            foreach ($indices as $candidateIndex) {
+                if ($candidateIndex === $preferredIndex) {
+                    continue;
+                }
+
+                $candidate = $this->events[$candidateIndex];
+                if (!$this->shouldMergeHumanDuplicate($preferred, $candidate)) {
+                    continue;
+                }
+
+                $preferred->mergeWith($candidate);
+                $remove[$candidateIndex] = true;
+                $mergeCount++;
+            }
+        }
+
+        if ($mergeCount === 0) {
+            return;
+        }
+
+        $this->metrics['human_target_duplicate_merges'] = ($this->metrics['human_target_duplicate_merges'] ?? 0) + $mergeCount;
+
+        $filtered = [];
+        foreach ($this->events as $index => $event) {
+            if (isset($remove[$index])) {
+                continue;
+            }
+            $filtered[] = $event;
+        }
+
+        $this->events = $filtered;
+        $this->rebuildEventIndex();
+    }
+
+    private function shouldMergeHumanDuplicate(NormalizedEvent $preferred, NormalizedEvent $candidate): bool
+    {
+        $preferredPrimary = $preferred->getPrimary();
+        $candidatePrimary = $candidate->getPrimary();
+
+        $preferredEvidence = count($preferred->getEvidence());
+        $candidateEvidence = count($candidate->getEvidence());
+
+        $sharedObjectId = false;
+        if (($preferredPrimary['ID'] ?? null) !== null && ($candidatePrimary['ID'] ?? null) !== null) {
+            $sharedObjectId = ((string)$preferredPrimary['ID']) === ((string)$candidatePrimary['ID']);
+        }
+
+        if ($sharedObjectId) {
+            return true;
+        }
+
+        // If both events have the same attacker (Parent), merge them regardless of evidence count
+        // This handles self-kills or duplicate kills by the same pilot that failed to merge earlier
+        $preferredParent = $preferred->getParent();
+        $candidateParent = $candidate->getParent();
+        if ($this->objectsComparable($preferredParent, $candidateParent)) {
+            return true;
+        }
+
+        if ($candidateEvidence <= 2) {
+            return true;
+        }
+
+        if ($candidate->getParent() === null && $candidate->getSecondary() === null) {
+            return true;
+        }
+
+        // Only merge when preferred has significantly stronger evidence
+        return ($preferredEvidence - $candidateEvidence) >= 3;
+    }
+
+    private function buildHumanTargetGroupKey(array $primary): ?string
+    {
+        $identity = ObjectIdentity::forObject($primary);
+        if ($identity === null) {
+            return null;
+        }
+
+        $key = $identity->getKey();
+        foreach (explode('|', $key) as $segment) {
+            if (str_starts_with($segment, 'pilot:')) {
+                return $segment;
+            }
+        }
+
+        return $key;
+    }
+
+    private function enrichHumanDestructionsFromHits(): void
+    {
+        if ($this->events === []) {
+            return;
+        }
+
+        /** @var array<string, list<array{attacker: array, evidence: int, time: float}>> $hitsByTarget */
+        $hitsByTarget = [];
+
+        foreach ($this->events as $event) {
+            if ($event->getType() !== 'HasBeenHitBy') {
+                continue;
+            }
+
+            $primary = $event->getPrimary();
+            if ($primary === null) {
+                continue;
+            }
+
+            $attacker = $this->selectHumanAttacker($event->getParent(), $event->getSecondary());
+            if ($attacker === null) {
+                continue;
+            }
+
+            $targetKey = $this->canonicalObjectKey($primary);
+            if ($targetKey === null) {
+                continue;
+            }
+
+            $hitsByTarget[$targetKey][] = [
+                'attacker' => $attacker,
+                'evidence' => count($event->getEvidence()),
+                'time' => $event->getMissionTime(),
+            ];
+        }
+
+        if ($hitsByTarget === []) {
+            return;
+        }
+
+        $attachments = 0;
+        foreach ($this->events as $event) {
+            if ($event->getType() !== 'HasBeenDestroyed') {
+                continue;
+            }
+
+            if ($event->getParent() !== null || $event->getSecondary() !== null) {
+                continue;
+            }
+
+            $primary = $event->getPrimary();
+            if ($primary === null) {
+                continue;
+            }
+
+            $targetKey = $this->canonicalObjectKey($primary);
+            if ($targetKey === null || !isset($hitsByTarget[$targetKey])) {
+                continue;
+            }
+
+            $best = $this->selectBestHitAttacker($hitsByTarget[$targetKey]);
+            if ($best === null) {
+                continue;
+            }
+
+            $event->setSecondary($best['attacker'], 'inferredFromHit');
+            $attachments++;
+        }
+
+        if ($attachments > 0) {
+            $this->metrics['human_hit_inferences'] = ($this->metrics['human_hit_inferences'] ?? 0) + $attachments;
+        }
+    }
+
+    /**
+     * @param list<array{attacker: array, evidence: int, time: float}> $hits
+     * @return array{attacker: array, evidence: int, time: float}|null
+     */
+    private function selectBestHitAttacker(array $hits): ?array
+    {
+        if ($hits === []) {
+            return null;
+        }
+
+        $best = $hits[0];
+        foreach ($hits as $hit) {
+            if ($hit['evidence'] > $best['evidence']) {
+                $best = $hit;
+                continue;
+            }
+
+            if ($hit['evidence'] === $best['evidence'] && $hit['time'] < $best['time']) {
+                $best = $hit;
+            }
+        }
+
+        return $best;
+    }
+
+    /**
+     * Select the preferred destruction event for an AI target.
+     * Prefers: most evidence > human attacker > earlier time
+     * 
+     * @param list<int> $indices
+     */
+    private function selectPreferredAITargetKill(array $indices): int
+    {
+        $preferred = $indices[0];
+        $preferredEvent = $this->events[$preferred];
+        $preferredEvidence = count($preferredEvent->getEvidence());
+        $preferredHasHuman = $this->hasHumanAttacker($preferredEvent);
+
+        foreach ($indices as $index) {
+            if ($index === $preferred) {
+                continue;
+            }
+
+            $event = $this->events[$index];
+            $evidence = count($event->getEvidence());
+            $hasHuman = $this->hasHumanAttacker($event);
+
+            // More evidence always wins
+            if ($evidence > $preferredEvidence) {
+                $preferred = $index;
+                $preferredEvent = $event;
+                $preferredEvidence = $evidence;
+                $preferredHasHuman = $hasHuman;
+                continue;
+            }
+
+            // Equal evidence - prefer human attacker
+            if ($evidence === $preferredEvidence && $hasHuman && !$preferredHasHuman) {
+                $preferred = $index;
+                $preferredEvent = $event;
+                $preferredEvidence = $evidence;
+                $preferredHasHuman = $hasHuman;
+            }
+        }
+
+        return $preferred;
+    }
+
+    /**
+     * Check if an event has a human attacker (parent or secondary).
+     */
+    private function hasHumanAttacker(NormalizedEvent $event): bool
+    {
+        $parent = $event->getParent();
+        $secondary = $event->getSecondary();
+
+        if ($parent !== null) {
+            $pilot = $parent['Pilot'] ?? '';
+            $type = $parent['Type'] ?? '';
+            if ($this->looksLikeHumanPilot($pilot, $type)) {
+                return true;
+            }
+        }
+
+        if ($secondary !== null) {
+            $pilot = $secondary['Pilot'] ?? '';
+            $type = $secondary['Type'] ?? '';
+            if ($this->looksLikeHumanPilot($pilot, $type)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param list<int> $indices
+     */
+    private function selectPreferredDestructionEvent(array $indices): int
+    {
+        $preferred = $indices[0];
+        foreach ($indices as $index) {
+            $preferred = $this->preferDestructionEvent($preferred, $index);
+        }
+
+        return $preferred;
+    }
+
+    private function preferDestructionEvent(int $currentIndex, int $candidateIndex): int
+    {
+        if ($currentIndex === $candidateIndex) {
+            return $currentIndex;
+        }
+
+        $current = $this->events[$currentIndex];
+        $candidate = $this->events[$candidateIndex];
+
+        $currentEvidence = count($current->getEvidence());
+        $candidateEvidence = count($candidate->getEvidence());
+        if ($candidateEvidence > $currentEvidence) {
+            return $candidateIndex;
+        }
+        if ($candidateEvidence < $currentEvidence) {
+            return $currentIndex;
+        }
+
+        $currentSignals = ($current->getParent() !== null ? 1 : 0) + ($current->getSecondary() !== null ? 1 : 0);
+        $candidateSignals = ($candidate->getParent() !== null ? 1 : 0) + ($candidate->getSecondary() !== null ? 1 : 0);
+        if ($candidateSignals > $currentSignals) {
+            return $candidateIndex;
+        }
+        if ($candidateSignals < $currentSignals) {
+            return $currentIndex;
+        }
+
+        return ($candidate->getMissionTime() < $current->getMissionTime()) ? $candidateIndex : $currentIndex;
+    }
+
+    private function buildTargetSignature(NormalizedEvent $event): ?string
+    {
+        $targetKey = $this->canonicalObjectKey($event->getPrimary());
+        if ($targetKey === null) {
+            return null;
+        }
+
+        // Prefer human pilots over AI units for attacker identification
+        $attacker = $this->selectHumanAttacker($event->getParent(), $event->getSecondary());
+
+        $attackerKey = $this->canonicalObjectKey($attacker) ?? 'unknown';
+
+        return $targetKey . '|' . $attackerKey;
+    }
+
+    /**
+     * Select the human pilot attacker, preferring secondary if parent is AI.
+     */
+    private function selectHumanAttacker(?array $parent, ?array $secondary): ?array
+    {
+        if ($parent === null && $secondary === null) {
+            return null;
+        }
+
+        if ($parent === null) {
+            return $secondary;
+        }
+
+        if ($secondary === null) {
+            return $parent;
+        }
+
+        // If parent looks like an AI unit (SAM, AAA, ground unit without human pilot format)
+        // prefer secondary which is more likely to be a human pilot
+        $parentPilot = $parent['Pilot'] ?? '';
+        $secondaryPilot = $secondary['Pilot'] ?? '';
+
+        $parentLooksHuman = $this->looksLikeHumanPilot($parentPilot, $parent['Type'] ?? '');
+        $secondaryLooksHuman = $this->looksLikeHumanPilot($secondaryPilot, $secondary['Type'] ?? '');
+
+        if (!$parentLooksHuman && $secondaryLooksHuman) {
+            return $secondary;
+        }
+
+        return $parent;
+    }
+
+    private function looksLikeHumanPilot(string $pilot, string $type): bool
+    {
+        if ($pilot === '') {
+            return false;
+        }
+
+        // AI units typically have structured names like "RSAM SA-8 11GTD/HQ/SAM_PLT-2 Unit #1"
+        // or are SAM/AAA/Ground types
+        $typeLower = strtolower($type);
+        if (str_contains($typeLower, 'sam') || str_contains($typeLower, 'aaa') || str_contains($typeLower, 'ground')) {
+            return false;
+        }
+
+        // Human pilots usually have pipe separator (Callsign | Name) or brackets [Name]
+        if (str_contains($pilot, '|') || str_contains($pilot, '[')) {
+            return true;
+        }
+
+        // AI units often have "Unit #" or systematic naming
+        if (preg_match('/Unit\s*#\d+/i', $pilot) || preg_match('/PLT-\d+/i', $pilot)) {
+            return false;
+        }
+
+        // AI flight group naming patterns like "Olympus-20-2", "GroupName-NN-N", "Name-N-N"
+        // These are typically AI-controlled aircraft spawned by the mission
+        if (preg_match('/^[A-Za-z]+-\d+-\d+$/', $pilot)) {
+            return false;
+        }
+
+        // Aircraft types are more likely to be human-piloted
+        if (str_contains($typeLower, 'aircraft') || str_contains($typeLower, 'helicopter')) {
+            return true;
+        }
+
+        return false;
+    }
+
     private function mergeByCompositeSignature(NormalizedEvent $candidate): bool
     {
         $type = strtolower($candidate->getType());
@@ -2222,8 +3083,6 @@ final class EventGraphAggregator
         if ($object === null) {
             return null;
         }
-
-       
 
         $identity = ObjectIdentity::forObject($object);
         return $identity?->getKey();
@@ -2432,17 +3291,31 @@ final class EventGraphAggregator
         $maxEvents = $maxEvents > 0 ? $maxEvents : 1;
         $maxDuration = $maxDuration > 0.0 ? $maxDuration : 1.0;
 
+        $confidenceSum = 0.0;
+        $confidenceCount = 0;
+
         foreach ($this->recordings as $recording) {
             $eventScore = $recording->rawEventCount / $maxEvents;
             $durationScore = $recording->duration !== null ? min(1.0, $recording->duration / $maxDuration) : 0.6;
             $coverageScore = $this->computeCoverageScore($recording);
 
-            $weight = (0.5 * $eventScore) + (0.3 * $durationScore) + (0.2 * $coverageScore);
+            // Include alignment confidence in reliability calculation
+            $alignmentScore = $this->alignmentConfidence[$recording->id] ?? 0.5;
+            $confidenceSum += $alignmentScore;
+            $confidenceCount++;
+
+            // Weighted reliability: events 40%, duration 25%, coverage 15%, alignment 20%
+            $weight = (0.4 * $eventScore) + (0.25 * $durationScore) + (0.15 * $coverageScore) + (0.2 * $alignmentScore);
             if ($recording->id === $this->baselineRecordingId) {
                 $weight = max($weight, 0.9);
             }
 
             $this->recordingReliability[$recording->id] = max(0.35, min(1.0, round($weight, 3)));
+        }
+
+        // Update aggregate confidence metric
+        if ($confidenceCount > 0) {
+            $this->metrics['alignment_confidence_avg'] = round($confidenceSum / $confidenceCount, 3);
         }
     }
 
@@ -2488,6 +3361,164 @@ final class EventGraphAggregator
         if ($minimumEventTime < 0.0) {
             $this->shiftAllEvents(-$minimumEventTime);
         }
+    }
+
+    private function pruneIncongruentSources(): void
+    {
+        if ($this->missionTimeCongruenceTolerance <= 0.0 || $this->startTime === null) {
+            return;
+        }
+
+        $trustedSources = [];
+        $candidates = [];
+
+        foreach ($this->recordings as $recording) {
+            $recordingId = $recording->id;
+            $startTime = $recording->startTime;
+
+            if ($recordingId === $this->baselineRecordingId || $startTime === null) {
+                $trustedSources[$recordingId] = true;
+                continue;
+            }
+
+            $strategy = $this->offsetStrategies[$recordingId] ?? '';
+            if ($this->hasReliableAlignmentStrategy($strategy)) {
+                $trustedSources[$recordingId] = true;
+                continue;
+            }
+
+            $offset = $this->recordingOffsets[$recordingId] ?? 0.0;
+            $alignedStart = $startTime - $offset;
+            $delta = abs($alignedStart - $this->startTime);
+
+            if ($delta <= $this->missionTimeCongruenceTolerance) {
+                $trustedSources[$recordingId] = true;
+                continue;
+            }
+
+            $candidates[$recordingId] = [
+                'delta' => $delta,
+                'strategy' => $strategy,
+                'alignedStart' => $alignedStart,
+            ];
+        }
+
+        if ($candidates === [] || $trustedSources === []) {
+            return;
+        }
+
+        $this->metrics['incongruent_prune_candidates'] = count($candidates);
+
+        $overlapMap = $this->buildCandidateOverlapMap($trustedSources);
+        foreach (array_keys($candidates) as $candidateId) {
+            if (isset($overlapMap[$candidateId])) {
+                $trustedSources[$candidateId] = true;
+                unset($candidates[$candidateId]);
+                $this->metrics['incongruent_rescued']++;
+            }
+        }
+
+        if ($candidates === []) {
+            return;
+        }
+
+        $this->metrics['incongruent_recordings'] = count($candidates);
+
+        $filtered = [];
+        foreach ($this->events as $event) {
+            $evidence = $event->getEvidence();
+            $keep = false;
+
+            foreach ($evidence as $entry) {
+                if (isset($trustedSources[$entry->sourceId])) {
+                    $keep = true;
+                    break;
+                }
+            }
+
+            if ($keep) {
+                $filtered[] = $event;
+                continue;
+            }
+
+            foreach ($evidence as $entry) {
+                if (isset($candidates[$entry->sourceId])) {
+                    $this->metrics['incongruent_events_pruned']++;
+                    break;
+                }
+            }
+        }
+
+        if ($this->metrics['incongruent_events_pruned'] > 0) {
+            $this->events = $filtered;
+            $this->rebuildEventIndex();
+        }
+
+        foreach ($candidates as $recordingId => $info) {
+            $this->excludedRecordings[$recordingId] = true;
+            $label = 'mission-time-out-of-band (Δ=' . round($info['delta'], 1) . 's)';
+            if (isset($this->offsetStrategies[$recordingId]) && $this->offsetStrategies[$recordingId] !== '') {
+                $label .= ' | prior=' . $this->offsetStrategies[$recordingId];
+            } else {
+                $label .= ' | alignment=unresolved';
+            }
+            $this->offsetStrategies[$recordingId] = $label;
+        }
+    }
+
+    /**
+     * @param array<string, bool> $trustedSources
+     * @return array<string, bool>
+     */
+    private function buildCandidateOverlapMap(array $trustedSources): array
+    {
+        if ($trustedSources === [] || $this->events === []) {
+            return [];
+        }
+
+        $overlap = [];
+
+        foreach ($this->events as $event) {
+            $evidence = $event->getEvidence();
+            if ($evidence === []) {
+                continue;
+            }
+
+            $sourceIds = [];
+            $hasTrusted = false;
+
+            foreach ($evidence as $entry) {
+                $sourceIds[$entry->sourceId] = true;
+                if (!$hasTrusted && isset($trustedSources[$entry->sourceId])) {
+                    $hasTrusted = true;
+                }
+            }
+
+            if (!$hasTrusted) {
+                continue;
+            }
+
+            foreach ($sourceIds as $sourceId => $_) {
+                if (!isset($trustedSources[$sourceId])) {
+                    $overlap[$sourceId] = true;
+                }
+            }
+        }
+
+        return $overlap;
+    }
+
+    private function hasReliableAlignmentStrategy(?string $strategy): bool
+    {
+        if ($strategy === null || $strategy === '') {
+            return false;
+        }
+
+        $normalized = strtolower($strategy);
+
+        return str_starts_with($normalized, 'anchor')
+            || str_starts_with($normalized, 'fallback-applied')
+            || str_starts_with($normalized, 'baseline');
     }
 
     private function computeCongruentStartTime(): ?float
@@ -2607,6 +3638,118 @@ final class EventGraphAggregator
         return $windows;
     }
 
+    /**
+     * Compute coverage statistics for a set of aligned windows.
+     * Returns metrics including gap percentage, overlap percentage, and per-source coverage.
+     *
+     * @param array<string, array{start: ?float, end: ?float, duration: ?float}> $alignedWindows
+     * @return array{
+     *     missionStart: float,
+     *     missionEnd: float,
+     *     missionDuration: float,
+     *     totalCoverage: float,
+     *     gapPercentage: float,
+     *     overlapPercentage: float,
+     *     sourceCount: int,
+     *     perSource: array<string, array{start: ?float, end: ?float, duration: ?float, coveragePercent: float}>
+     * }
+     */
+    private function computeCoverageStatistics(array $alignedWindows): array
+    {
+        $missionStart = $this->startTime ?? 0.0;
+        $missionEnd = $this->endTime ?? 0.0;
+        $missionDuration = max(1.0, $missionEnd - $missionStart);
+
+        $stats = [
+            'missionStart' => $missionStart,
+            'missionEnd' => $missionEnd,
+            'missionDuration' => $missionDuration,
+            'totalCoverage' => 0.0,
+            'gapPercentage' => 100.0,
+            'overlapPercentage' => 0.0,
+            'sourceCount' => count($alignedWindows),
+            'perSource' => [],
+        ];
+
+        if ($alignedWindows === []) {
+            return $stats;
+        }
+
+        // Build interval list for coverage calculation
+        $intervals = [];
+        foreach ($alignedWindows as $sourceId => $window) {
+            $start = $window['start'] ?? null;
+            $end = $window['end'] ?? null;
+            $duration = $window['duration'] ?? null;
+
+            // Calculate coverage percent for this source
+            $coveragePercent = 0.0;
+            if ($start !== null && $end !== null && $missionDuration > 0) {
+                $sourceDuration = max(0.0, $end - $start);
+                $coveragePercent = min(100.0, ($sourceDuration / $missionDuration) * 100);
+            }
+
+            $stats['perSource'][$sourceId] = [
+                'start' => $start,
+                'end' => $end,
+                'duration' => $duration,
+                'coveragePercent' => round($coveragePercent, 2),
+            ];
+
+            if ($start !== null && $end !== null && $start < $end) {
+                $intervals[] = [$start, $end];
+            }
+        }
+
+        if ($intervals === []) {
+            return $stats;
+        }
+
+        // Merge overlapping intervals to compute total coverage
+        usort($intervals, static fn (array $a, array $b): int => $a[0] <=> $b[0]);
+
+        $merged = [];
+        $current = $intervals[0];
+
+        for ($i = 1, $count = count($intervals); $i < $count; $i++) {
+            if ($intervals[$i][0] <= $current[1]) {
+                // Overlapping - extend current interval
+                $current[1] = max($current[1], $intervals[$i][1]);
+            } else {
+                // Non-overlapping - save current and start new
+                $merged[] = $current;
+                $current = $intervals[$i];
+            }
+        }
+        $merged[] = $current;
+
+        // Calculate total covered time
+        $totalCovered = 0.0;
+        foreach ($merged as $interval) {
+            $totalCovered += ($interval[1] - $interval[0]);
+        }
+
+        // Calculate overlap: total of all individual durations minus merged duration
+        $totalIndividual = 0.0;
+        foreach ($intervals as $interval) {
+            $totalIndividual += ($interval[1] - $interval[0]);
+        }
+        $overlapTime = max(0.0, $totalIndividual - $totalCovered);
+
+        // Calculate gaps: mission duration minus total covered
+        $gapTime = max(0.0, $missionDuration - $totalCovered);
+
+        $stats['totalCoverage'] = round($totalCovered, 2);
+        $stats['gapPercentage'] = round(($gapTime / $missionDuration) * 100, 2);
+        $stats['overlapPercentage'] = round(($overlapTime / $missionDuration) * 100, 2);
+
+        // Update metrics
+        $this->metrics['coverage_gap_percent'] = $stats['gapPercentage'];
+        $this->metrics['coverage_overlap_percent'] = $stats['overlapPercentage'];
+
+        return $stats;
+    }
+
     private function expandMissionBoundsWithAlignedWindows(array $alignedWindows): void
     {
         $minStart = $this->startTime;
@@ -2711,5 +3854,11 @@ final class EventGraphAggregator
         }
 
         return max(0.0, $this->endTime - $this->startTime);
+    }
+
+    private function isWeaponObject(?array $object): bool
+    {
+        $category = $this->classifyObjectCategory($object);
+        return in_array($category, ['missile', 'bomb', 'rocket', 'torpedo', 'projectile'], true);
     }
 }

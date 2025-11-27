@@ -285,6 +285,33 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/debriefing.php';
 					$statusMessages .= "<li>Duplicates suppressed: " . (int)($metrics['duplicates_suppressed'] ?? 0) . "</li>";
 					$statusMessages .= "<li>Inferred links: " . (int)($metrics['inferred_links'] ?? 0) . "</li>";
 					$statusMessages .= "</ul>";
+
+					// Phase 1: Coverage & Alignment Statistics
+					$statusMessages .= "<h3>Coverage & Alignment</h3>";
+					$statusMessages .= "<ul>";
+					$alignmentConfidenceAvg = isset($metrics['alignment_confidence_avg']) ? round((float)$metrics['alignment_confidence_avg'] * 100, 1) : null;
+					if ($alignmentConfidenceAvg !== null) {
+						$statusMessages .= "<li>Avg alignment confidence: {$alignmentConfidenceAvg}%</li>";
+					}
+					$alignmentConflicts = (int)($metrics['alignment_conflicts'] ?? 0);
+					if ($alignmentConflicts > 0) {
+						$statusMessages .= "<li>⚠️ Alignment conflicts: {$alignmentConflicts}</li>";
+					}
+					$coalitionMatches = (int)($metrics['coalition_alignment_matches'] ?? 0);
+					$coalitionMismatches = (int)($metrics['coalition_alignment_mismatches'] ?? 0);
+					if ($coalitionMatches + $coalitionMismatches > 0) {
+						$statusMessages .= "<li>Coalition alignments: {$coalitionMatches} matches, {$coalitionMismatches} mismatches</li>";
+					}
+					$coverageStats = $metrics['coverage_stats'] ?? null;
+					if ($coverageStats !== null) {
+						$gapPercent = round((float)($coverageStats['gapPercent'] ?? 0), 1);
+						$overlapPercent = round((float)($coverageStats['overlapPercent'] ?? 0), 1);
+						$totalCoverage = (float)($coverageStats['totalCoverage'] ?? 0);
+						$statusMessages .= "<li>Coverage gaps: {$gapPercent}%</li>";
+						$statusMessages .= "<li>Coverage overlap: {$overlapPercent}%</li>";
+						$statusMessages .= "<li>Total coverage time: " . gmdate('H:i:s', (int)$totalCoverage) . "</li>";
+					}
+					$statusMessages .= "</ul>";
 					
 					$sources = $cache['mission']['sources'] ?? [];
 					if (!empty($sources)) {
@@ -297,7 +324,7 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/debriefing.php';
 							$offsetHtml = htmlspecialchars($offsetLabel, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 							$strategy = $source['offsetStrategy'] ?? null;
 							$strategyLabel = '';
-							if ($strategy === 'anchor') {
+							if (is_string($strategy) && str_starts_with($strategy, 'anchor')) {
 								$strategyLabel = ' via anchor match';
 							} elseif ($strategy === 'fallback-applied') {
 								$strategyLabel = ' via fallback';
@@ -305,7 +332,16 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/debriefing.php';
 								$strategyLabel = ' (fallback skipped)';
 							}
 							$baselineMarker = !empty($source['baseline']) ? ' <strong>(baseline)</strong>' : '';
-							$statusMessages .= "<li>{$label}{$baselineMarker} ({$eventsCount} events, offset {$offsetHtml}{$strategyLabel})</li>";
+							$confLabel = '';
+							if (isset($source['alignmentConfidence'])) {
+								$confPercent = round((float)$source['alignmentConfidence'] * 100, 0);
+								$confLabel = ", conf {$confPercent}%";
+							}
+							$covLabel = '';
+							if (isset($source['coveragePercent'])) {
+								$covLabel = ", cov " . round((float)$source['coveragePercent'], 1) . "%";
+							}
+							$statusMessages .= "<li>{$label}{$baselineMarker} ({$eventsCount} events, offset {$offsetHtml}{$confLabel}{$covLabel}{$strategyLabel})</li>";
 						}
 						$statusMessages .= "</ul>";
 					}

@@ -277,6 +277,12 @@ final class NormalizedEvent
         $this->addGraphLink('parentReason', $reason, $confidenceBoost);
     }
 
+    public function setSecondary(array $secondary, string $reason, float $confidenceBoost = 0.0): void
+    {
+        $this->secondary = $this->mergeObject($this->secondary, $secondary);
+        $this->addGraphLink('secondaryReason', $reason, $confidenceBoost);
+    }
+
     public function shiftMissionTime(float $delta): void
     {
         if ($delta === 0.0) {

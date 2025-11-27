@@ -23,7 +23,7 @@ return [
     'core_path' => 'core',  // Path to the bundled core assets
     
     // Output compression (helps with serverless environments like Vercel)
-    'enable_compression' => true,  // Enable gzip output compression
+    'enable_compression' => false,  // Enable gzip output compression
     
     // EventGraph aggregator tuning
     'aggregator' => [
@@ -34,5 +34,9 @@ return [
         'max_fallback_offset' => 900.0,
         'max_anchor_offset' => 14400.0,
         'mission_time_congruence_tolerance' => 1800.0,
+        // Phase 1 enhancements - alignment tuning
+        'anchor_decay' => 0.95,           // Decay factor for older anchor matches (0.0-1.0, 1.0 = no decay)
+        'drift_sample_window' => 60.0,    // Time window (seconds) for drift detection sampling
+        'coalition_alignment_weight' => 0.15, // How much coalition alignment affects confidence (0.0-1.0)
     ],
 ];
