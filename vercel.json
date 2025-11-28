@@ -52,7 +52,16 @@
       ]
     },
     {
-      "source": "/:path*.:ext(jpg|jpeg|png|gif|webp|svg|ico|css|js|woff|woff2|ttf|otf)",
+      "source": "/:path*.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=60, s-maxage=600, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/:path*.:ext(jpg|jpeg|png|gif|webp|svg|ico|js|woff|woff2|ttf|otf)",
       "headers": [
         {
           "key": "Cache-Control",

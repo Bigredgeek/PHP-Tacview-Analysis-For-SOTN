@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed - 2025-11-27 (Restore Cold War Theme)
 - Recovered `public/tacview.css` from commit `a10b8cb` to get back the Cold War command-center styling that powers the SOTN deployment and prevents Vercel from serving the Brownwater neon theme.
 
+### Fixed - 2025-11-27 (Vercel CSS Cache Invalidation)
+- Relaxed the `Cache-Control` policy for `*.css` in `vercel.json` to `public, max-age=60, s-maxage=600, must-revalidate` so new deployments immediately take effect even on long-lived browsers while leaving other static assets on the previous immutable, year-long cache.
+
 ### Fixed - 2025-11-26 (Vercel Payload Optimization)
 - **Implemented aggressive output compression and HTML minification for Vercel deployment**
   - Enabled gzip compression with level 9 (maximum) using forced `zlib.output_compression`
