@@ -1,0 +1,43 @@
+{
+  "mission": {
+    "title": "Disconnect Classification",
+    "category": "Regression",
+    "mission_time": "1986-05-30T05:58:47Z",
+    "duration": 3600,
+    "source": "DCS 2.9.24",
+    "recorder": "UnitTest Recorder"
+  },
+  "recordings": [
+    {
+      "author": "Recorder Alpha",
+      "recording_time": "2026-03-07T18:00:00Z",
+      "events": [
+        {
+          "time": 500.0,
+          "action": "HasBeenDestroyed",
+          "location": { "Longitude": 12.5, "Latitude": 53.1, "Altitude": 6000.0 },
+          "primary": {
+            "ID": "AIR-1", "Type": "Aircraft", "Name": "F-5E Tiger II",
+            "Pilot": "Loner 1-1 | Ghost", "Coalition": "Allies", "Country": "us", "Group": "Loner"
+          }
+        },
+        {
+          "time": 520.0,
+          "action": "HasBeenDestroyed",
+          "location": { "Longitude": 12.6, "Latitude": 53.2, "Altitude": 100.0 },
+          "primary": {
+            "ID": "MSL-1", "Type": "Missile", "Name": "AIM-7 Sparrow", "Coalition": "Allies"
+          }
+        },
+        {
+          "time": 540.0,
+          "action": "HasBeenDestroyed",
+          "location": { "Longitude": 12.7, "Latitude": 53.3, "Altitude": 0.0 },
+          "primary": {
+            "ID": "GND-1", "Type": "Tank", "Name": "T-72", "Coalition": "Enemies", "Country": "ru", "Group": "Armor"
+          }
+        }
+      ]
+    }
+  ]
+}

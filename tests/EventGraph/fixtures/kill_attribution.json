@@ -1,0 +1,77 @@
+{
+  "mission": {
+    "title": "Attribution Regression",
+    "category": "Regression",
+    "mission_time": "1986-05-30T05:58:47Z",
+    "duration": 3600,
+    "source": "DCS 2.9.24",
+    "recorder": "UnitTest Recorder"
+  },
+  "recordings": [
+    {
+      "author": "Recorder Alpha",
+      "recording_time": "2026-03-07T18:00:00Z",
+      "events": [
+        {
+          "time": 100.0,
+          "action": "HasBeenHitBy",
+          "location": { "Longitude": 12.5, "Latitude": 53.1, "Altitude": 3000.0 },
+          "primary": {
+            "ID": "BLUE-1", "Type": "Aircraft", "Name": "F/A-18C Hornet",
+            "Pilot": "Sting 1-4 | Corsac", "Coalition": "Allies", "Country": "us", "Group": "Sting"
+          },
+          "secondary": {
+            "ID": "WPN-SA8-1", "Type": "Weapon+Missile", "Name": "SA-8 Gecko", "Coalition": "Enemies"
+          },
+          "parent": {
+            "ID": "SAM-1", "Type": "Ground+Static+SAM", "Name": "SA-8 Osa",
+            "Pilot": "RSAM SA-8 7GTD/HQ/SAM_PLT-2 Unit #1", "Coalition": "Enemies", "Country": "ru", "Group": "RSAM SA-8"
+          }
+        },
+        {
+          "time": 140.0,
+          "action": "HasBeenDestroyed",
+          "location": { "Longitude": 12.5, "Latitude": 53.1, "Altitude": 2500.0 },
+          "primary": {
+            "ID": "BLUE-1", "Type": "Aircraft", "Name": "F/A-18C Hornet",
+            "Pilot": "Sting 1-4 | Corsac", "Coalition": "Allies", "Country": "us", "Group": "Sting"
+          }
+        },
+        {
+          "time": 200.0,
+          "action": "HasBeenHitBy",
+          "location": { "Longitude": 12.6, "Latitude": 53.2, "Altitude": 4000.0 },
+          "primary": {
+            "ID": "BLUE-2", "Type": "Aircraft", "Name": "F-14B Tomcat",
+            "Pilot": "Ghost 1-1 | Maverick", "Coalition": "Allies", "Country": "us", "Group": "Ghost"
+          },
+          "secondary": {
+            "ID": "WPN-R27-1", "Type": "Weapon+Missile", "Name": "R-27R", "Coalition": "Enemies"
+          },
+          "parent": {
+            "ID": "RED-9", "Type": "Aircraft", "Name": "MiG-29A Fulcrum-A",
+            "Pilot": "Olympus-3-1", "Coalition": "Enemies", "Country": "ru", "Group": "Olympus"
+          }
+        },
+        {
+          "time": 210.0,
+          "action": "HasTakenOff",
+          "location": { "Longitude": 12.7, "Latitude": 53.3, "Altitude": 20.0 },
+          "primary": {
+            "ID": "BLUE-2", "Type": "Aircraft", "Name": "F-14B Tomcat",
+            "Pilot": "Ghost 1-1 | Maverick", "Coalition": "Allies", "Country": "us", "Group": "Ghost"
+          }
+        },
+        {
+          "time": 260.0,
+          "action": "HasBeenDestroyed",
+          "location": { "Longitude": 12.8, "Latitude": 53.4, "Altitude": 1500.0 },
+          "primary": {
+            "ID": "BLUE-2", "Type": "Aircraft", "Name": "F-14B Tomcat",
+            "Pilot": "Ghost 1-1 | Maverick", "Coalition": "Allies", "Country": "us", "Group": "Ghost"
+          }
+        }
+      ]
+    }
+  ]
+}

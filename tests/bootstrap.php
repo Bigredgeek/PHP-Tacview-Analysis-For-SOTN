@@ -11,11 +11,13 @@ if (!defined('PROJECT_ROOT')) {
 $vendorAutoload = $projectRoot . '/vendor/autoload.php';
 if (is_file($vendorAutoload)) {
     require $vendorAutoload;
-} else {
-    require $projectRoot . '/src/EventGraph/autoload.php';
-    require_once $projectRoot . '/tests/EventGraph/Fixture/TacviewFixtureLoader.php';
 }
+
 require_once $projectRoot . '/src/core_path.php';
+
+// EventGraph now lives in the shared core; the shim resolves the core path and loads it from there.
+require_once $projectRoot . '/src/EventGraph/autoload.php';
+require_once $projectRoot . '/tests/EventGraph/Fixture/TacviewFixtureLoader.php';
 
 $config = require $projectRoot . '/config.php';
 $corePath = tacview_resolve_core_path($config['core_path'] ?? 'core', $projectRoot);

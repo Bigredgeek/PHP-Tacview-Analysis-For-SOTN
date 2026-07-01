@@ -32,6 +32,50 @@ require_once $eventGraphAutoloadPath;
 
 use EventGraph\EventGraphAggregator;
 
+if (!function_exists('tacview_alignment_warning_banner')) {
+	/**
+	 * Build a visible banner warning about source recordings that aligned with low confidence.
+	 * Their contributed event times are less certain and may be offset on the merged timeline.
+	 *
+	 * @param list<array<string, mixed>> $sources
+	 */
+	function tacview_alignment_warning_banner(array $sources): string
+	{
+		$low = [];
+		foreach ($sources as $source) {
+			if (!is_array($source) || !empty($source['baseline'])) {
+				continue;
+			}
+			$isLow = array_key_exists('lowConfidence', $source)
+				? (bool)$source['lowConfidence']
+				: (isset($source['alignmentConfidence']) && (float)$source['alignmentConfidence'] < 0.65);
+			if (!$isLow) {
+				continue;
+			}
+			$name = (string)($source['filename'] ?? $source['id'] ?? 'unknown');
+			$conf = isset($source['alignmentConfidence']) ? (int)round((float)$source['alignmentConfidence'] * 100) : null;
+			$low[] = $conf !== null ? "{$name} ({$conf}%)" : $name;
+		}
+
+		if ($low === []) {
+			return '';
+		}
+
+		$count = count($low);
+		$plural = $count === 1 ? 'recording' : 'recordings';
+		$items = implode(', ', array_map(
+			static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+			$low
+		));
+
+		return '<div class="alignment-warning" role="alert" style="margin:12px 0;padding:10px 14px;'
+			. 'border-left:4px solid #d98c00;background:#2a2418;color:#f0d9a8;border-radius:4px;font-size:0.9em;">'
+			. '⚠️ <strong>' . $count . ' ' . $plural . ' aligned with low confidence.</strong> '
+			. 'Event times contributed by these recordings are less certain and may be offset on the timeline: '
+			. $items . '.</div>';
+	}
+}
+
 if (!function_exists('tacview_normalize_url_path')) {
 	function tacview_normalize_url_path(?string $path): string
 	{
@@ -270,6 +314,7 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/debriefing.php';
 						count($sources),
 						$sources
 					);
+					echo tacview_alignment_warning_banner($sources);
 					echo $tv->getOutput();
 					
 					// Display cache info
@@ -388,6 +433,7 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/debriefing.php';
 					count($sources),
 					$sources
 				);
+				echo tacview_alignment_warning_banner($sources);
 				echo $tv->getOutput();
 
 				$metrics = $aggregator->getMetrics();
